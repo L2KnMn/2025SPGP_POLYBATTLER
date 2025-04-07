@@ -7,12 +7,17 @@ by 게임공학과 이관민
 
 **게임 컨셉: 도형을 이용해 표현한 캐릭터, 오토배틀러 장르식 게임 진행**
 
-![image](https://github.com/user-attachments/assets/f966dbb1-ae6a-4701-b3ba-6e972059cc56)
-
 환경
   - 세로 환경에서 게임을 한다고 가정
   - landscape로 휴대폰이 바뀌어도 화면이 그대로 portrait로 유지된다고 가정한다
   - 한손으로 엄지만으로 조작하기 쉬운 게임을 만든다
+
+---
+
+예상 게임 실행 흐름
+
+게임 흐름도
+![흐름도](https://github.com/user-attachments/assets/0808535a-b2dc-4766-8ecc-43756df99e80)
 
 ---
 
@@ -36,12 +41,20 @@ by 게임공학과 이관민
   - 게임 오버 혹은 10라운드까지 게임 클리어 -> UI로 결과 보여주기
   - 정산 하면 로비로 돌아가면서 덱을 점수와 함께 기록 -> 이 기록된 덱은 후에 다음 게임에 활용 및 점수 랭킹으로 확인
 ---
-예상 게임 실행 흐름
 
-게임 흐름도
-![SDL Diagram for Process Game](https://github.com/user-attachments/assets/78fab771-6938-4889-923f-0beed9d60088)
+게임의 레퍼런스
 
-게임의 컨셉 그림
+![레퍼런스](https://github.com/user-attachments/assets/0224e5c9-578c-454d-abc8-ff32e522e931)
+
+![image](https://github.com/user-attachments/assets/f966dbb1-ae6a-4701-b3ba-6e972059cc56)
+
+게임 전투 진행 컨셉 이미지
+
+![image](https://github.com/user-attachments/assets/8f545e94-d683-4f98-84a7-06d5c6786792)
+
+![image](https://github.com/user-attachments/assets/915135a6-4bf0-4f97-af23-de1fed1f381e)
+
+게임 상점 컨셉 이미지
 
 ---
 
