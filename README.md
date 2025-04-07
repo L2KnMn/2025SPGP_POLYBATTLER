@@ -5,7 +5,14 @@
 ![Lobby Image](https://github.com/user-attachments/assets/d73ca04d-e420-4f11-a413-d50f8aa1418d)
 
 **게임 컨셉: 도형을 이용해 표현한 캐릭터, 오토배틀러 장르식 게임 진행**
+
+환경
+  - 세로 환경에서 게임을 한다고 가정
+  - landscape로 휴대폰이 바뀌어도 화면이 그대로 portrait로 유지된다고 가정한다
+  - 한손으로 엄지만으로 조작하기 쉬운 게임을 만든다
+
 ---
+
 개발 범위
 
 로비 
