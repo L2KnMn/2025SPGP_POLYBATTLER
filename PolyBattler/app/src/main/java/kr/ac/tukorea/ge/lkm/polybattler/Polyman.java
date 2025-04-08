@@ -44,11 +44,7 @@ public class Polyman implements IGameObject {
                 canvas.drawCircle(transform.getPosition().x, transform.getPosition().y, transform.getSize(), paint);
                 break;
             case TRIANGLE:
-                Path path = new Path();
-                path.moveTo(transform.getPosition().x, transform.getPosition().y - transform.getSize());
-                path.lineTo(transform.getPosition().x - transform.getSize(), transform.getPosition().y + transform.getSize()/4);
-                path.lineTo(transform.getPosition().x  + transform.getSize(), transform.getPosition().y + transform.getSize()/4);
-                canvas.drawPath(path, paint);
+                canvas.drawPath(transform.getTriangle(), paint);
                 break;
             default:
                 break;
@@ -69,5 +65,9 @@ public class Polyman implements IGameObject {
             default:
                 return 0xFFFF0000;
         }
+    }
+
+    public void setTilePosition(Position start, Position tileSizeUnit, int x, int y) {
+        transform.getPosition().set(start.x + (x + 0.5f) * tileSizeUnit.x, start.y + (y + 0.5f) * tileSizeUnit.y);
     }
 }

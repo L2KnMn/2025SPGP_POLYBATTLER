@@ -1,5 +1,6 @@
 package kr.ac.tukorea.ge.lkm.polybattler;
 
+import android.graphics.Path;
 import android.graphics.RectF;
 
 public class Transform {
@@ -7,6 +8,7 @@ public class Transform {
     private float radian;
     private float size;
 
+    private Path path;
     private RectF body;
     private boolean rigid;
 
@@ -20,6 +22,7 @@ public class Transform {
     }
     private void init(){
         body = new RectF();
+        path = new Path();
         setAngle(0);
         setSize(1);
         setRigid(false);
@@ -41,8 +44,6 @@ public class Transform {
     }
     public void setSize(float size){
         this.size = size;
-        body.set(position.x-size, position.y-size,
-                position.x+size, position.y+size);
     }
     public Position getPosition(){ return position; }
     public boolean isRigid(){
@@ -58,6 +59,17 @@ public class Transform {
         body.set(position.x-size, position.y-size,
                 position.x+size, position.y+size);
         return body;
+    }
+    public Path getTriangle(){
+        double startangle = 150.0f / 360.0f * 2 * Math.PI;
+        double angle = 2 * Math.PI / 3; // 정삼각형의 각 점 사이의 각도 (120도 라디안)
+
+        path.reset();
+        path.moveTo(position.x + size * (float)Math.cos(startangle), position.y + size * (float)Math.sin(startangle));
+        path.lineTo(position.x + size * (float)Math.cos(angle + startangle), position.y + size * (float)Math.sin(angle + startangle));
+        path.lineTo(position.x + size * (float)Math.cos(angle * 2 + startangle), position.y + size * (float)Math.sin(angle * 2 + startangle));
+
+        return path;
     }
     public void move(float x, float y){
        position.x += x;

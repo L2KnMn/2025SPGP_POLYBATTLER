@@ -9,6 +9,7 @@ import android.content.res.Resources;
 
 public class Boardmap implements IGameObject {
 
+    final private float length;
     private int width;
     private int height;
     private IGameObject[][] board;
@@ -17,23 +18,23 @@ public class Boardmap implements IGameObject {
     private final Paint paintLight;
     private final Paint paintDark;
 
-    private Position startTileLeftTop;
-    private Position startTileCenter;
+    final private Position startTileLeftTop;
 
     public Boardmap(){
         width = 4;
         height = 7;
 
-        tileRect = new RectF(0, 0, (Metrics.SCREEN_WIDTH-2) / width, (Metrics.SCREEN_WIDTH-2) / width);
+        float tileWidth = (Metrics.SCREEN_WIDTH-2) / width;
+        float tileHeight = (Metrics.SCREEN_HEIGHT-2) / height;
+        length = tileWidth < tileHeight ? tileWidth : tileHeight;
+
+        tileRect = new RectF(0, 0, length, length);
         startTileLeftTop = new Position( (Metrics.SCREEN_WIDTH-tileRect.width()*width)/2
                 , (Metrics.SCREEN_HEIGHT-tileRect.height()*height)/2);
 
         dstRect  = new RectF(startTileLeftTop.x, startTileLeftTop.y,
                 startTileLeftTop.x + tileRect.width() * width,
                 startTileLeftTop.y + tileRect.height() * height);
-
-        startTileCenter = new Position(startTileLeftTop.x + tileRect.width() / 2,
-                startTileLeftTop.y + tileRect.height() / 2);
 
         board = new IGameObject[width][height];
 
@@ -64,6 +65,14 @@ public class Boardmap implements IGameObject {
                 }
             }
         }
+    }
+
+    public float getTileSize() {
+        return length;
+    }
+
+    public Position getTileLeftTop() {
+        return startTileLeftTop;
     }
 }
 

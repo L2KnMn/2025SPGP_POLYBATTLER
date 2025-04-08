@@ -46,17 +46,25 @@ public class GameView extends View implements Choreographer.FrameCallback {
         backgroundImage = BitmapFactory.decodeResource(res, R.mipmap.game_background);
         //backgroundRect = new RectF(0, 0, Metrics.SCREEN_WIDTH, Metrics.SCREEN_HEIGHT);
 
-        gameObjects.add(new Boardmap());
+        Boardmap boardmap = new Boardmap();
+        gameObjects.add(boardmap);
+        float size = boardmap.getTileSize() / 2;
+        Position start = new Position();
+        start.set(boardmap.getTileLeftTop());
+
         Polyman polyman = new Polyman(ShapeType.CIRCLE, ColorType.RED);
-        polyman.transform.set(5, 6);
+        polyman.transform.set(0, 0);
+        polyman.transform.setSize(size);
         gameObjects.add(polyman);
 
         Polyman polyman2 = new Polyman(ShapeType.RECTANGLE, ColorType.BLUE);
-        polyman2.transform.set(6, 6);
+        polyman2.setTilePosition(start, new Position(size * 2, size * 2), 0, 3);
+        polyman2.transform.setSize(size);
         gameObjects.add(polyman2);
 
         Polyman polyman3 = new Polyman(ShapeType.TRIANGLE, ColorType.GREEN);
-        polyman3.transform.set(8, 10);
+        polyman3.setTilePosition(start, new Position(size * 2, size * 2), 0, 3);
+        polyman3.transform.setSize(size);
         gameObjects.add(polyman3);
 
         scheduleUpdate();
