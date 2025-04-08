@@ -13,7 +13,7 @@ enum ColorType {
 }
 
 public class Polyman implements IGameObject {
-    public  Transform transform;
+    public Transform transform;
     private Paint paint;
     private ShapeType shape;
     private ColorType color;
@@ -52,6 +52,11 @@ public class Polyman implements IGameObject {
         //canvas.drawCircle(transform.getPosition().x, transform.getPosition().y, transform.getSize(), paint);
     }
 
+    @Override
+    public Transform getTransform() {
+        return transform;
+    }
+
     private int getColor(){
         switch (color) {
             case RED:
@@ -69,5 +74,24 @@ public class Polyman implements IGameObject {
 
     public void setTilePosition(Position start, Position tileSizeUnit, int x, int y) {
         transform.getPosition().set(start.x + (x + 0.5f) * tileSizeUnit.x, start.y + (y + 0.5f) * tileSizeUnit.y);
+    }
+
+    public boolean inPoint(Position point){
+        switch (shape){
+            case RECTANGLE:
+                if(transform.getRect().contains(point.x, point.y)){
+                    return true;
+                }
+            case CIRCLE:
+                if(transform.distance(point.x, point.y) < transform.getSize()){
+                    return true;
+                }
+            case TRIANGLE:
+                if(transform.isPointInTriangle(point)){
+                    return true;
+                }
+            default:
+                return false;
+        }
     }
 }

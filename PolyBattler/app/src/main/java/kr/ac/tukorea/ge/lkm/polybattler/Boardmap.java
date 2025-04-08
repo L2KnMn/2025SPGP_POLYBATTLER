@@ -1,11 +1,8 @@
 package kr.ac.tukorea.ge.lkm.polybattler;
 
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
-import android.content.res.Resources;
 
 public class Boardmap implements IGameObject {
 
@@ -67,12 +64,84 @@ public class Boardmap implements IGameObject {
         }
     }
 
+    @Override
+    public Transform getTransform() {
+        return null;
+    }
+
     public float getTileSize() {
         return length;
     }
 
     public Position getTileLeftTop() {
         return startTileLeftTop;
+    }
+
+    public int getWidth(float x) {
+        return (int) ((x - startTileLeftTop.x) / length);
+    }
+
+    public int getHeight(float y) {
+        return (int) ((y - startTileLeftTop.y) / length);
+    }
+
+    public enum TilePosition{
+        CENTER, TOP, BOTTOM, LEFT, RIGHT,
+        TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT
+    }
+
+    public void setPositionTile(Transform transform, int width, int height){
+        setPositionTile(transform, width, height, TilePosition.CENTER);
+    }
+
+    public void setPositionTile(Transform transform, int width, int height, TilePosition gravity){
+        float ax = 0f, ay = 0f;
+        switch (gravity){
+            case CENTER:
+            case TOP:
+            case BOTTOM:
+                ax = 0.5f;
+                break;
+            case LEFT:
+            case TOP_LEFT:
+            case BOTTOM_LEFT:
+                ax = 0.0f;
+                break;
+            case RIGHT:
+            case TOP_RIGHT:
+            case BOTTOM_RIGHT:
+                ax = 1.0f;
+                break;
+        }
+        switch (gravity){
+            case CENTER:
+            case LEFT:
+            case RIGHT:
+                ay = 0.5f;
+                break;
+            case TOP:
+            case TOP_LEFT:
+            case TOP_RIGHT:
+                ay = 0.0f;
+                break;
+            case BOTTOM:
+            case BOTTOM_LEFT:
+            case BOTTOM_RIGHT:
+                ay = 1.0f;
+                break;
+        }
+        float x = startTileLeftTop.x + (width + ax) * length;
+        float y = startTileLeftTop.y + (height + ay) * length;
+        transform.set(x, y);
+    }
+
+    public void setPositionNearTile(Transform transform){
+        setPositionNearTile(transform, TilePosition.CENTER);
+    }
+    public void setPositionNearTile(Transform transform, TilePosition gravity){
+        int targetWidth = getWidth(transform.getPosition().x);
+        int targetHeight = getHeight(transform.getPosition().y);
+        setPositionTile(transform, targetWidth, targetHeight, gravity);
     }
 }
 

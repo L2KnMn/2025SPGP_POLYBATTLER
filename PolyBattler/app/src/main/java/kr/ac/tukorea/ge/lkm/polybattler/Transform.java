@@ -60,14 +60,36 @@ public class Transform {
                 position.x+size, position.y+size);
         return body;
     }
-    public Path getTriangle(){
-        double startangle = 150.0f / 360.0f * 2 * Math.PI;
-        double angle = 2 * Math.PI / 3; // 정삼각형의 각 점 사이의 각도 (120도 라디안)
 
+    public float crossProduct(float p1x, float p1y, float p2x, float p2y, Position p3) {
+        return (p2x - p1x) * (p3.y - p1y) - (p2y - p1y) * (p3.x - p1x);
+    }
+
+    final static double startangle = 150.0f / 360.0f * 2 * Math.PI;
+    final static double unit_angle = 2 * Math.PI / 3; // 정삼각형의 각 점 사이의 각도 (120도 라디안)
+    public boolean isPointInTriangle(Position p) {
+        float ax = position.x + size * (float)Math.cos(startangle);
+        float ay = position.y + size * (float)Math.sin(startangle);
+
+        float bx = position.x + size * (float)Math.cos(unit_angle + startangle);
+        float by = position.y + size * (float)Math.sin(unit_angle + startangle);
+
+        float cx = position.x + size * (float)Math.cos(unit_angle * 2 + startangle);
+        float cy = position.y + size * (float)Math.sin(unit_angle * 2 + startangle);
+
+        float abp = crossProduct(ax, ay, bx, by, p);
+        float bcp = crossProduct(bx, by, cx, cy, p);
+        float cap = crossProduct(cx, cy, ax, ay, p);
+        boolean b1 = abp >= 0;
+        boolean b2 = bcp >= 0;
+        boolean b3 = cap >= 0;
+        return (b1 == b2) && (b2 == b3);
+    }
+    public Path getTriangle(){
         path.reset();
         path.moveTo(position.x + size * (float)Math.cos(startangle), position.y + size * (float)Math.sin(startangle));
-        path.lineTo(position.x + size * (float)Math.cos(angle + startangle), position.y + size * (float)Math.sin(angle + startangle));
-        path.lineTo(position.x + size * (float)Math.cos(angle * 2 + startangle), position.y + size * (float)Math.sin(angle * 2 + startangle));
+        path.lineTo(position.x + size * (float)Math.cos(unit_angle + startangle), position.y + size * (float)Math.sin(unit_angle + startangle));
+        path.lineTo(position.x + size * (float)Math.cos(unit_angle * 2 + startangle), position.y + size * (float)Math.sin(unit_angle * 2 + startangle));
 
         return path;
     }

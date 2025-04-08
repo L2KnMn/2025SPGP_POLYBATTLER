@@ -10,7 +10,6 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.Choreographer;
 import android.view.MotionEvent;
 import android.view.View;
@@ -55,7 +54,7 @@ public class GameView extends View implements Choreographer.FrameCallback {
         start.set(boardmap.getTileLeftTop());
 
         Polyman polyman = new Polyman(ShapeType.CIRCLE, ColorType.RED);
-        polyman.transform.set(0, 0);
+        boardmap.setPositionTile(polyman.transform, 1, 1);
         polyman.transform.setSize(size);
         gameObjects.add(polyman);
 
@@ -96,6 +95,7 @@ public class GameView extends View implements Choreographer.FrameCallback {
     protected void onDraw(@NonNull Canvas canvas) {
         super.onDraw(canvas);
         canvas.save();
+        // 가장 밑에 바탕 그림 그린다
         canvas.drawBitmap(backgroundImage, null, backgroundRect, null);
         canvas.setMatrix(transformMatrix);
         // 반드시 성공적인 빌드가 진행된 후에 BuildConfig.java 가 생성되므로
@@ -124,7 +124,7 @@ public class GameView extends View implements Choreographer.FrameCallback {
             // check the clicked object
             for (IGameObject gobj : gameObjects) {
                 if (gobj instanceof Polyman) {
-                    if(((Polyman)gobj).transform.distance(pointsBuffer[0], pointsBuffer[1]) < ((Polyman)gobj).transform.getSize()){
+                    if(((Polyman)gobj).inPoint(new Position(pointsBuffer[0], pointsBuffer[1]))){
                         pickedObject = gobj;
                     }
                 }
@@ -132,7 +132,7 @@ public class GameView extends View implements Choreographer.FrameCallback {
             return true;
         case MotionEvent.ACTION_UP:
             if(pickedObject != null){
-
+                boardmap.setPositionNearTile(pickedObject.getTransform());
                 pickedObject = null;
             }
         case MotionEvent.ACTION_MOVE:
