@@ -30,6 +30,7 @@ public class GameView extends View implements Choreographer.FrameCallback {
     public static float frameTime;
     private Bitmap backgroundImage;
     private RectF backgroundRect;
+    private Boardmap boardmap;
 
     public GameView(Context context) {
         super(context);
@@ -47,7 +48,7 @@ public class GameView extends View implements Choreographer.FrameCallback {
         backgroundImage = BitmapFactory.decodeResource(res, R.mipmap.game_background);
         //backgroundRect = new RectF(0, 0, Metrics.SCREEN_WIDTH, Metrics.SCREEN_HEIGHT);
 
-        Boardmap boardmap = new Boardmap();
+        boardmap = new Boardmap();
         gameObjects.add(boardmap);
         float size = boardmap.getTileSize() / 2;
         Position start = new Position();
@@ -111,6 +112,7 @@ public class GameView extends View implements Choreographer.FrameCallback {
         }
     }
 
+    private IGameObject pickedObject = null;
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         switch (event.getAction()) {
@@ -118,19 +120,29 @@ public class GameView extends View implements Choreographer.FrameCallback {
             pointsBuffer[0] = event.getX();
             pointsBuffer[1] = event.getY();
             invertedMatrix.mapPoints(pointsBuffer);
-            Log.d(TAG, "Event=" + event.getAction() + " x=" + pointsBuffer[0] + " y=" + pointsBuffer[1]);
+            // Log.d(TAG, "Event=" + event.getAction() + " x=" + pointsBuffer[0] + " y=" + pointsBuffer[1]);
             // check the clicked object
             for (IGameObject gobj : gameObjects) {
                 if (gobj instanceof Polyman) {
-
+                    if(((Polyman)gobj).transform.distance(pointsBuffer[0], pointsBuffer[1]) < ((Polyman)gobj).transform.getSize()){
+                        pickedObject = gobj;
+                    }
                 }
             }
             return true;
+        case MotionEvent.ACTION_UP:
+            if(pickedObject != null){
+
+                pickedObject = null;
+            }
         case MotionEvent.ACTION_MOVE:
             pointsBuffer[0] = event.getX();
             pointsBuffer[1] = event.getY();
             invertedMatrix.mapPoints(pointsBuffer);
-            Log.d(TAG, "Event=" + event.getAction());
+            // Log.d(TAG, "Event=" + event.getAction());
+            if (pickedObject != null) {
+                ((Polyman)pickedObject).transform.moveTo(pointsBuffer[0], pointsBuffer[1]);
+            }
             return true;
         }
         return super.onTouchEvent(event);

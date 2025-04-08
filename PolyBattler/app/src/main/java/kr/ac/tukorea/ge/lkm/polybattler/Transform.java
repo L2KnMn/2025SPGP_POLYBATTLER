@@ -85,8 +85,13 @@ public class Transform {
         position.set(pos.position);
     }
     public float distance(Transform pos) {
-        this.position.x = Math.abs(this.position.x - pos.position.x);
-        this.position.y = Math.abs(this.position.y - pos.position.y);
-        return (float) Math.sqrt(Math.pow(this.position.x, 2) + Math.pow(this.position.y, 2));
+        float dx = Math.abs(this.position.x - pos.position.x);
+        float dy = Math.abs(this.position.y - pos.position.y);
+        return (float) Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
+    }
+    public float distance(float x, float y) {
+        float dx = Math.abs(this.position.x - x);
+        float dy = Math.abs(this.position.y - y);
+        return (float) Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
     }
 }
