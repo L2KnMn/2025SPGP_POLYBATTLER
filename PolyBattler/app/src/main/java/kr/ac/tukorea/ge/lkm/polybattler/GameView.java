@@ -10,6 +10,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Choreographer;
 import android.view.MotionEvent;
 import android.view.View;
@@ -54,17 +55,23 @@ public class GameView extends View implements Choreographer.FrameCallback {
         start.set(boardmap.getTileLeftTop());
 
         Polyman polyman = new Polyman(ShapeType.CIRCLE, ColorType.RED);
-        boardmap.setPositionTile(polyman.transform, 1, 1);
+        if(boardmap.setObjectOnTile(polyman.transform, 1, 8)) {
+            boardmap.putOnBoard(polyman);
+        }
         polyman.transform.setSize(size);
         gameObjects.add(polyman);
 
         Polyman polyman2 = new Polyman(ShapeType.RECTANGLE, ColorType.BLUE);
-        polyman2.setTilePosition(start, new Position(size * 2, size * 2), 0, 3);
+        if(boardmap.setObjectOnTile(polyman2.transform, 2, 7)){
+            boardmap.putOnBoard(polyman2);
+        }
         polyman2.transform.setSize(size);
         gameObjects.add(polyman2);
 
         Polyman polyman3 = new Polyman(ShapeType.TRIANGLE, ColorType.GREEN);
-        polyman3.setTilePosition(start, new Position(size * 2, size * 2), 0, 3);
+        if(boardmap.setObjectOnTile(polyman3.transform, 3, 5)){
+            boardmap.putOnBoard(polyman3);
+        }
         polyman3.transform.setSize(size);
         gameObjects.add(polyman3);
 
@@ -113,35 +120,48 @@ public class GameView extends View implements Choreographer.FrameCallback {
     }
 
     private IGameObject pickedObject = null;
+    private int origin_width = -1, origin_height = -1;
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        pointsBuffer[0] = event.getX();
+        pointsBuffer[1] = event.getY();
+        invertedMatrix.mapPoints(pointsBuffer);
         switch (event.getAction()) {
         case MotionEvent.ACTION_DOWN:
-            pointsBuffer[0] = event.getX();
-            pointsBuffer[1] = event.getY();
-            invertedMatrix.mapPoints(pointsBuffer);
             // Log.d(TAG, "Event=" + event.getAction() + " x=" + pointsBuffer[0] + " y=" + pointsBuffer[1]);
             // check the clicked object
             for (IGameObject gobj : gameObjects) {
                 if (gobj instanceof Polyman) {
                     if(((Polyman)gobj).inPoint(new Position(pointsBuffer[0], pointsBuffer[1]))){
+                        origin_width = boardmap.getWidth(pointsBuffer[0]);
+                        origin_height = boardmap.getHeight(pointsBuffer[1]);
+                        Log.d(TAG, "is Empty ? = " + boardmap.pickUpObject(origin_width, origin_height));
                         pickedObject = gobj;
+                        boardmap.setOnPredictPoint(pointsBuffer[0], pointsBuffer[1]);
+                        return true;
                     }
                 }
             }
-            return true;
         case MotionEvent.ACTION_UP:
             if(pickedObject != null){
-                boardmap.setPositionNearTile(pickedObject.getTransform());
+                if(boardmap.isSettable(pointsBuffer[0], pointsBuffer[1])) {
+                    boardmap.setPositionNearTile(pickedObject.getTransform());
+                    boardmap.putOnBoard(pickedObject);
+                }else{
+                    boardmap.setObjectOnTile(pickedObject.getTransform(), origin_width, origin_height);
+                    boardmap.putOnBoard(pickedObject);
+                }
+                boardmap.setOffPredictPoint();
                 pickedObject = null;
+                origin_width = -1;
+                origin_height = -1;
             }
+            return true;
         case MotionEvent.ACTION_MOVE:
-            pointsBuffer[0] = event.getX();
-            pointsBuffer[1] = event.getY();
-            invertedMatrix.mapPoints(pointsBuffer);
             // Log.d(TAG, "Event=" + event.getAction());
             if (pickedObject != null) {
-                ((Polyman)pickedObject).transform.moveTo(pointsBuffer[0], pointsBuffer[1]);
+                pickedObject.getTransform().moveTo(pointsBuffer[0], pointsBuffer[1]);
+                boardmap.movePredictPoint(pointsBuffer[0], pointsBuffer[1]);
             }
             return true;
         }

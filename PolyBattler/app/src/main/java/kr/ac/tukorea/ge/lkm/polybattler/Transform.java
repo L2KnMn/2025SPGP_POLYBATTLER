@@ -4,6 +4,7 @@ import android.graphics.Path;
 import android.graphics.RectF;
 
 public class Transform {
+    private IGameObject instance = null;
     private Position position;
     private float radian;
     private float size;
@@ -12,12 +13,19 @@ public class Transform {
     private RectF body;
     private boolean rigid;
 
-    public Transform(){
-        position = new Position();
+    public Transform(IGameObject parent){
+        instance = parent;
+        position = new Position(0, 0);
         init();
     }
-    public Transform(float x, float y){
+    public Transform(IGameObject parent, float x, float y){
+        instance = parent;
         position = new Position(x, y);
+        init();
+    }
+    public Transform(IGameObject parent, Position position){
+        instance = parent;
+        this.position = position;
         init();
     }
     private void init(){
@@ -115,5 +123,9 @@ public class Transform {
         float dx = Math.abs(this.position.x - x);
         float dy = Math.abs(this.position.y - y);
         return (float) Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
+    }
+
+    public IGameObject getInstance() {
+        return instance;
     }
 }

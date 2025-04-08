@@ -3,6 +3,7 @@ package kr.ac.tukorea.ge.lkm.polybattler;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.util.Log;
 
 public class Boardmap implements IGameObject {
 
@@ -15,11 +16,17 @@ public class Boardmap implements IGameObject {
     private final Paint paintLight;
     private final Paint paintDark;
 
+    private Transform predictPoint;
+    private Paint predictRectPaint;
     final private Position startTileLeftTop;
+    private boolean availible;
+    private boolean floatObjectOn;
 
     public Boardmap(){
         width = 4;
         height = 7;
+
+        availible = true;
 
         float tileWidth = (Metrics.SCREEN_WIDTH-2) / width;
         float tileHeight = (Metrics.SCREEN_HEIGHT-2) / height;
@@ -42,6 +49,15 @@ public class Boardmap implements IGameObject {
         paintDark = new Paint();
         paintDark.setColor(0xffAE6B2D);
         paintDark.setStyle(Paint.Style.FILL);
+
+        predictPoint = new Transform(this);
+        predictPoint.setSize(length/2);
+        predictPoint.setRigid(false);
+        predictRectPaint = new Paint();
+        predictRectPaint.setColor(0xA0FFEF82);
+        predictRectPaint.setStyle(Paint.Style.STROKE);
+        predictRectPaint.setStrokeWidth(0.3f);
+        floatObjectOn = false;
     }
 
     @Override
@@ -52,14 +68,25 @@ public class Boardmap implements IGameObject {
     @Override
     public void draw(Canvas canvas) {
         // 드로잉 로직
-        canvas.drawRect(dstRect, paintDark);
+        canvas.drawRect(dstRect, predictRectPaint);
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
+                float sx = startTileLeftTop.x + i * tileRect.width();
+                float sy = startTileLeftTop.y + j * tileRect.height();
                 if((i+j)%2 == 0){
-                    float sx = startTileLeftTop.x + i * tileRect.width();
-                    float sy = startTileLeftTop.y + j * tileRect.height();
                     canvas.drawRect(sx, sy, sx + tileRect.width(), sy + tileRect.height(), paintLight);
+                }else{
+                    canvas.drawRect(sx, sy, sx + tileRect.width(), sy + tileRect.height(), paintDark);
                 }
+            }
+        }
+        if(floatObjectOn){
+            if(isSettable(predictPoint.getPosition().x, predictPoint.getPosition().y)){
+                setPositionNearTile(predictPoint);
+                canvas.drawRect(predictPoint.getRect(), predictRectPaint);
+            }else{
+                predictPoint.set(getTileX(origin_width, TilePosition.CENTER), getTileY(origin_height, TilePosition.CENTER));
+                canvas.drawRect(predictPoint.getRect(), predictRectPaint);
             }
         }
     }
@@ -69,6 +96,17 @@ public class Boardmap implements IGameObject {
         return null;
     }
 
+    @Override
+    public void SetActive(boolean active) {
+        // Polyman의 활성화 로직
+        availible = active;
+    }
+
+    @Override
+    public boolean isActive() {
+        return availible;
+    }
+    
     public float getTileSize() {
         return length;
     }
@@ -81,21 +119,8 @@ public class Boardmap implements IGameObject {
         return (int) ((x - startTileLeftTop.x) / length);
     }
 
-    public int getHeight(float y) {
-        return (int) ((y - startTileLeftTop.y) / length);
-    }
-
-    public enum TilePosition{
-        CENTER, TOP, BOTTOM, LEFT, RIGHT,
-        TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT
-    }
-
-    public void setPositionTile(Transform transform, int width, int height){
-        setPositionTile(transform, width, height, TilePosition.CENTER);
-    }
-
-    public void setPositionTile(Transform transform, int width, int height, TilePosition gravity){
-        float ax = 0f, ay = 0f;
+    public float getTileX(int width, TilePosition gravity) {
+        float ax = 0.0f;
         switch (gravity){
             case CENTER:
             case TOP:
@@ -112,7 +137,18 @@ public class Boardmap implements IGameObject {
             case BOTTOM_RIGHT:
                 ax = 1.0f;
                 break;
+            default:
+                Log.d("Boardmap", "gravity error");
         }
+        return startTileLeftTop.x + (width + ax) * length;
+    }
+
+    public int getHeight(float y) {
+        return (int) ((y - startTileLeftTop.y) / length);
+    }
+
+    public float getTileY(int height, TilePosition gravity) {
+        float ay = 0.0f;
         switch (gravity){
             case CENTER:
             case LEFT:
@@ -129,19 +165,105 @@ public class Boardmap implements IGameObject {
             case BOTTOM_RIGHT:
                 ay = 1.0f;
                 break;
+            default:
+                Log.d("Boardmap", "gravity error");
         }
-        float x = startTileLeftTop.x + (width + ax) * length;
-        float y = startTileLeftTop.y + (height + ay) * length;
-        transform.set(x, y);
+        return startTileLeftTop.y + (height + ay) * length;
     }
 
-    public void setPositionNearTile(Transform transform){
-        setPositionNearTile(transform, TilePosition.CENTER);
+    public enum TilePosition{
+        CENTER, TOP, BOTTOM, LEFT, RIGHT,
+        TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT
     }
-    public void setPositionNearTile(Transform transform, TilePosition gravity){
+
+    public boolean setObjectOnTile(Transform transform, int width, int height){
+        return setObjectOnTile(transform, width, height, TilePosition.CENTER);
+    }
+
+    public boolean setObjectOnTile(Transform transform, int width, int height, TilePosition gravity){
+        if(width < 0 || width >= this.width) {
+            return false;
+        }
+        if(height < 0 || height >= this.height) {
+            return false;
+        }
+        if(transform.isRigid() && board[width][height] != null){
+            return false;
+        }
+        float x = getTileX(width, gravity);
+        float y = getTileY(height, gravity);
+        transform.set(x, y);
+        if(transform.isRigid()){
+            putOnBoard(transform.getInstance());
+        }
+        return true;
+    }
+
+    public boolean setPositionNearTile(Transform transform){
+        if(!dstRect.contains(transform.getPosition().x, transform.getPosition().y)){
+            return false;
+        }
+        return setPositionNearTile(transform, TilePosition.CENTER);
+    }
+    public boolean setPositionNearTile(Transform transform, TilePosition gravity){
         int targetWidth = getWidth(transform.getPosition().x);
         int targetHeight = getHeight(transform.getPosition().y);
-        setPositionTile(transform, targetWidth, targetHeight, gravity);
+        return setObjectOnTile(transform, targetWidth, targetHeight, gravity);
+    }
+
+    public IGameObject pickUpObject(int width, int height){
+        if(width < 0 || width >= this.width){
+            return null;
+        }
+        if(height < 0 || height >= this.height) {
+            return null;
+        }
+        IGameObject temp = board[width][height];
+        board[width][height] = null;
+        return temp;
+    }
+    public void putOnBoard(IGameObject object){
+        int width = getWidth(object.getTransform().getPosition().x);
+        int height = getHeight(object.getTransform().getPosition().y);
+
+        if(width < 0 || width >= this.width){
+            return;
+        }
+        if(height < 0 || height >= this.height) {
+            return;
+        }
+
+        if(board[width][height] == null) {
+            board[width][height] = object;
+        }
+    }
+
+    int origin_width;
+    int origin_height;
+    public void setOnPredictPoint(float x, float y) {
+        predictPoint.set(x, y);
+        origin_width = getWidth(x);
+        origin_height = getHeight(y);
+        floatObjectOn = true;
+    }
+
+    public void movePredictPoint(float x, float y) {
+        predictPoint.set(x, y);
+    }
+
+    public void setOffPredictPoint() {
+        floatObjectOn = false;
+        origin_width = -1;
+        origin_height = -1;
+    }
+
+    public boolean isSettable(float x, float y){
+        if(dstRect.contains(x, y)){
+            int width = getWidth(x);
+            int height = getHeight(y);
+            return (board[width][height] == null);
+        }
+        return false;
     }
 }
 

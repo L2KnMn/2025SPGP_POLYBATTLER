@@ -17,11 +17,12 @@ public class Polyman implements IGameObject {
     private Paint paint;
     private ShapeType shape;
     private ColorType color;
+    private boolean availible;
 
     public Polyman(ShapeType shape, ColorType color) {
         this.shape = shape;
         this.color = color;
-        transform = new Transform(0, 0);
+        transform = new Transform(this, 0, 0);
         transform.setRigid(true);
         paint = new Paint();
         paint.setColor(getColor());
@@ -57,6 +58,17 @@ public class Polyman implements IGameObject {
         return transform;
     }
 
+    @Override
+    public void SetActive(boolean active) {
+        // Polyman의 활성화 로직
+        availible = active;
+    }
+
+    @Override
+    public boolean isActive() {
+        return availible;
+    }
+
     private int getColor(){
         switch (color) {
             case RED:
@@ -71,11 +83,6 @@ public class Polyman implements IGameObject {
                 return 0xFFFF0000;
         }
     }
-
-    public void setTilePosition(Position start, Position tileSizeUnit, int x, int y) {
-        transform.getPosition().set(start.x + (x + 0.5f) * tileSizeUnit.x, start.y + (y + 0.5f) * tileSizeUnit.y);
-    }
-
     public boolean inPoint(Position point){
         switch (shape){
             case RECTANGLE:
