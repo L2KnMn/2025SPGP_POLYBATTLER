@@ -6,7 +6,9 @@ android {
     namespace = "kr.ac.tukorea.ge.lkm.polybattler"
     compileSdk = 35
 
-
+    buildFeatures {
+        buildConfig = true
+    }
 
     defaultConfig {
         applicationId = "kr.ac.tukorea.ge.lkm.polybattler"
