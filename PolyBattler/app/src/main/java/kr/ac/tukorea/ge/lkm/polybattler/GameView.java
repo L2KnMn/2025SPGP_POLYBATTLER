@@ -10,6 +10,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Choreographer;
 import android.view.MotionEvent;
 import android.view.View;
@@ -114,11 +115,22 @@ public class GameView extends View implements Choreographer.FrameCallback {
     public boolean onTouchEvent(MotionEvent event) {
         switch (event.getAction()) {
         case MotionEvent.ACTION_DOWN:
+            pointsBuffer[0] = event.getX();
+            pointsBuffer[1] = event.getY();
+            invertedMatrix.mapPoints(pointsBuffer);
+            Log.d(TAG, "Event=" + event.getAction() + " x=" + pointsBuffer[0] + " y=" + pointsBuffer[1]);
+            // check the clicked object
+            for (IGameObject gobj : gameObjects) {
+                if (gobj instanceof Polyman) {
+
+                }
+            }
+            return true;
         case MotionEvent.ACTION_MOVE:
             pointsBuffer[0] = event.getX();
             pointsBuffer[1] = event.getY();
             invertedMatrix.mapPoints(pointsBuffer);
-            //Log.d(TAG, "Event=" + event.getAction());
+            Log.d(TAG, "Event=" + event.getAction());
             return true;
         }
         return super.onTouchEvent(event);
