@@ -3,8 +3,7 @@ package kr.ac.tukorea.ge.lkm.polybattler;
 import android.graphics.RectF;
 
 public class Transform {
-    private float x;
-    private float y;
+    private Position position;
     private float radian;
     private float size;
 
@@ -12,52 +11,40 @@ public class Transform {
     private boolean rigid;
 
     public Transform(){
-        this.x = 0;
-        this.y = 0;
+        position = new Position();
         init();
     }
     public Transform(float x, float y){
-        this.x = x;
-        this.y = y;
+        position = new Position(x, y);
         init();
     }
-
     private void init(){
-        this.radian = 0;
-        this.size = 1;
-        this.rigid = false;
-        body = new RectF(x-size/2, y-size/2, x+size/2, y+size/2);
-    }
-    public Transform(float x, float y, float radian, float size){
-        this.x = x;
-        this.y = y;
+        body = new RectF();
+        setAngle(0);
+        setSize(1);
+        setRigid(false);
     }
     public void setRigid(boolean rigid){
         this.rigid = rigid;
     }
     public void set(float x, float y){
-        this.x = x;
-        this.y = y;
-    }
-    public void setX(float x){
-        this.x = x;
-    }
-    public void setY(float y){
-        this.y = y;
+        position.set(x, y);
     }
     public void setAngle(float radian){
         this.radian = radian;
     }
+    public void turnLeft(float radian){
+        this.radian -= radian;
+    }
+    public void turnRight(float radian){
+        this.radian += radian;
+    }
     public void setSize(float size){
         this.size = size;
-        body.set(x-size/2, y-size/2, x+size/2, y+size/2);
+        body.set(position.x-size, position.y-size,
+                position.x+size, position.y+size);
     }
-    public float getX(){
-        return this.x;
-    }
-    public float getY(){
-        return this.y;
-    }
+    public Position getPosition(){ return position; }
     public boolean isRigid(){
         return this.rigid;
     }
@@ -68,26 +55,26 @@ public class Transform {
         return this.size;
     }
     public RectF getRect(){
+        body.set(position.x-size, position.y-size,
+                position.x+size, position.y+size);
         return body;
     }
     public void move(float x, float y){
-        this.x += x;
-        this.y += y;
+       position.x += x;
+       position.y += y;
     }
     public void move(Transform pos){
-        this.x += pos.getX();
-        this.y += pos.getY();
+        position.add(pos.position);
     }
     public void moveTo(float x, float y){
-        this.x = x;
-        this.y = y;
+        position.set(x, y);
     }
     public void moveTo(Transform pos){
-        this.x = pos.getX();
+        position.set(pos.position);
     }
     public float distance(Transform pos) {
-        this.x = Math.abs(this.x - pos.getX());
-        this.y = Math.abs(this.y - pos.getY());
-        return (float) Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2));
+        this.position.x = Math.abs(this.position.x - pos.position.x);
+        this.position.y = Math.abs(this.position.y - pos.position.y);
+        return (float) Math.sqrt(Math.pow(this.position.x, 2) + Math.pow(this.position.y, 2));
     }
 }

@@ -11,22 +11,31 @@ public class Boardmap implements IGameObject {
 
     private int width;
     private int height;
-    private Transform transform;
     private IGameObject[][] board;
-    private final Bitmap bitmap;
     private final RectF dstRect;
     private final RectF tileRect;
     private final Paint paintLight;
     private final Paint paintDark;
 
-    public Boardmap(Bitmap bitmap){
-        this.bitmap = bitmap;
-        dstRect  = new RectF(0, 0, Metrics.SCREEN_WIDTH, Metrics.SCREEN_HEIGHT);
-        tileRect = new RectF(0, 0, 1, 1);
+    private Position startTileLeftTop;
+    private Position startTileCenter;
+
+    public Boardmap(){
         width = 4;
         height = 7;
+
+        tileRect = new RectF(0, 0, (Metrics.SCREEN_WIDTH-2) / width, (Metrics.SCREEN_WIDTH-2) / width);
+        startTileLeftTop = new Position( (Metrics.SCREEN_WIDTH-tileRect.width()*width)/2
+                , (Metrics.SCREEN_HEIGHT-tileRect.height()*height)/2);
+
+        dstRect  = new RectF(startTileLeftTop.x, startTileLeftTop.y,
+                startTileLeftTop.x + tileRect.width() * width,
+                startTileLeftTop.y + tileRect.height() * height);
+
+        startTileCenter = new Position(startTileLeftTop.x + tileRect.width() / 2,
+                startTileLeftTop.y + tileRect.height() / 2);
+
         board = new IGameObject[width][height];
-        transform = new Transform(0, 0);
 
         paintLight = new Paint();
         paintLight.setColor(0xFFD2944A);
@@ -46,15 +55,12 @@ public class Boardmap implements IGameObject {
     public void draw(Canvas canvas) {
         // 드로잉 로직
         canvas.drawRect(dstRect, paintDark);
-        float tileWidth = dstRect.width() / width;
-        float tileHeight = dstRect.height() / height;
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
                 if((i+j)%2 == 0){
-                    canvas.drawRect(i * tileWidth,
-                            j * tileHeight,
-                            (i + 1) * tileWidth,
-                            (j + 1) * tileHeight, paintLight);
+                    float sx = startTileLeftTop.x + i * tileRect.width();
+                    float sy = startTileLeftTop.y + j * tileRect.height();
+                    canvas.drawRect(sx, sy, sx + tileRect.width(), sy + tileRect.height(), paintLight);
                 }
             }
         }
