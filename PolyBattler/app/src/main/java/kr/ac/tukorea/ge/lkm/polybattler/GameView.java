@@ -27,6 +27,8 @@ public class GameView extends View implements Choreographer.FrameCallback {
     private final ArrayList<IGameObject> gameObjects = new ArrayList<>();
     private static long previousNanos;
     public static float frameTime;
+    private Bitmap backgroundImage;
+    private RectF backgroundRect;
 
     public GameView(Context context) {
         super(context);
@@ -40,8 +42,12 @@ public class GameView extends View implements Choreographer.FrameCallback {
 
     private void init() {
         // 실질적 생성자 역할
-
         Resources res = getResources();
+        backgroundImage = BitmapFactory.decodeResource(res, R.mipmap.game_background);
+        //backgroundRect = new RectF(0, 0, Metrics.SCREEN_WIDTH, Metrics.SCREEN_HEIGHT);
+
+        gameObjects.add(new Boardmap(backgroundImage));
+
         scheduleUpdate();
     }
 
@@ -51,6 +57,7 @@ public class GameView extends View implements Choreographer.FrameCallback {
         float view_ratio = (float)w / (float)h;
         float game_ratio = Metrics.SCREEN_WIDTH / Metrics.SCREEN_HEIGHT;
 
+        backgroundRect = new RectF(0, 0, w, h);
         transformMatrix.reset();
         if (view_ratio > game_ratio) {
             float scale = h / Metrics.SCREEN_HEIGHT;
@@ -68,6 +75,7 @@ public class GameView extends View implements Choreographer.FrameCallback {
     protected void onDraw(@NonNull Canvas canvas) {
         super.onDraw(canvas);
         canvas.save();
+        canvas.drawBitmap(backgroundImage, null, backgroundRect, null);
         canvas.setMatrix(transformMatrix);
         // 반드시 성공적인 빌드가 진행된 후에 BuildConfig.java 가 생성되므로
         // 아래 코드가 문제가 되면 잠시 삭제해서 빌드만 성공시키고 다시 살려두어도 된다.
