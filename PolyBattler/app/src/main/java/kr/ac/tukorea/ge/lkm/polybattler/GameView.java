@@ -131,6 +131,7 @@ public class GameView extends View implements Choreographer.FrameCallback {
             // Log.d(TAG, "Event=" + event.getAction() + " x=" + pointsBuffer[0] + " y=" + pointsBuffer[1]);
             // check the clicked object
             for (IGameObject gobj : gameObjects) {
+                // 이 부분은 Boardmap 오브젝트에게 맡기는 걸로 변경 예정 순차 검색보단 좌표로 해당 배열에 직접 액세스 하는 게 오버헤드도 적고 버그도 없을 듯
                 if (gobj instanceof Polyman) {
                     if(((Polyman)gobj).inPoint(new Position(pointsBuffer[0], pointsBuffer[1]))){
                         origin_width = boardmap.getWidth(pointsBuffer[0]);
