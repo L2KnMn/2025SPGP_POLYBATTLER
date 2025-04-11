@@ -11,7 +11,7 @@ public class Boardmap implements IGameObject {
     final private int width;
     final private int height;
     private IGameObject[][] board;
-    private IGameObject[][] bench;
+    private IGameObject[] bench;
     final private int benchSize;
     final private Position startBenchLeftTop;
     private final RectF dstRect;
@@ -36,14 +36,15 @@ public class Boardmap implements IGameObject {
         int width_max = Math.max(benchSize, width);
         int height_max = height + 1;
 
-        float tileWidth = (Metrics.SCREEN_WIDTH-1) / width_max;
+        float tileWidth = (Metrics.SCREEN_WIDTH) / width_max;
         float tileHeight = (Metrics.SCREEN_HEIGHT-1) / height_max;
         length = tileWidth < tileHeight ? tileWidth : tileHeight;
 
-        tileRect = new RectF(0, 0, length, length);
-        startTileLeftTop = new Position( (Metrics.SCREEN_WIDTH-tileRect.width()*width)/2, 0);
+        float height_term = (Metrics.SCREEN_HEIGHT - length * height_max) / 3;
 
-        startBenchLeftTop = new Position((Metrics.SCREEN_WIDTH-tileRect.width()*benchSize)/2, Metrics.SCREEN_HEIGHT-tileRect.height());
+        tileRect = new RectF(0, 0, length, length);
+        startTileLeftTop = new Position( (Metrics.SCREEN_WIDTH-tileRect.width()*width)/2, height_term);
+        startBenchLeftTop = new Position((Metrics.SCREEN_WIDTH-tileRect.width()*benchSize)/2, Metrics.SCREEN_HEIGHT-tileRect.height() - height_term);
 
         dstRect  = new RectF(startTileLeftTop.x, startTileLeftTop.y,
                 startTileLeftTop.x + tileRect.width() * width,
@@ -53,6 +54,7 @@ public class Boardmap implements IGameObject {
                 startBenchLeftTop.y + tileRect.height());
 
         board = new IGameObject[width][height];
+        bench = new IGameObject[benchSize];
 
         paintLight = new Paint();
         paintLight.setColor(0xFFD2944A);
@@ -288,6 +290,25 @@ public class Boardmap implements IGameObject {
             return (board[width][height] == null);
         }
         return false;
+    }
+
+    public IGameObject findObject(float x, float y){
+        if(dstRect.contains(x, y)){
+            int width = getWidth(x);
+            int height = getHeight(y);
+            return board[width][height];
+        }else if(benchRect.contains(x, y)) {
+            int index = getIndex(x, y);
+            return bench[index];
+        }
+        return null;
+    }
+
+    private int getIndex(float x, float y) {
+        if(benchRect.contains(x, y)){
+            return (int)((x - startBenchLeftTop.x) / length);
+        }
+        return -1;
     }
 }
 
