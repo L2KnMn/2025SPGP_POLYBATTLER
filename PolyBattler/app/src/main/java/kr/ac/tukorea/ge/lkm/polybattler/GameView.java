@@ -55,14 +55,14 @@ public class GameView extends View implements Choreographer.FrameCallback {
         start.set(boardmap.getTileLeftTop());
 
         Polyman polyman = new Polyman(ShapeType.CIRCLE, ColorType.RED);
-        if(boardmap.setObjectOnTile(polyman.transform, 1, 8)) {
+        if(boardmap.setObjectOnTile(polyman.transform, 1, 6)) {
             boardmap.putOnBoard(polyman);
         }
         polyman.transform.setSize(size);
         gameObjects.add(polyman);
 
         Polyman polyman2 = new Polyman(ShapeType.RECTANGLE, ColorType.BLUE);
-        if(boardmap.setObjectOnTile(polyman2.transform, 2, 7)){
+        if(boardmap.setObjectOnTile(polyman2.transform, 2, 5)){
             boardmap.putOnBoard(polyman2);
         }
         polyman2.transform.setSize(size);
@@ -130,19 +130,15 @@ public class GameView extends View implements Choreographer.FrameCallback {
         case MotionEvent.ACTION_DOWN:
             // Log.d(TAG, "Event=" + event.getAction() + " x=" + pointsBuffer[0] + " y=" + pointsBuffer[1]);
             // check the clicked object
-            for (IGameObject gobj : gameObjects) {
-                // 이 부분은 Boardmap 오브젝트에게 맡기는 걸로 변경 예정 순차 검색보단 좌표로 해당 배열에 직접 액세스 하는 게 오버헤드도 적고 버그도 없을 듯
-                if (gobj instanceof Polyman) {
-                    if(((Polyman)gobj).inPoint(new Position(pointsBuffer[0], pointsBuffer[1]))){
-                        origin_width = boardmap.getWidth(pointsBuffer[0]);
-                        origin_height = boardmap.getHeight(pointsBuffer[1]);
-                        boardmap.pickUpObject(origin_width, origin_height);
-                        pickedObject = gobj;
-                        boardmap.setOnPredictPoint(pointsBuffer[0], pointsBuffer[1]);
-                        return true;
-                    }
-                }
+            IGameObject object = boardmap.findObject(pointsBuffer[0], pointsBuffer[1]);
+            if(object != null){
+                boardmap.pickUpObject(boardmap.getWidth(pointsBuffer[0]), boardmap.getHeight(pointsBuffer[1]));
+                pickedObject = object;
+                boardmap.setOnPredictPoint(pointsBuffer[0], pointsBuffer[1]);
+                origin_width = boardmap.getWidth(pointsBuffer[0]);
+                origin_height = boardmap.getHeight(pointsBuffer[1]);
             }
+            return true;
         case MotionEvent.ACTION_UP:
             if(pickedObject != null){
                 if(boardmap.isSettable(pointsBuffer[0], pointsBuffer[1])) {
