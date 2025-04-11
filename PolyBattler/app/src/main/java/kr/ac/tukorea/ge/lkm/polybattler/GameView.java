@@ -135,7 +135,7 @@ public class GameView extends View implements Choreographer.FrameCallback {
                     if(((Polyman)gobj).inPoint(new Position(pointsBuffer[0], pointsBuffer[1]))){
                         origin_width = boardmap.getWidth(pointsBuffer[0]);
                         origin_height = boardmap.getHeight(pointsBuffer[1]);
-                        Log.d(TAG, "is Empty ? = " + boardmap.pickUpObject(origin_width, origin_height));
+                        boardmap.pickUpObject(origin_width, origin_height);
                         pickedObject = gobj;
                         boardmap.setOnPredictPoint(pointsBuffer[0], pointsBuffer[1]);
                         return true;

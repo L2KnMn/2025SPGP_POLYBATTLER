@@ -8,10 +8,14 @@ import android.util.Log;
 public class Boardmap implements IGameObject {
 
     final private float length;
-    private int width;
-    private int height;
+    final private int width;
+    final private int height;
     private IGameObject[][] board;
+    private IGameObject[][] bench;
+    final private int benchSize;
+    final private Position startBenchLeftTop;
     private final RectF dstRect;
+    private final RectF benchRect;
     private final RectF tileRect;
     private final Paint paintLight;
     private final Paint paintDark;
@@ -23,22 +27,30 @@ public class Boardmap implements IGameObject {
     private boolean floatObjectOn;
 
     public Boardmap(){
+        benchSize = 5;
         width = 4;
         height = 7;
 
         availible = true;
 
-        float tileWidth = (Metrics.SCREEN_WIDTH-2) / width;
-        float tileHeight = (Metrics.SCREEN_HEIGHT-2) / height;
+        int width_max = Math.max(benchSize, width);
+        int height_max = height + 1;
+
+        float tileWidth = (Metrics.SCREEN_WIDTH-1) / width_max;
+        float tileHeight = (Metrics.SCREEN_HEIGHT-1) / height_max;
         length = tileWidth < tileHeight ? tileWidth : tileHeight;
 
         tileRect = new RectF(0, 0, length, length);
-        startTileLeftTop = new Position( (Metrics.SCREEN_WIDTH-tileRect.width()*width)/2
-                , (Metrics.SCREEN_HEIGHT-tileRect.height()*height)/2);
+        startTileLeftTop = new Position( (Metrics.SCREEN_WIDTH-tileRect.width()*width)/2, 0);
+
+        startBenchLeftTop = new Position((Metrics.SCREEN_WIDTH-tileRect.width()*benchSize)/2, Metrics.SCREEN_HEIGHT-tileRect.height());
 
         dstRect  = new RectF(startTileLeftTop.x, startTileLeftTop.y,
                 startTileLeftTop.x + tileRect.width() * width,
                 startTileLeftTop.y + tileRect.height() * height);
+        benchRect = new RectF(startBenchLeftTop.x, startBenchLeftTop.y,
+                startBenchLeftTop.x + tileRect.width() * benchSize,
+                startBenchLeftTop.y + tileRect.height());
 
         board = new IGameObject[width][height];
 
@@ -73,11 +85,23 @@ public class Boardmap implements IGameObject {
             for (int j = 0; j < height; j++) {
                 float sx = startTileLeftTop.x + i * tileRect.width();
                 float sy = startTileLeftTop.y + j * tileRect.height();
+                tileRect.set(sx, sy, sx + tileRect.width(), sy + tileRect.height());
                 if((i+j)%2 == 0){
-                    canvas.drawRect(sx, sy, sx + tileRect.width(), sy + tileRect.height(), paintLight);
+                    canvas.drawRect(tileRect, paintLight);
                 }else{
-                    canvas.drawRect(sx, sy, sx + tileRect.width(), sy + tileRect.height(), paintDark);
+                    canvas.drawRect(tileRect, paintDark);
                 }
+            }
+        }
+        canvas.drawRect(benchRect, predictRectPaint);
+        for (int i = 0; i < benchSize; i++) {
+            float sx = startBenchLeftTop.x + i * tileRect.width();
+            float sy = startBenchLeftTop.y;
+            tileRect.set(sx, sy, sx + tileRect.width(), sy + tileRect.height());
+            if(i%2 == 0){
+                canvas.drawRect(tileRect, paintLight);
+            }else{
+                canvas.drawRect(tileRect, paintDark);
             }
         }
         if(floatObjectOn){
