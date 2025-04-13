@@ -108,10 +108,9 @@ public class Boardmap implements IGameObject {
         }
         if(floatObjectOn){
             if(isSettable(predictPoint.getPosition().x, predictPoint.getPosition().y)){
-                setPositionNearTile(predictPoint);
                 canvas.drawRect(predictPoint.getRect(), predictRectPaint);
             }else{
-                predictPoint.set(getTileX(origin_width, TilePosition.CENTER), getTileY(origin_height, TilePosition.CENTER));
+                predictPoint.moveTo(origin_x, origin_y);
                 canvas.drawRect(predictPoint.getRect(), predictRectPaint);
             }
         }
@@ -119,6 +118,7 @@ public class Boardmap implements IGameObject {
 
     @Override
     public Transform getTransform() {
+        Log.d("Boardmap", "call boardmap's getTransform() it is error");
         return null;
     }
 
@@ -216,25 +216,45 @@ public class Boardmap implements IGameObject {
         if(transform.isRigid() && board[width][height] != null){
             return false;
         }
+
         float x = getTileX(width, gravity);
         float y = getTileY(height, gravity);
-        transform.set(x, y);
-        if(transform.isRigid()){
-            putOnBoard(transform.getInstance());
+        transform.moveTo(x, y);
+
+        if(transform.isRigid()) {
+            return putOnBoard(transform.getInstance());
         }
         return true;
     }
 
-    public boolean setPositionNearTile(Transform transform){
-        if(!dstRect.contains(transform.getPosition().x, transform.getPosition().y)){
+    public boolean setObjectOnBench(Transform transform, int index){
+        if(index < 0 || index >= this.benchSize) {
             return false;
         }
-        return setPositionNearTile(transform, TilePosition.CENTER);
+        if(transform.isRigid() && bench[index] != null){
+            return false;
+        }
+        float x = startBenchLeftTop.x + length * (index + 0.5f);
+        float y = startBenchLeftTop.y + length/2;
+        transform.moveTo(x, y);
+        if(transform.isRigid())
+            putOnBench(transform.getInstance());
+        return true;
     }
-    public boolean setPositionNearTile(Transform transform, TilePosition gravity){
-        int targetWidth = getWidth(transform.getPosition().x);
-        int targetHeight = getHeight(transform.getPosition().y);
-        return setObjectOnTile(transform, targetWidth, targetHeight, gravity);
+
+    public boolean setPositionNear(Transform transform){
+        return setPositionNear(transform, TilePosition.CENTER);
+    }
+    public boolean setPositionNear(Transform transform, TilePosition gravity){
+        if(dstRect.contains(transform.getPosition().x, transform.getPosition().y)){
+            int targetWidth = getWidth(transform.getPosition().x);
+            int targetHeight = getHeight(transform.getPosition().y);
+            return setObjectOnTile(transform, targetWidth, targetHeight, gravity);
+        }else if(benchRect.contains(transform.getPosition().x, transform.getPosition().y)){
+            return setObjectOnBench(transform, getIndex(transform.getPosition().x, transform.getPosition().y));
+        }else{
+            return false;
+        }
     }
 
     public IGameObject pickUpObject(int width, int height){
@@ -248,46 +268,115 @@ public class Boardmap implements IGameObject {
         board[width][height] = null;
         return temp;
     }
-    public void putOnBoard(IGameObject object){
+
+    private boolean putOnBoard(IGameObject object){
         int width = getWidth(object.getTransform().getPosition().x);
         int height = getHeight(object.getTransform().getPosition().y);
 
         if(width < 0 || width >= this.width){
-            return;
+            return false;
         }
         if(height < 0 || height >= this.height) {
-            return;
+            return false;
         }
 
         if(board[width][height] == null) {
             board[width][height] = object;
+            return true;
         }
+        return false;
+    }
+    private boolean putOnBench(IGameObject object){
+        int index = getIndex(object.getTransform().getPosition().x, object.getTransform().getPosition().y);
+        if(index < 0 || index >= this.benchSize) {
+            return false;
+        }
+        if(bench[index] == null) {
+            bench[index] = object;
+            return true;
+        }
+        return false;
     }
 
-    int origin_width;
-    int origin_height;
-    public void setOnPredictPoint(float x, float y) {
-        predictPoint.set(x, y);
-        origin_width = getWidth(x);
-        origin_height = getHeight(y);
+    private boolean putOnMap(IGameObject object){
+        if(dstRect.contains(object.getTransform().getPosition().x, object.getTransform().getPosition().y)){
+            return putOnBoard(object);
+        }else if(benchRect.contains(object.getTransform().getPosition().x, object.getTransform().getPosition().y)){
+            return putOnBench(object);
+        }
+        return false;
+    }
+
+    float origin_x;
+    float origin_y;
+    private IGameObject pickedObject = null;
+    public IGameObject setOnPredictPoint(float x, float y) {
+        // 물체를 짚는 것을 지시
+        // 이 때 이미 짚은 물체가 있다면 어떻게 처리할 것인지 고민해봐야됨
+        // 일단은 에러 로그를 표시하고, 그냥 새 짚는 명령 무시하는 걸로
+        IGameObject picked = null;
+        if(floatObjectOn){
+            Log.d("Boardmap", "already float object is exist");
+           return picked;
+        }
+        if(dstRect.contains(x, y)) {
+            int width = getWidth(x);
+            int height = getHeight(y);
+            if(board[width][height] != null) {
+                pickedObject = board[width][height];
+                activatePredictPoint(x, y);
+                board[width][height] = null;
+            }
+        }else if (benchRect.contains(x, y)) {
+            int index = getIndex(x, y);
+            if(index > 0 && index < benchSize && bench[index] != null) {
+                pickedObject = bench[index];
+                activatePredictPoint(x, y);
+                bench[index] = null;
+            }
+        }
+        return picked;
+    }
+
+    private void activatePredictPoint(float x, float y){
+        predictPoint.moveTo(x, y);
+        setPositionNear(predictPoint);
+        origin_x = predictPoint.getPosition().x;
+        origin_y = predictPoint.getPosition().y;
         floatObjectOn = true;
     }
 
     public void movePredictPoint(float x, float y) {
-        predictPoint.set(x, y);
+        if(!floatObjectOn)
+            return;
+        pickedObject.getTransform().moveTo(x, y);
+        predictPoint.moveTo(x, y);
+        setPositionNear(predictPoint);
     }
 
     public void setOffPredictPoint() {
-        floatObjectOn = false;
-        origin_width = -1;
-        origin_height = -1;
+        if(floatObjectOn) {
+            floatObjectOn = false;
+            if(isSettable(pickedObject.getTransform())){
+
+            }else{
+                pickedObject.getTransform().moveTo(origin_x, origin_y);
+            }
+            setPositionNear(pickedObject.getTransform());
+        }
     }
 
+    public boolean isSettable(Transform transform){
+        return isSettable(transform.getPosition().x, transform.getPosition().y);
+    }
     public boolean isSettable(float x, float y){
         if(dstRect.contains(x, y)){
             int width = getWidth(x);
             int height = getHeight(y);
             return (board[width][height] == null);
+        }else if(benchRect.contains(x, y)){
+            int width = getIndex(x, y);
+            return (bench[width] == null);
         }
         return false;
     }

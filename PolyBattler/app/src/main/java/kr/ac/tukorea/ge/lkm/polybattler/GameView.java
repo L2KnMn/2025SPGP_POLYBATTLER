@@ -10,7 +10,6 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.Choreographer;
 import android.view.MotionEvent;
 import android.view.View;
@@ -55,24 +54,18 @@ public class GameView extends View implements Choreographer.FrameCallback {
         start.set(boardmap.getTileLeftTop());
 
         Polyman polyman = new Polyman(ShapeType.CIRCLE, ColorType.RED);
-        if(boardmap.setObjectOnTile(polyman.transform, 1, 6)) {
-            boardmap.putOnBoard(polyman);
-        }
         polyman.transform.setSize(size);
+        boardmap.setObjectOnTile(polyman.transform, 1, 6);
         gameObjects.add(polyman);
 
         Polyman polyman2 = new Polyman(ShapeType.RECTANGLE, ColorType.BLUE);
-        if(boardmap.setObjectOnTile(polyman2.transform, 2, 5)){
-            boardmap.putOnBoard(polyman2);
-        }
         polyman2.transform.setSize(size);
+        boardmap.setObjectOnTile(polyman2.transform, 2, 5);
         gameObjects.add(polyman2);
 
         Polyman polyman3 = new Polyman(ShapeType.TRIANGLE, ColorType.GREEN);
-        if(boardmap.setObjectOnTile(polyman3.transform, 3, 5)){
-            boardmap.putOnBoard(polyman3);
-        }
         polyman3.transform.setSize(size);
+        boardmap.setObjectOnTile(polyman3.transform, 3, 5);
         gameObjects.add(polyman3);
 
         scheduleUpdate();
@@ -119,7 +112,6 @@ public class GameView extends View implements Choreographer.FrameCallback {
         }
     }
 
-    private IGameObject pickedObject = null;
     private int origin_width = -1, origin_height = -1;
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -130,36 +122,14 @@ public class GameView extends View implements Choreographer.FrameCallback {
         case MotionEvent.ACTION_DOWN:
             // Log.d(TAG, "Event=" + event.getAction() + " x=" + pointsBuffer[0] + " y=" + pointsBuffer[1]);
             // check the clicked object
-            IGameObject object = boardmap.findObject(pointsBuffer[0], pointsBuffer[1]);
-            if(object != null){
-                boardmap.pickUpObject(boardmap.getWidth(pointsBuffer[0]), boardmap.getHeight(pointsBuffer[1]));
-                pickedObject = object;
-                boardmap.setOnPredictPoint(pointsBuffer[0], pointsBuffer[1]);
-                origin_width = boardmap.getWidth(pointsBuffer[0]);
-                origin_height = boardmap.getHeight(pointsBuffer[1]);
-            }
+            boardmap.setOnPredictPoint(pointsBuffer[0], pointsBuffer[1]);
             return true;
         case MotionEvent.ACTION_UP:
-            if(pickedObject != null){
-                if(boardmap.isSettable(pointsBuffer[0], pointsBuffer[1])) {
-                    boardmap.setPositionNearTile(pickedObject.getTransform());
-                    boardmap.putOnBoard(pickedObject);
-                }else{
-                    boardmap.setObjectOnTile(pickedObject.getTransform(), origin_width, origin_height);
-                    boardmap.putOnBoard(pickedObject);
-                }
-                boardmap.setOffPredictPoint();
-                pickedObject = null;
-                origin_width = -1;
-                origin_height = -1;
-            }
+            boardmap.setOffPredictPoint();
             return true;
         case MotionEvent.ACTION_MOVE:
             // Log.d(TAG, "Event=" + event.getAction());
-            if (pickedObject != null) {
-                pickedObject.getTransform().moveTo(pointsBuffer[0], pointsBuffer[1]);
-                boardmap.movePredictPoint(pointsBuffer[0], pointsBuffer[1]);
-            }
+            boardmap.movePredictPoint(pointsBuffer[0], pointsBuffer[1]);
             return true;
         }
         return super.onTouchEvent(event);
