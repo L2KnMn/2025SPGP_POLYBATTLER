@@ -125,7 +125,7 @@ public class GameView extends View implements Choreographer.FrameCallback {
             boardmap.setOnPredictPoint(pointsBuffer[0], pointsBuffer[1]);
             return true;
         case MotionEvent.ACTION_UP:
-            boardmap.setOffPredictPoint();
+            boardmap.setOffPredictPoint(pointsBuffer[0], pointsBuffer[1]);
             return true;
         case MotionEvent.ACTION_MOVE:
             // Log.d(TAG, "Event=" + event.getAction());

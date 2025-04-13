@@ -36,7 +36,7 @@ public class Boardmap implements IGameObject {
         int width_max = Math.max(benchSize, width);
         int height_max = height + 1;
 
-        float tileWidth = (Metrics.SCREEN_WIDTH) / width_max;
+        float tileWidth = (Metrics.SCREEN_WIDTH-0.5f) / width_max;
         float tileHeight = (Metrics.SCREEN_HEIGHT-1) / height_max;
         length = tileWidth < tileHeight ? tileWidth : tileHeight;
 
@@ -329,7 +329,7 @@ public class Boardmap implements IGameObject {
             }
         }else if (benchRect.contains(x, y)) {
             int index = getIndex(x, y);
-            if(index > 0 && index < benchSize && bench[index] != null) {
+            if(index >= 0 && index < benchSize && bench[index] != null) {
                 pickedObject = bench[index];
                 activatePredictPoint(x, y);
                 bench[index] = null;
@@ -354,11 +354,13 @@ public class Boardmap implements IGameObject {
         setPositionNear(predictPoint);
     }
 
-    public void setOffPredictPoint() {
+    public void setOffPredictPoint(float x, float y) {
         if(floatObjectOn) {
             floatObjectOn = false;
+            pickedObject.getTransform().moveTo(x, y);
+            predictPoint.moveTo(x, y);
             if(isSettable(pickedObject.getTransform())){
-
+                setPositionNear(pickedObject.getTransform());
             }else{
                 pickedObject.getTransform().moveTo(origin_x, origin_y);
             }
