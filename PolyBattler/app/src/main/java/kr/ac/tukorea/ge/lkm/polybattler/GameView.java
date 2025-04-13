@@ -113,7 +113,6 @@ public class GameView extends View implements Choreographer.FrameCallback {
         }
     }
 
-    private int origin_width = -1, origin_height = -1;
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         pointsBuffer[0] = event.getX();
