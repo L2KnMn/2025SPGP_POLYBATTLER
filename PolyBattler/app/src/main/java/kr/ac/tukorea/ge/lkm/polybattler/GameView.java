@@ -30,6 +30,7 @@ public class GameView extends View implements Choreographer.FrameCallback {
     private Bitmap backgroundImage;
     private RectF backgroundRect;
     private Boardmap boardmap;
+    private Shop shop;
 
     public GameView(Context context) {
         super(context);
@@ -49,24 +50,24 @@ public class GameView extends View implements Choreographer.FrameCallback {
 
         boardmap = new Boardmap();
         gameObjects.add(boardmap);
-        float size = boardmap.getTileSize() / 2;
-        Position start = new Position();
-        start.set(boardmap.getTileLeftTop());
+        shop = new Shop();
+        gameObjects.add(shop);
 
-        Polyman polyman = new Polyman(ShapeType.CIRCLE, ColorType.RED);
-        polyman.transform.setSize(size);
-        boardmap.setObjectOnTile(polyman.transform, 1, 6);
-        gameObjects.add(polyman);
-
-        Polyman polyman2 = new Polyman(ShapeType.RECTANGLE, ColorType.BLUE);
-        polyman2.transform.setSize(size);
-        boardmap.setObjectOnTile(polyman2.transform, 2, 5);
-        gameObjects.add(polyman2);
-
-        Polyman polyman3 = new Polyman(ShapeType.TRIANGLE, ColorType.GREEN);
-        polyman3.transform.setSize(size);
-        boardmap.setObjectOnTile(polyman3.transform, 3, 5);
-        gameObjects.add(polyman3);
+        //float size = boardmap.getTileSize() / 2;
+//        Polyman polyman = new Polyman(ShapeType.CIRCLE, ColorType.RED);
+//        polyman.transform.setSize(size);
+//        boardmap.setObjectOnTile(polyman.transform, 1, 6);
+//        gameObjects.add(polyman);
+//
+//        Polyman polyman2 = new Polyman(ShapeType.RECTANGLE, ColorType.BLUE);
+//        polyman2.transform.setSize(size);
+//        boardmap.setObjectOnTile(polyman2.transform, 2, 5);
+//        gameObjects.add(polyman2);
+//
+//        Polyman polyman3 = new Polyman(ShapeType.TRIANGLE, ColorType.GREEN);
+//        polyman3.transform.setSize(size);
+//        boardmap.setObjectOnTile(polyman3.transform, 3, 5);
+//        gameObjects.add(polyman3);
 
         scheduleUpdate();
     }
