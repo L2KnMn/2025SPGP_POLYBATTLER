@@ -7,8 +7,19 @@ import android.util.Log;
 
 public class Shop implements IGameObject {
     boolean active;
+    private RectF backboard;
+    private Paint backboardPaint;
     public Shop() {
         active = true;
+
+        backboard = new RectF();
+        backboard.left = 0;
+        backboard.top = 0;
+        backboard.right = Metrics.SCREEN_WIDTH;
+        backboard.bottom = Metrics.SCREEN_HEIGHT / 2;
+
+        backboardPaint = new Paint();
+        backboardPaint.setColor(0xa0000000);
     }
     @Override
     public boolean isActive() {
@@ -29,9 +40,9 @@ public class Shop implements IGameObject {
     public void draw(Canvas canvas) {
         // 드로잉 로직
         if (active) {
-
+            canvas.drawRect(backboard, backboardPaint);
         }else{
-
+            //canvas.drawRect(backboard, backboardPaint);
         }
     }
     @Override

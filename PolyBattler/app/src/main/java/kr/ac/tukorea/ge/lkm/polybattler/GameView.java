@@ -53,21 +53,21 @@ public class GameView extends View implements Choreographer.FrameCallback {
         shop = new Shop();
         gameObjects.add(shop);
 
-        //float size = boardmap.getTileSize() / 2;
-//        Polyman polyman = new Polyman(ShapeType.CIRCLE, ColorType.RED);
-//        polyman.transform.setSize(size);
-//        boardmap.setObjectOnTile(polyman.transform, 1, 6);
-//        gameObjects.add(polyman);
-//
-//        Polyman polyman2 = new Polyman(ShapeType.RECTANGLE, ColorType.BLUE);
-//        polyman2.transform.setSize(size);
-//        boardmap.setObjectOnTile(polyman2.transform, 2, 5);
-//        gameObjects.add(polyman2);
-//
-//        Polyman polyman3 = new Polyman(ShapeType.TRIANGLE, ColorType.GREEN);
-//        polyman3.transform.setSize(size);
-//        boardmap.setObjectOnTile(polyman3.transform, 3, 5);
-//        gameObjects.add(polyman3);
+        float size = boardmap.getTileSize() / 2;
+        Polyman polyman = new Polyman(ShapeType.CIRCLE, ColorType.RED);
+        polyman.transform.setSize(size);
+        boardmap.setObjectOnTile(polyman.transform, 1, 6);
+        gameObjects.add(polyman);
+
+        Polyman polyman2 = new Polyman(ShapeType.RECTANGLE, ColorType.BLUE);
+        polyman2.transform.setSize(size);
+        boardmap.setObjectOnTile(polyman2.transform, 2, 5);
+        gameObjects.add(polyman2);
+
+        Polyman polyman3 = new Polyman(ShapeType.TRIANGLE, ColorType.GREEN);
+        polyman3.transform.setSize(size);
+        boardmap.setObjectOnTile(polyman3.transform, 3, 5);
+        gameObjects.add(polyman3);
 
         scheduleUpdate();
     }
@@ -124,9 +124,11 @@ public class GameView extends View implements Choreographer.FrameCallback {
             // Log.d(TAG, "Event=" + event.getAction() + " x=" + pointsBuffer[0] + " y=" + pointsBuffer[1]);
             // check the clicked object
             boardmap.setOnPredictPoint(pointsBuffer[0], pointsBuffer[1]);
+            shop.SetActive(false);
             return true;
         case MotionEvent.ACTION_UP:
             boardmap.setOffPredictPoint(pointsBuffer[0], pointsBuffer[1]);
+            shop.SetActive(true);
             return true;
         case MotionEvent.ACTION_MOVE:
             // Log.d(TAG, "Event=" + event.getAction());

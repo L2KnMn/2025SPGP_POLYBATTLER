@@ -11,6 +11,7 @@ public class Boardmap implements IGameObject {
     final private int width;
     final private int height;
     private IGameObject[][] board;
+    private boolean[][] boardState;
     private IGameObject[] bench;
     final private int benchSize;
     final private Position startBenchLeftTop;
@@ -19,6 +20,7 @@ public class Boardmap implements IGameObject {
     private final RectF tileRect;
     private final Paint paintLight;
     private final Paint paintDark;
+    private final Paint paintFilter;
 
     private Transform predictPoint;
     private Paint predictRectPaint;
@@ -53,6 +55,15 @@ public class Boardmap implements IGameObject {
                 startBenchLeftTop.x + tileRect.width() * benchSize,
                 startBenchLeftTop.y + tileRect.height());
 
+        boardState = new boolean[width][height];
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height-3; j++) {
+                boardState[i][j] = false;
+            }
+            for (int j = height-3; j < height; j++) {
+                boardState[i][j] = true;
+            }
+        }
         board = new IGameObject[width][height];
         bench = new IGameObject[benchSize];
 
@@ -63,6 +74,10 @@ public class Boardmap implements IGameObject {
         paintDark = new Paint();
         paintDark.setColor(0xffAE6B2D);
         paintDark.setStyle(Paint.Style.FILL);
+
+        paintFilter = new Paint();
+        paintFilter.setColor(0x80000000);
+        paintFilter.setStyle(Paint.Style.FILL);
 
         predictPoint = new Transform(this);
         predictPoint.setSize(length/2);
@@ -82,6 +97,7 @@ public class Boardmap implements IGameObject {
     @Override
     public void draw(Canvas canvas) {
         // 드로잉 로직
+        // 맵 그림
         canvas.drawRect(dstRect, predictRectPaint);
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
@@ -93,8 +109,12 @@ public class Boardmap implements IGameObject {
                 }else{
                     canvas.drawRect(tileRect, paintDark);
                 }
+                if(!boardState[i][j]){
+                    canvas.drawRect(tileRect, paintFilter);
+                }
             }
         }
+        // 벤치 그림
         canvas.drawRect(benchRect, predictRectPaint);
         for (int i = 0; i < benchSize; i++) {
             float sx = startBenchLeftTop.x + i * tileRect.width();
@@ -106,6 +126,7 @@ public class Boardmap implements IGameObject {
                 canvas.drawRect(tileRect, paintDark);
             }
         }
+        // 짚는 물체 예상 위치 그림
         if(floatObjectOn){
             if(isSettable(predictPoint.getPosition().x, predictPoint.getPosition().y)){
                 canvas.drawRect(predictPoint.getRect(), predictRectPaint);
@@ -375,7 +396,10 @@ public class Boardmap implements IGameObject {
         if(dstRect.contains(x, y)){
             int width = getWidth(x);
             int height = getHeight(y);
-            return (board[width][height] == null);
+            if(boardState[width][height])
+                return (board[width][height] == null);
+            else
+                return false;
         }else if(benchRect.contains(x, y)){
             int width = getIndex(x, y);
             return (bench[width] == null);
