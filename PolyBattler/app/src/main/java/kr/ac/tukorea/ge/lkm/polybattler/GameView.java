@@ -119,7 +119,7 @@ public class GameView extends View implements Choreographer.FrameCallback {
     private Paint borderPaint, gridPaint, fpsPaint;
     private void drawDebugBackground(@NonNull Canvas canvas) {
         if (borderRect == null) {
-            borderRect = new RectF(0, 0, Metrics.SCREEN_WIDTH, Metrics.SCREEN_HEIGHT);
+            borderRect = new RectF(0, 0, Metrics.width, Metrics.height);
 
             borderPaint = new Paint();
             borderPaint.setStyle(Paint.Style.STROKE);
@@ -133,11 +133,11 @@ public class GameView extends View implements Choreographer.FrameCallback {
         }
 
         canvas.drawRect(borderRect, borderPaint);
-        for (float x = Metrics.GRID_UNIT; x < Metrics.SCREEN_WIDTH; x += Metrics.GRID_UNIT) {
-            canvas.drawLine(x, 0, x, Metrics.SCREEN_HEIGHT, gridPaint);
+        for (float x = Metrics.GRID_UNIT; x < Metrics.width; x += Metrics.GRID_UNIT) {
+            canvas.drawLine(x, 0, x, Metrics.height, gridPaint);
         }
-        for (float y = Metrics.GRID_UNIT; y < Metrics.SCREEN_HEIGHT; y += Metrics.GRID_UNIT) {
-            canvas.drawLine(0, y, Metrics.SCREEN_WIDTH, y, gridPaint);
+        for (float y = Metrics.GRID_UNIT; y < Metrics.height; y += Metrics.GRID_UNIT) {
+            canvas.drawLine(0, y, Metrics.width, y, gridPaint);
         }
     }
     private void drawDebugInfo(Canvas canvas) {
