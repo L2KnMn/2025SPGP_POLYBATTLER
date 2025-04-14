@@ -335,9 +335,10 @@ public class Map implements IGameObject {
         // 물체를 짚는 것을 지시
         // 이 때 이미 짚은 물체가 있다면 어떻게 처리할 것인지 고민해봐야됨
         // 일단은 에러 로그를 표시하고, 그냥 새 짚는 명령 무시하는 걸로
+        IGameObject picked = null;
         if(floatObjectOn){
             Log.d("Boardmap", "already float object is exist");
-           return null;
+           return picked;
         }
         if(dstRect.contains(x, y)) {
             int width = getWidth(x);
@@ -355,7 +356,7 @@ public class Map implements IGameObject {
                 bench[index] = null;
             }
         }
-        return pickedObject;
+        return picked;
     }
 
     private void activatePredictPoint(float x, float y){
