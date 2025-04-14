@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class GameActivity extends AppCompatActivity {
@@ -20,10 +21,17 @@ public class GameActivity extends AppCompatActivity {
         gameView.pushScene(mainScene);
         setContentView(gameView);
 
-        setFullScreen();
+        gameView.setEmptyStackListener(this::finish);
+        getOnBackPressedDispatcher().addCallback(onBackPressedCallback);
     }
 
-    @SuppressWarnings("deprecation")
+    private final OnBackPressedCallback onBackPressedCallback = new OnBackPressedCallback(true) {
+        @Override
+        public void handleOnBackPressed() {
+            gameView.onBackPressed();
+        }
+    };
+
     public void setFullScreen() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             // API 30 이상: 최신 방식

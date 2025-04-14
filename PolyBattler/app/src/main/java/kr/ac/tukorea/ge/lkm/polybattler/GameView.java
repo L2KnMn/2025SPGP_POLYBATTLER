@@ -1,5 +1,6 @@
 package kr.ac.tukorea.ge.lkm.polybattler;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -19,8 +20,15 @@ public class GameView extends View implements Choreographer.FrameCallback {
     private static final String TAG = GameView.class.getSimpleName();
     private static long previousNanos;
     public static float frameTime;
-
-    private ArrayList<Scene> sceneStack = new ArrayList<>();
+    public static GameView view;
+    public interface OnEmptyStackListener {
+        void onEmptyStack();
+    }
+    private OnEmptyStackListener emptyStackListener;
+    public void setEmptyStackListener(OnEmptyStackListener emptyStackListener) {
+        this.emptyStackListener = emptyStackListener;
+    }
+    final private ArrayList<Scene> sceneStack = new ArrayList<>();
 
     public GameView(Context context) {
         super(context);
@@ -33,17 +41,47 @@ public class GameView extends View implements Choreographer.FrameCallback {
     }
 
     private void init() {
+        GameView.view = this;
         // 실질적 생성자 역할
         scheduleUpdate();
     }
 
     public void pushScene(Scene scene) {
-        this.sceneStack.add(scene);
+        int last = sceneStack.size() - 1;
+        if (last >= 0) {
+            sceneStack.get(last).onPause();
+        }
+        sceneStack.add(scene);
+        scene.onEnter();
     }
     public Scene popScene() {
         int last = sceneStack.size() - 1;
-        if (last < 0) return null;
-        return sceneStack.remove(last);
+        if (last < 0) {
+            notifyEmptyStack();
+            return null;
+        }
+        Scene top = sceneStack.remove(last);
+        top.onExit();
+        if (last >= 1) {
+            sceneStack.get(last - 1).onResume();
+        } else {
+            notifyEmptyStack();
+        }
+        return top;
+    }
+
+    private void notifyEmptyStack() {
+        if (emptyStackListener != null) {
+            emptyStackListener.onEmptyStack();
+        }
+    }
+
+    public void changeScene(Scene scene) {
+        int last = sceneStack.size() - 1;
+        if (last < 0) return;
+        sceneStack.get(last).onExit();
+        sceneStack.add(scene);
+        scene.onEnter();
     }
     public Scene getTopScene() {
         //return sceneStack.getLast();
@@ -63,8 +101,6 @@ public class GameView extends View implements Choreographer.FrameCallback {
     protected void onDraw(@NonNull Canvas canvas) {
         super.onDraw(canvas);
         canvas.save();
-        // 가장 밑에 바탕 그림 그린다
-        //canvas.drawBitmap(backgroundImage, null, backgroundRect, null);
         Metrics.concat(canvas);
         // 반드시 성공적인 빌드가 진행된 후에 BuildConfig.java 가 생성되므로
         // 아래 코드가 문제가 되면 잠시 삭제해서 빌드만 성공시키고 다시 살려두어도 된다.
@@ -81,15 +117,26 @@ public class GameView extends View implements Choreographer.FrameCallback {
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         Scene scene = getTopScene();
         if (scene != null) {
             return scene.onTouchEvent(event);
         }
+
         return super.onTouchEvent(event);
     }
+    public void onBackPressed() {
+        int last = sceneStack.size() - 1;
+        if (last < 0) return; // finish activity here ?
 
+        Scene scene = sceneStack.get(last);
+        boolean handled = scene.onBackPressed();
+        if (handled) return;
+
+        popScene();
+    }
     private void scheduleUpdate() {
         Choreographer.getInstance().postFrameCallback(this);
     }
@@ -106,7 +153,7 @@ public class GameView extends View implements Choreographer.FrameCallback {
         if (isShown()) {
             scheduleUpdate();
         }
-    };
+    }
 
     private void update() {
         Scene scene = getTopScene();
