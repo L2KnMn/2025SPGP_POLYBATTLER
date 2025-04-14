@@ -21,9 +21,6 @@ import java.util.ArrayList;
 
 public class GameView extends View implements Choreographer.FrameCallback {
     private static final String TAG = GameView.class.getSimpleName();
-    private final Matrix transformMatrix = new Matrix();
-    private final Matrix invertedMatrix = new Matrix();
-    private final float[] pointsBuffer = new float[2];
     private final ArrayList<IGameObject> gameObjects = new ArrayList<>();
     private static long previousNanos;
     public static float frameTime;
@@ -46,7 +43,7 @@ public class GameView extends View implements Choreographer.FrameCallback {
         // 실질적 생성자 역할
         Resources res = getResources();
         backgroundImage = BitmapFactory.decodeResource(res, R.mipmap.game_background);
-        //backgroundRect = new RectF(0, 0, Metrics.SCREEN_WIDTH, Metrics.SCREEN_HEIGHT);
+        backgroundRect = new RectF(0, 0, 1, 1);
 
         boardmap = new Boardmap();
         gameObjects.add(boardmap);
@@ -75,21 +72,8 @@ public class GameView extends View implements Choreographer.FrameCallback {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        float view_ratio = (float)w / (float)h;
-        float game_ratio = Metrics.SCREEN_WIDTH / Metrics.SCREEN_HEIGHT;
-
-        backgroundRect = new RectF(0, 0, w, h);
-        transformMatrix.reset();
-        if (view_ratio > game_ratio) {
-            float scale = h / Metrics.SCREEN_HEIGHT;
-            transformMatrix.preTranslate((w - h * game_ratio) / 2, 0);
-            transformMatrix.preScale(scale, scale);
-        } else {
-            float scale = w / Metrics.SCREEN_WIDTH;
-            transformMatrix.preTranslate(0, (h - w / game_ratio) / 2);
-            transformMatrix.preScale(scale, scale);
-        }
-        transformMatrix.invert(invertedMatrix);
+        Metrics.onSize(w, h);
+        backgroundRect.set(0, 0, w, h);
     }
 
     @Override
@@ -98,8 +82,8 @@ public class GameView extends View implements Choreographer.FrameCallback {
         canvas.save();
         // 가장 밑에 바탕 그림 그린다
         canvas.drawBitmap(backgroundImage, null, backgroundRect, null);
-        canvas.setMatrix(transformMatrix);
         // 반드시 성공적인 빌드가 진행된 후에 BuildConfig.java 가 생성되므로
+        Metrics.concat(canvas);
         // 아래 코드가 문제가 되면 잠시 삭제해서 빌드만 성공시키고 다시 살려두어도 된다.
         if (BuildConfig.DEBUG) {
             drawDebugBackground(canvas);
@@ -115,23 +99,21 @@ public class GameView extends View implements Choreographer.FrameCallback {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        pointsBuffer[0] = event.getX();
-        pointsBuffer[1] = event.getY();
-        invertedMatrix.mapPoints(pointsBuffer);
+        float[] xy = Metrics.fromScreen(event.getX(), event.getY());
         switch (event.getAction()) {
         case MotionEvent.ACTION_DOWN:
             // Log.d(TAG, "Event=" + event.getAction() + " x=" + pointsBuffer[0] + " y=" + pointsBuffer[1]);
             // check the clicked object
-            boardmap.setOnPredictPoint(pointsBuffer[0], pointsBuffer[1]);
+            boardmap.setOnPredictPoint(xy[0], xy[1]);
             shop.SetActive(false);
             return true;
         case MotionEvent.ACTION_UP:
-            boardmap.setOffPredictPoint(pointsBuffer[0], pointsBuffer[1]);
+            boardmap.setOffPredictPoint(xy[0], xy[1]);
             shop.SetActive(true);
             return true;
         case MotionEvent.ACTION_MOVE:
             // Log.d(TAG, "Event=" + event.getAction());
-            boardmap.movePredictPoint(pointsBuffer[0], pointsBuffer[1]);
+            boardmap.movePredictPoint(xy[0], xy[1]);
             return true;
         }
         return super.onTouchEvent(event);
