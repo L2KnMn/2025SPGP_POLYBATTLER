@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.view.MotionEvent;
+import android.graphics.RectF;
 
 import java.util.ArrayList;
 
@@ -15,9 +16,9 @@ public class MainScene extends Scene {
     private Shop shop;
 
     public MainScene(GameView gameView) {
-        Resources res = getResources();
+        Resources res = gameView.getResources();
         backgroundImage = BitmapFactory.decodeResource(res, R.mipmap.game_background);
-        backgroundRect = new RectF(0, 0, 1, 1);
+        backgroundRect = new RectF(0, 0, Metrics.SCREEN_WIDTH, Metrics.SCREEN_HEIGHT);
 
         boardmap = new Boardmap();
         gameObjects.add(boardmap);
@@ -48,17 +49,28 @@ public class MainScene extends Scene {
         }
     }
     public void draw(Canvas canvas) {
+        canvas.drawBitmap(backgroundImage, null, backgroundRect, null);
         for (IGameObject gobj : gameObjects) {
             gobj.draw(canvas);
         }
     }
 
     public boolean onTouchEvent(MotionEvent event) {
+        float[] xy = Metrics.fromScreen(event.getX(), event.getY());
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
+                // Log.d(TAG, "Event=" + event.getAction() + " x=" + pointsBuffer[0] + " y=" + pointsBuffer[1]);
+                // check the clicked object
+                boardmap.setOnPredictPoint(xy[0], xy[1]);
+                shop.SetActive(false);
+                return true;
+            case MotionEvent.ACTION_UP:
+                boardmap.setOffPredictPoint(xy[0], xy[1]);
+                shop.SetActive(true);
+                return true;
             case MotionEvent.ACTION_MOVE:
-                float[] xy = Metrics.fromScreen(event.getX(), event.getY());
-                fighter.setTargetPosition(xy[0], xy[1]);
+                // Log.d(TAG, "Event=" + event.getAction());
+                boardmap.movePredictPoint(xy[0], xy[1]);
                 return true;
         }
         return false;
