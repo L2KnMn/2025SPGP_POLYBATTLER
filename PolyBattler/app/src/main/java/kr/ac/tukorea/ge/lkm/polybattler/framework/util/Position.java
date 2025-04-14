@@ -1,14 +1,14 @@
-package kr.ac.tukorea.ge.lkm.polybattler;
+package kr.ac.tukorea.ge.lkm.polybattler.framework.util;
 
 public class Position {
     public float x;
     public float y;
 
-    Position(){
+    public Position(){
         this.x = 0;
         this.y = 0;
     }
-    Position(float x, float y) {
+    public Position(float x, float y) {
         this.x = x;
         this.y = y;
     }

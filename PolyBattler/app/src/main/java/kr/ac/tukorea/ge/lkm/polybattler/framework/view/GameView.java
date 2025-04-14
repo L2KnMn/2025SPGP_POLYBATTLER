@@ -1,4 +1,4 @@
-package kr.ac.tukorea.ge.lkm.polybattler;
+package kr.ac.tukorea.ge.lkm.polybattler.framework.view;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -15,6 +15,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
+
+import kr.ac.tukorea.ge.lkm.polybattler.BuildConfig;
+import kr.ac.tukorea.ge.lkm.polybattler.framework.scene.Scene;
 
 public class GameView extends View implements Choreographer.FrameCallback {
     private static final String TAG = GameView.class.getSimpleName();

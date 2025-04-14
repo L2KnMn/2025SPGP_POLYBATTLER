@@ -1,10 +1,13 @@
-package kr.ac.tukorea.ge.lkm.polybattler;
+package kr.ac.tukorea.ge.lkm.polybattler.framework.scene;
 
 import android.graphics.Canvas;
 import android.util.Log;
 import android.view.MotionEvent;
 
 import java.util.ArrayList;
+
+import kr.ac.tukorea.ge.lkm.polybattler.framework.view.GameView;
+import kr.ac.tukorea.ge.lkm.polybattler.framework.interfaces.IGameObject;
 
 public class Scene {
     private static final String TAG = Scene.class.getSimpleName();

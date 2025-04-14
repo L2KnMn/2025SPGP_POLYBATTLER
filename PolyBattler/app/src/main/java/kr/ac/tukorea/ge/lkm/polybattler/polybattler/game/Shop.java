@@ -1,9 +1,13 @@
-package kr.ac.tukorea.ge.lkm.polybattler;
+package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.util.Log;
+
+import kr.ac.tukorea.ge.lkm.polybattler.framework.interfaces.IGameObject;
+import kr.ac.tukorea.ge.lkm.polybattler.framework.util.Transform;
+import kr.ac.tukorea.ge.lkm.polybattler.framework.view.Metrics;
 
 public class Shop implements IGameObject {
     boolean active;

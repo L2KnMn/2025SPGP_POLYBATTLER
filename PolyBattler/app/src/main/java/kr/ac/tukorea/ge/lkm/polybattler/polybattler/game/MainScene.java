@@ -1,11 +1,18 @@
-package kr.ac.tukorea.ge.lkm.polybattler;
+package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game;
 
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.view.MotionEvent;
-import android.graphics.RectF;
+
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ColorType;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ShapeType;
+import kr.ac.tukorea.ge.lkm.polybattler.R;
+import kr.ac.tukorea.ge.lkm.polybattler.framework.interfaces.IGameObject;
+import kr.ac.tukorea.ge.lkm.polybattler.framework.scene.Scene;
+import kr.ac.tukorea.ge.lkm.polybattler.framework.view.GameView;
+import kr.ac.tukorea.ge.lkm.polybattler.framework.view.Metrics;
 
 public class MainScene extends Scene {
     private final Bitmap backgroundImage;

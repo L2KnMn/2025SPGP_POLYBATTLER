@@ -1,9 +1,14 @@
-package kr.ac.tukorea.ge.lkm.polybattler;
+package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.util.Log;
+
+import kr.ac.tukorea.ge.lkm.polybattler.framework.util.Position;
+import kr.ac.tukorea.ge.lkm.polybattler.framework.util.Transform;
+import kr.ac.tukorea.ge.lkm.polybattler.framework.interfaces.IGameObject;
+import kr.ac.tukorea.ge.lkm.polybattler.framework.view.Metrics;
 
 public class Map implements IGameObject {
 
@@ -45,8 +50,8 @@ public class Map implements IGameObject {
         float height_term = (Metrics.height - length * height_max) / 3;
 
         tileRect = new RectF(0, 0, length, length);
-        startTileLeftTop = new Position( (Metrics.width -tileRect.width()*width)/2, height_term);
-        startBenchLeftTop = new Position((Metrics.width -tileRect.width()*benchSize)/2, Metrics.height -tileRect.height() - height_term);
+        startTileLeftTop = new Position( (Metrics.width - tileRect.width()*width)/2, height_term);
+        startBenchLeftTop = new Position((Metrics.width - tileRect.width()*benchSize)/2, Metrics.height -tileRect.height() - height_term);
 
         dstRect  = new RectF(startTileLeftTop.x, startTileLeftTop.y,
                 startTileLeftTop.x + tileRect.width() * width,

@@ -1,8 +1,11 @@
-package kr.ac.tukorea.ge.lkm.polybattler;
+package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Path;
+
+import kr.ac.tukorea.ge.lkm.polybattler.framework.util.Position;
+import kr.ac.tukorea.ge.lkm.polybattler.framework.util.Transform;
+import kr.ac.tukorea.ge.lkm.polybattler.framework.interfaces.IGameObject;
 
 enum ShapeType {
     RECTANGLE, CIRCLE, TRIANGLE

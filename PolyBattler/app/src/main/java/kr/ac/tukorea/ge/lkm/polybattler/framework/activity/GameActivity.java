@@ -1,4 +1,4 @@
-package kr.ac.tukorea.ge.lkm.polybattler;
+package kr.ac.tukorea.ge.lkm.polybattler.framework.activity;
 
 import android.os.Build;
 import android.os.Bundle;
@@ -8,6 +8,9 @@ import android.view.WindowInsetsController;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
+
+import kr.ac.tukorea.ge.lkm.polybattler.framework.view.GameView;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.MainScene;
 
 public class GameActivity extends AppCompatActivity {
 

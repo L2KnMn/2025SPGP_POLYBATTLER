@@ -1,10 +1,12 @@
-package kr.ac.tukorea.ge.lkm.polybattler;
+package kr.ac.tukorea.ge.lkm.polybattler.framework.res;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
 
 import java.util.HashMap;
+
+import kr.ac.tukorea.ge.lkm.polybattler.framework.view.GameView;
 
 public class BitmapPool {
     private static final String TAG = BitmapPool.class.getSimpleName();
