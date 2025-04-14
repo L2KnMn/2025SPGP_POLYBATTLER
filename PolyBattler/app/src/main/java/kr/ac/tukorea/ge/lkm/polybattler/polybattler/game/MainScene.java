@@ -19,9 +19,9 @@ public class MainScene extends Scene {
     private final Map map;
     private final Shop shop;
 
-    public MainScene(GameView gameView) {
+    public MainScene() {
         Metrics.setGameSize(700, 1600);
-        Resources res = gameView.getResources();
+        Resources res = GameView.view.getResources();
         backgroundImage = BitmapFactory.decodeResource(res, R.mipmap.game_background);
 
         map = new Map();

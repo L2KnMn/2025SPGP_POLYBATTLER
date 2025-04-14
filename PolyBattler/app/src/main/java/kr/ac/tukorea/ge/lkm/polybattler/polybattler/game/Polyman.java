@@ -3,8 +3,6 @@ package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 
-import kr.ac.tukorea.ge.lkm.polybattler.framework.util.Position;
-import kr.ac.tukorea.ge.lkm.polybattler.framework.util.Transform;
 import kr.ac.tukorea.ge.lkm.polybattler.framework.interfaces.IGameObject;
 
 enum ShapeType {
@@ -54,22 +52,6 @@ public class Polyman implements IGameObject {
                 break;
         }
         //canvas.drawCircle(transform.getPosition().x, transform.getPosition().y, transform.getSize(), paint);
-    }
-
-    @Override
-    public Transform getTransform() {
-        return transform;
-    }
-
-    @Override
-    public void SetActive(boolean active) {
-        // Polyman의 활성화 로직
-        availible = active;
-    }
-
-    @Override
-    public boolean isActive() {
-        return availible;
     }
 
     private int getColor(){

@@ -5,8 +5,6 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.util.Log;
 
-import kr.ac.tukorea.ge.lkm.polybattler.framework.util.Position;
-import kr.ac.tukorea.ge.lkm.polybattler.framework.util.Transform;
 import kr.ac.tukorea.ge.lkm.polybattler.framework.interfaces.IGameObject;
 import kr.ac.tukorea.ge.lkm.polybattler.framework.view.Metrics;
 
@@ -15,9 +13,9 @@ public class Map implements IGameObject {
     final private float length;
     final private int width;
     final private int height;
-    private final IGameObject[][] board;
+    private final Transform[][] board;
     private final boolean[][] boardState;
-    private final IGameObject[] bench;
+    private final Transform[] bench;
     final private int benchSize;
     final private Position startBenchLeftTop;
     private final RectF dstRect;
@@ -69,8 +67,8 @@ public class Map implements IGameObject {
                 boardState[i][j] = true;
             }
         }
-        board = new IGameObject[width][height];
-        bench = new IGameObject[benchSize];
+        board = new Transform[width][height];
+        bench = new Transform[benchSize];
 
         paintLight = new Paint();
         paintLight.setColor(0xFFD2944A);
@@ -90,7 +88,7 @@ public class Map implements IGameObject {
         predictRectPaint = new Paint();
         predictRectPaint.setColor(0xA0FFEF82);
         predictRectPaint.setStyle(Paint.Style.STROKE);
-        predictRectPaint.setStrokeWidth(0.3f);
+        predictRectPaint.setStrokeWidth(Metrics.GRID_UNIT * 0.1f);
         floatObjectOn = false;
     }
 
@@ -142,23 +140,6 @@ public class Map implements IGameObject {
         }
     }
 
-    @Override
-    public Transform getTransform() {
-        Log.d("Boardmap", "call boardmap's getTransform() it is error");
-        return null;
-    }
-
-    @Override
-    public void SetActive(boolean active) {
-        // Polyman의 활성화 로직
-        activate = active;
-    }
-
-    @Override
-    public boolean isActive() {
-        return activate;
-    }
-    
     public float getTileSize() {
         return length;
     }
@@ -248,7 +229,7 @@ public class Map implements IGameObject {
         transform.moveTo(x, y);
 
         if(transform.isRigid()) {
-            return putOnBoard(transform.getInstance());
+            return putOnBoard(transform);
         }
         return true;
     }
@@ -264,7 +245,7 @@ public class Map implements IGameObject {
         float y = startBenchLeftTop.y + length/2;
         transform.moveTo(x, y);
         if(transform.isRigid())
-            putOnBench(transform.getInstance());
+            putOnBench(transform);
         return true;
     }
 
@@ -290,14 +271,14 @@ public class Map implements IGameObject {
         if(height < 0 || height >= this.height) {
             return null;
         }
-        IGameObject temp = board[width][height];
+        IGameObject temp = board[width][height].getInstance();
         board[width][height] = null;
         return temp;
     }
 
-    private boolean putOnBoard(IGameObject object){
-        int width = getWidth(object.getTransform().getPosition().x);
-        int height = getHeight(object.getTransform().getPosition().y);
+    private boolean putOnBoard(Transform transform){
+        int width = getWidth(transform.getPosition().x);
+        int height = getHeight(transform.getPosition().y);
 
         if(width < 0 || width >= this.width){
             return false;
@@ -307,61 +288,60 @@ public class Map implements IGameObject {
         }
 
         if(board[width][height] == null) {
-            board[width][height] = object;
+            board[width][height] = transform;
             return true;
         }
         return false;
     }
-    private boolean putOnBench(IGameObject object){
-        int index = getIndex(object.getTransform().getPosition().x, object.getTransform().getPosition().y);
+    private boolean putOnBench(Transform transform){
+        int index = getIndex(transform.getPosition().x, transform.getPosition().y);
         if(index < 0 || index >= this.benchSize) {
             return false;
         }
         if(bench[index] == null) {
-            bench[index] = object;
+            bench[index] = transform;
             return true;
         }
         return false;
     }
 
-    private boolean putOnMap(IGameObject object){
-        if(dstRect.contains(object.getTransform().getPosition().x, object.getTransform().getPosition().y)){
-            return putOnBoard(object);
-        }else if(benchRect.contains(object.getTransform().getPosition().x, object.getTransform().getPosition().y)){
-            return putOnBench(object);
+    private boolean putOnMap(Transform transform){
+        if(dstRect.contains(transform.getPosition().x, transform.getPosition().y)){
+            return putOnBoard(transform);
+        }else if(benchRect.contains(transform.getPosition().x, transform.getPosition().y)){
+            return putOnBench(transform);
         }
         return false;
     }
 
     float origin_x;
     float origin_y;
-    private IGameObject pickedObject = null;
+    private Transform pickedObjectTransform = null;
     public IGameObject setOnPredictPoint(float x, float y) {
         // 물체를 짚는 것을 지시
         // 이 때 이미 짚은 물체가 있다면 어떻게 처리할 것인지 고민해봐야됨
         // 일단은 에러 로그를 표시하고, 그냥 새 짚는 명령 무시하는 걸로
-        IGameObject picked = null;
         if(floatObjectOn){
             Log.d("Boardmap", "already float object is exist");
-           return picked;
+           return null;
         }
         if(dstRect.contains(x, y)) {
             int width = getWidth(x);
             int height = getHeight(y);
             if(board[width][height] != null) {
-                pickedObject = board[width][height];
+                pickedObjectTransform = board[width][height];
                 activatePredictPoint(x, y);
                 board[width][height] = null;
             }
         }else if (benchRect.contains(x, y)) {
             int index = getIndex(x, y);
             if(index >= 0 && index < benchSize && bench[index] != null) {
-                pickedObject = bench[index];
+                pickedObjectTransform = bench[index];
                 activatePredictPoint(x, y);
                 bench[index] = null;
             }
         }
-        return picked;
+        return pickedObjectTransform.getInstance();
     }
 
     private void activatePredictPoint(float x, float y){
@@ -375,7 +355,7 @@ public class Map implements IGameObject {
     public void movePredictPoint(float x, float y) {
         if(!floatObjectOn)
             return;
-        pickedObject.getTransform().moveTo(x, y);
+        pickedObjectTransform.moveTo(x, y);
         predictPoint.moveTo(x, y);
         setPositionNear(predictPoint);
     }
@@ -383,14 +363,14 @@ public class Map implements IGameObject {
     public void setOffPredictPoint(float x, float y) {
         if(floatObjectOn) {
             floatObjectOn = false;
-            pickedObject.getTransform().moveTo(x, y);
+            pickedObjectTransform.moveTo(x, y);
             predictPoint.moveTo(x, y);
-            if(isSettable(pickedObject.getTransform())){
-                setPositionNear(pickedObject.getTransform());
+            if(isSettable(pickedObjectTransform)){
+                setPositionNear(pickedObjectTransform);
             }else{
-                pickedObject.getTransform().moveTo(origin_x, origin_y);
+                pickedObjectTransform.moveTo(origin_x, origin_y);
             }
-            setPositionNear(pickedObject.getTransform());
+            setPositionNear(pickedObjectTransform);
         }
     }
 
@@ -416,10 +396,10 @@ public class Map implements IGameObject {
         if(dstRect.contains(x, y)){
             int width = getWidth(x);
             int height = getHeight(y);
-            return board[width][height];
+            return board[width][height].getInstance();
         }else if(benchRect.contains(x, y)) {
             int index = getIndex(x, y);
-            return bench[index];
+            return bench[index].getInstance();
         }
         return null;
     }

@@ -6,7 +6,6 @@ import android.graphics.RectF;
 import android.util.Log;
 
 import kr.ac.tukorea.ge.lkm.polybattler.framework.interfaces.IGameObject;
-import kr.ac.tukorea.ge.lkm.polybattler.framework.util.Transform;
 import kr.ac.tukorea.ge.lkm.polybattler.framework.view.Metrics;
 
 public class Shop implements IGameObject {
@@ -25,14 +24,7 @@ public class Shop implements IGameObject {
         backboardPaint = new Paint();
         backboardPaint.setColor(0xa0000000);
     }
-    @Override
-    public boolean isActive() {
-        return active;
-    }
-    @Override
-    public void SetActive(boolean active) {
-        this.active = active;
-    }
+
     @Override
     public void update() {
         // 업데이트 로직
@@ -47,9 +39,8 @@ public class Shop implements IGameObject {
             canvas.drawRect(backboard, backboardPaint);
         }
     }
-    @Override
-    public Transform getTransform() {
-        Log.d("Shop", "call Shop's getTransform() it is error");
-        return null;
+
+    public void SetActive(boolean b) {
+        this.active = b;
     }
 }

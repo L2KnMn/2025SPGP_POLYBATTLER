@@ -20,11 +20,17 @@ public class GameActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         gameView = new GameView(this);
-        MainScene mainScene = new MainScene(gameView);
-        gameView.pushScene(mainScene);
+        new MainScene().push();
         setContentView(gameView);
 
-        gameView.setEmptyStackListener(this::finish);
+        setFullScreen();
+
+        gameView.setEmptyStackListener(new GameView.OnEmptyStackListener() {
+            @Override
+            public void onEmptyStack() {
+                finish();
+            }
+        });
         getOnBackPressedDispatcher().addCallback(onBackPressedCallback);
     }
 
@@ -34,7 +40,7 @@ public class GameActivity extends AppCompatActivity {
             gameView.onBackPressed();
         }
     };
-
+    @SuppressWarnings("deprecation")
     public void setFullScreen() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             // API 30 이상: 최신 방식

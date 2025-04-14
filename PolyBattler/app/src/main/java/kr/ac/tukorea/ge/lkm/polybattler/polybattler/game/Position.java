@@ -1,4 +1,4 @@
-package kr.ac.tukorea.ge.lkm.polybattler.framework.util;
+package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game;
 
 public class Position {
     public float x;

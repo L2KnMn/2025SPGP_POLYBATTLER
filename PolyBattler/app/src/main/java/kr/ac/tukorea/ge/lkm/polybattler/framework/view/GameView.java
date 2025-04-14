@@ -25,13 +25,13 @@ public class GameView extends View implements Choreographer.FrameCallback {
     public static float frameTime;
     public static GameView view;
     public interface OnEmptyStackListener {
-        void onEmptyStack();
+        public void onEmptyStack();
     }
     private OnEmptyStackListener emptyStackListener;
     public void setEmptyStackListener(OnEmptyStackListener emptyStackListener) {
         this.emptyStackListener = emptyStackListener;
     }
-    final private ArrayList<Scene> sceneStack = new ArrayList<>();
+    private ArrayList<Scene> sceneStack = new ArrayList<>();
 
     public GameView(Context context) {
         super(context);
@@ -120,7 +120,6 @@ public class GameView extends View implements Choreographer.FrameCallback {
         }
     }
 
-    @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         Scene scene = getTopScene();
@@ -156,7 +155,7 @@ public class GameView extends View implements Choreographer.FrameCallback {
         if (isShown()) {
             scheduleUpdate();
         }
-    }
+    };
 
     private void update() {
         Scene scene = getTopScene();
@@ -165,12 +164,9 @@ public class GameView extends View implements Choreographer.FrameCallback {
         }
     }
 
-    private RectF borderRect;
     private Paint borderPaint, gridPaint, fpsPaint;
     private void drawDebugBackground(@NonNull Canvas canvas) {
-        if (borderRect == null) {
-            borderRect = new RectF(0, 0, Metrics.width, Metrics.height);
-
+        if (borderPaint == null) {
             borderPaint = new Paint();
             borderPaint.setStyle(Paint.Style.STROKE);
             borderPaint.setStrokeWidth(10f);
@@ -182,7 +178,7 @@ public class GameView extends View implements Choreographer.FrameCallback {
             gridPaint.setColor(Color.GRAY);
         }
 
-        canvas.drawRect(borderRect, borderPaint);
+        canvas.drawRect(Metrics.borderRect, borderPaint);
         for (float x = Metrics.GRID_UNIT; x < Metrics.width; x += Metrics.GRID_UNIT) {
             canvas.drawLine(x, 0, x, Metrics.height, gridPaint);
         }
