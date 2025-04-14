@@ -38,8 +38,8 @@ public class Boardmap implements IGameObject {
         int width_max = Math.max(benchSize, width);
         int height_max = height + 1;
 
-        float tileWidth = (Metrics.SCREEN_WIDTH-0.5f) / width_max;
-        float tileHeight = (Metrics.SCREEN_HEIGHT-1) / height_max;
+        float tileWidth = (Metrics.SCREEN_WIDTH-Metrics.GRID_UNIT/2) / width_max;
+        float tileHeight = (Metrics.SCREEN_HEIGHT-Metrics.GRID_UNIT) / height_max;
         length = tileWidth < tileHeight ? tileWidth : tileHeight;
 
         float height_term = (Metrics.SCREEN_HEIGHT - length * height_max) / 3;
