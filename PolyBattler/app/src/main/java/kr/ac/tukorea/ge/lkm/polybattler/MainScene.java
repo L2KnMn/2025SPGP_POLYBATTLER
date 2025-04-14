@@ -9,35 +9,33 @@ import android.graphics.RectF;
 
 public class MainScene extends Scene {
     private final Bitmap backgroundImage;
-    private final RectF backgroundRect;
-    private final Map boardmap;
+    private final Map map;
     private final Shop shop;
 
     public MainScene(GameView gameView) {
         Metrics.setGameSize(700, 1600);
         Resources res = gameView.getResources();
         backgroundImage = BitmapFactory.decodeResource(res, R.mipmap.game_background);
-        backgroundRect = new RectF(0, 0, Metrics.width, Metrics.height);
 
-        boardmap = new Map();
-        gameObjects.add(boardmap);
+        map = new Map();
+        gameObjects.add(map);
         shop = new Shop();
         gameObjects.add(shop);
 
-        float size = boardmap.getTileSize() / 2;
+        float size = map.getTileSize() / 2;
         Polyman polyman = new Polyman(ShapeType.CIRCLE, ColorType.RED);
         polyman.transform.setSize(size);
-        boardmap.setObjectOnTile(polyman.transform, 1, 6);
+        map.setObjectOnTile(polyman.transform, 1, 6);
         gameObjects.add(polyman);
 
         Polyman polyman2 = new Polyman(ShapeType.RECTANGLE, ColorType.BLUE);
         polyman2.transform.setSize(size);
-        boardmap.setObjectOnTile(polyman2.transform, 2, 5);
+        map.setObjectOnTile(polyman2.transform, 2, 5);
         gameObjects.add(polyman2);
 
         Polyman polyman3 = new Polyman(ShapeType.TRIANGLE, ColorType.GREEN);
         polyman3.transform.setSize(size);
-        boardmap.setObjectOnTile(polyman3.transform, 3, 5);
+        map.setObjectOnTile(polyman3.transform, 3, 5);
         gameObjects.add(polyman3);
 
     }
@@ -47,6 +45,7 @@ public class MainScene extends Scene {
             gobj.update();
         }
     }
+
     public void draw(Canvas canvas) {
         canvas.drawBitmap(backgroundImage, null, Metrics.screenRect, null);
         for (IGameObject gobj : gameObjects) {
@@ -60,16 +59,16 @@ public class MainScene extends Scene {
             case MotionEvent.ACTION_DOWN:
                 // Log.d(TAG, "Event=" + event.getAction() + " x=" + pointsBuffer[0] + " y=" + pointsBuffer[1]);
                 // check the clicked object
-                boardmap.setOnPredictPoint(xy[0], xy[1]);
+                map.setOnPredictPoint(xy[0], xy[1]);
                 shop.SetActive(false);
                 return true;
             case MotionEvent.ACTION_UP:
-                boardmap.setOffPredictPoint(xy[0], xy[1]);
+                map.setOffPredictPoint(xy[0], xy[1]);
                 shop.SetActive(true);
                 return true;
             case MotionEvent.ACTION_MOVE:
                 // Log.d(TAG, "Event=" + event.getAction());
-                boardmap.movePredictPoint(xy[0], xy[1]);
+                map.movePredictPoint(xy[0], xy[1]);
                 return true;
         }
         return false;
