@@ -2,15 +2,19 @@ package kr.ac.tukorea.ge.lkm.polybattler;
 
 import android.graphics.Canvas;
 import android.graphics.Matrix;
+import android.util.Log;
 
 public class Metrics {
-    public static final float SCREEN_WIDTH = 9.0f;
-    public static final float SCREEN_HEIGHT = 16.0f;
+    public static final float SCREEN_WIDTH = 900f;
+    public static final float SCREEN_HEIGHT = 1600f;
+    public static final float GRID_UNIT = 100f;
+
     private static final Matrix transformMatrix = new Matrix();
     private static final Matrix invertedMatrix = new Matrix();
     private static final float[] pointsBuffer = new float[2];
 
     public static void onSize(int w, int h) {
+
         float view_ratio = (float)w / (float)h;
         float game_ratio = Metrics.SCREEN_WIDTH / Metrics.SCREEN_HEIGHT;
 
@@ -43,4 +47,3 @@ public class Metrics {
         canvas.concat(transformMatrix);
     }
 }
-
