@@ -7,8 +7,8 @@ import android.util.Log;
 
 public class Shop implements IGameObject {
     boolean active;
-    private RectF backboard;
-    private Paint backboardPaint;
+    private final RectF backboard;
+    private final Paint backboardPaint;
     public Shop() {
         active = true;
 
@@ -32,17 +32,15 @@ public class Shop implements IGameObject {
     @Override
     public void update() {
         // 업데이트 로직
-        if (active) {
-
-        }
+//        if (active) {
+//
+//        }
     }
     @Override
     public void draw(Canvas canvas) {
         // 드로잉 로직
         if (active) {
             canvas.drawRect(backboard, backboardPaint);
-        }else{
-            //canvas.drawRect(backboard, backboardPaint);
         }
     }
     @Override

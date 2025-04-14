@@ -8,10 +8,10 @@ import android.view.MotionEvent;
 import android.graphics.RectF;
 
 public class MainScene extends Scene {
-    private Bitmap backgroundImage;
-    private RectF backgroundRect;
-    private Map boardmap;
-    private Shop shop;
+    private final Bitmap backgroundImage;
+    private final RectF backgroundRect;
+    private final Map boardmap;
+    private final Shop shop;
 
     public MainScene(GameView gameView) {
         Metrics.setGameSize(700, 1600);
@@ -48,7 +48,7 @@ public class MainScene extends Scene {
         }
     }
     public void draw(Canvas canvas) {
-        canvas.drawBitmap(backgroundImage, null, backgroundRect, null);
+        canvas.drawBitmap(backgroundImage, null, Metrics.screenRect, null);
         for (IGameObject gobj : gameObjects) {
             gobj.draw(canvas);
         }
