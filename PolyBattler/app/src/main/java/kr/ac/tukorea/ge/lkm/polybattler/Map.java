@@ -5,14 +5,14 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.util.Log;
 
-public class Boardmap implements IGameObject {
+public class Map implements IGameObject {
 
     final private float length;
     final private int width;
     final private int height;
-    private IGameObject[][] board;
-    private boolean[][] boardState;
-    private IGameObject[] bench;
+    private final IGameObject[][] board;
+    private final boolean[][] boardState;
+    private final IGameObject[] bench;
     final private int benchSize;
     final private Position startBenchLeftTop;
     private final RectF dstRect;
@@ -22,31 +22,31 @@ public class Boardmap implements IGameObject {
     private final Paint paintDark;
     private final Paint paintFilter;
 
-    private Transform predictPoint;
-    private Paint predictRectPaint;
+    private final Transform predictPoint;
+    private final Paint predictRectPaint;
     final private Position startTileLeftTop;
-    private boolean availible;
+    private boolean activate;
     private boolean floatObjectOn;
 
-    public Boardmap(){
+    public Map(){
         benchSize = 5;
         width = 4;
         height = 7;
 
-        availible = true;
+        activate = true;
 
         int width_max = Math.max(benchSize, width);
         int height_max = height + 1;
 
-        float tileWidth = (Metrics.SCREEN_WIDTH-Metrics.GRID_UNIT/2) / width_max;
-        float tileHeight = (Metrics.SCREEN_HEIGHT-Metrics.GRID_UNIT) / height_max;
+        float tileWidth = (Metrics.width -Metrics.GRID_UNIT/2) / width_max;
+        float tileHeight = (Metrics.height -Metrics.GRID_UNIT) / height_max;
         length = tileWidth < tileHeight ? tileWidth : tileHeight;
 
-        float height_term = (Metrics.SCREEN_HEIGHT - length * height_max) / 3;
+        float height_term = (Metrics.height - length * height_max) / 3;
 
         tileRect = new RectF(0, 0, length, length);
-        startTileLeftTop = new Position( (Metrics.SCREEN_WIDTH-tileRect.width()*width)/2, height_term);
-        startBenchLeftTop = new Position((Metrics.SCREEN_WIDTH-tileRect.width()*benchSize)/2, Metrics.SCREEN_HEIGHT-tileRect.height() - height_term);
+        startTileLeftTop = new Position( (Metrics.width -tileRect.width()*width)/2, height_term);
+        startBenchLeftTop = new Position((Metrics.width -tileRect.width()*benchSize)/2, Metrics.height -tileRect.height() - height_term);
 
         dstRect  = new RectF(startTileLeftTop.x, startTileLeftTop.y,
                 startTileLeftTop.x + tileRect.width() * width,
@@ -146,12 +146,12 @@ public class Boardmap implements IGameObject {
     @Override
     public void SetActive(boolean active) {
         // Polyman의 활성화 로직
-        availible = active;
+        activate = active;
     }
 
     @Override
     public boolean isActive() {
-        return availible;
+        return activate;
     }
     
     public float getTileSize() {
@@ -335,10 +335,9 @@ public class Boardmap implements IGameObject {
         // 물체를 짚는 것을 지시
         // 이 때 이미 짚은 물체가 있다면 어떻게 처리할 것인지 고민해봐야됨
         // 일단은 에러 로그를 표시하고, 그냥 새 짚는 명령 무시하는 걸로
-        IGameObject picked = null;
         if(floatObjectOn){
             Log.d("Boardmap", "already float object is exist");
-           return picked;
+           return null;
         }
         if(dstRect.contains(x, y)) {
             int width = getWidth(x);
@@ -356,7 +355,7 @@ public class Boardmap implements IGameObject {
                 bench[index] = null;
             }
         }
-        return picked;
+        return pickedObject;
     }
 
     private void activatePredictPoint(float x, float y){

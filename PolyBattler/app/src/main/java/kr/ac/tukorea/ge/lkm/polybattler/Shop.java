@@ -15,8 +15,8 @@ public class Shop implements IGameObject {
         backboard = new RectF();
         backboard.left = 0;
         backboard.top = 0;
-        backboard.right = Metrics.SCREEN_WIDTH;
-        backboard.bottom = Metrics.SCREEN_HEIGHT / 2;
+        backboard.right = Metrics.width;
+        backboard.bottom = Metrics.height / 2;
 
         backboardPaint = new Paint();
         backboardPaint.setColor(0xa0000000);

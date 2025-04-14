@@ -7,20 +7,19 @@ import android.graphics.Canvas;
 import android.view.MotionEvent;
 import android.graphics.RectF;
 
-import java.util.ArrayList;
-
 public class MainScene extends Scene {
     private Bitmap backgroundImage;
     private RectF backgroundRect;
-    private Boardmap boardmap;
+    private Map boardmap;
     private Shop shop;
 
     public MainScene(GameView gameView) {
+        Metrics.setGameSize(700, 1600);
         Resources res = gameView.getResources();
         backgroundImage = BitmapFactory.decodeResource(res, R.mipmap.game_background);
-        backgroundRect = new RectF(0, 0, Metrics.SCREEN_WIDTH, Metrics.SCREEN_HEIGHT);
+        backgroundRect = new RectF(0, 0, Metrics.width, Metrics.height);
 
-        boardmap = new Boardmap();
+        boardmap = new Map();
         gameObjects.add(boardmap);
         shop = new Shop();
         gameObjects.add(shop);
