@@ -6,8 +6,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.view.MotionEvent;
 
-import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ColorType;
-import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ShapeType;
 import kr.ac.tukorea.ge.lkm.polybattler.R;
 import kr.ac.tukorea.ge.lkm.polybattler.framework.interfaces.IGameObject;
 import kr.ac.tukorea.ge.lkm.polybattler.framework.scene.Scene;

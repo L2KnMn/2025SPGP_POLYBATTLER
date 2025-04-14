@@ -13,8 +13,20 @@ public class Scene {
     private static final String TAG = Scene.class.getSimpleName();
     protected final ArrayList<IGameObject> gameObjects = new ArrayList<>();
 
+    //////////////////////////////////////////////////
+    // Game Object Management
+    public void add(IGameObject gameObject) {
+        gameObjects.add(gameObject);
+        //Log.d(TAG, gameObjects.size() + " objects in " + this);
+    }
+
+    //////////////////////////////////////////////////
+    // Game Loop Functions
+
     public void update() {
-        for (IGameObject gobj : gameObjects) {
+        int count = gameObjects.size();
+        for (int i = count - 1; i >= 0; i--) {
+            IGameObject gobj = gameObjects.get(i);
             gobj.update();
         }
     }
@@ -23,15 +35,24 @@ public class Scene {
             gobj.draw(canvas);
         }
     }
-    public boolean onTouchEvent(MotionEvent event) {
-        return false;
-    }
+
+    //////////////////////////////////////////////////
+    // Scene Stack Functions
 
     public void push() {
         GameView.view.pushScene(this);
     }
     public static Scene pop() {
         return GameView.view.popScene();
+    }
+    public static Scene top() {
+        return GameView.view.getTopScene();
+    }
+
+    //////////////////////////////////////////////////
+    // Overridables
+    public boolean onTouchEvent(MotionEvent event) {
+        return false;
     }
 
     public void onEnter() {

@@ -7,7 +7,7 @@ import kr.ac.tukorea.ge.lkm.polybattler.framework.interfaces.IGameObject;
 
 public class Transform {
     private IGameObject instance = null;
-    private Position position;
+    public final Position position;
     private float radian;
     private float size;
 

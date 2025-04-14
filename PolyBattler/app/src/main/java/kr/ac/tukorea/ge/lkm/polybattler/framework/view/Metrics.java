@@ -10,13 +10,12 @@ public class Metrics {
     public static float width = 900f;
     public static float height = 1600f;
     public static final float GRID_UNIT = 100f;
-
     public static final RectF borderRect = new RectF(0, 0, Metrics.width, Metrics.height);
     public static final RectF screenRect = new RectF();
-
     private static final Matrix transformMatrix = new Matrix();
     private static final Matrix invertedMatrix = new Matrix();
     private static final float[] pointsBuffer = new float[2];
+
 
     public static void setGameSize(float width, float height) {
         Metrics.width = width;
@@ -24,7 +23,6 @@ public class Metrics {
         borderRect.right = width;
         borderRect.bottom = height;
     }
-
     public static void onSize(int w, int h) {
 
         float view_ratio = (float)w / (float)h;
@@ -43,7 +41,7 @@ public class Metrics {
 
         screenRect.set(0, 0, w, h);
         invertedMatrix.mapRect(screenRect);
-        Log.d(TAG, "ScreenRect=" + screenRect);
+        Log.d(TAG, "Screen Rect = " + screenRect);
     }
 
     public static float[] fromScreen(float x, float y) {

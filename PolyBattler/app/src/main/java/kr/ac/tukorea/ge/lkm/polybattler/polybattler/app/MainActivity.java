@@ -17,11 +17,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
     }
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig){
-        super.onConfigurationChanged(newConfig);
-    }
+//    @Override
+//    public void onConfigurationChanged(Configuration newConfig){
+//        super.onConfigurationChanged(newConfig);
+//    }
     public void onBtnStartGame(View view) {
         Intent intent = new Intent(this, GameActivity.class);
         startActivity(intent);
