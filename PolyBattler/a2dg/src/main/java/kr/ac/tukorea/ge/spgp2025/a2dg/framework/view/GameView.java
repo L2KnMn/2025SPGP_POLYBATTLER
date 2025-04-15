@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Choreographer;
 import android.view.MotionEvent;
 import android.view.View;
@@ -18,6 +19,7 @@ import kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene.Scene;
 
 public class GameView extends View implements Choreographer.FrameCallback {
     private static final String TAG = GameView.class.getSimpleName();
+    private boolean running = true;
     private static long previousNanos;
     public static float frameTime;
     public static GameView view;
@@ -72,9 +74,23 @@ public class GameView extends View implements Choreographer.FrameCallback {
         return top;
     }
 
+    public void popAllScenes() {
+        int count = sceneStack.size();
+        Log.d(TAG, "in popAllScenes(), scenes count = " + count);
+        for (int i = count - 1; i >= 0; i--) {
+            Scene scene = sceneStack.get(i);
+            scene.onExit();
+        }
+        sceneStack.clear();
+        if (count > 0) {
+            notifyEmptyStack();
+        }
+    }
+
     private void notifyEmptyStack() {
         if (emptyStackListener != null) {
             emptyStackListener.onEmptyStack();
+            Log.d(TAG, "notifyEmptyStack() is called");
         }
     }
 
@@ -115,7 +131,7 @@ public class GameView extends View implements Choreographer.FrameCallback {
         }
         canvas.restore();
         if (drawsDebugStuffs) {
-            drawDebugInfo(canvas);
+            drawDebugInfo(canvas, scene);
         }
     }
 
@@ -130,7 +146,10 @@ public class GameView extends View implements Choreographer.FrameCallback {
     }
     public void onBackPressed() {
         int last = sceneStack.size() - 1;
-        if (last < 0) return; // finish activity here ?
+        if (last < 0) {
+            notifyEmptyStack(); // finish activity here
+            return;
+        }
 
         Scene scene = sceneStack.get(last);
         boolean handled = scene.onBackPressed();
@@ -151,7 +170,7 @@ public class GameView extends View implements Choreographer.FrameCallback {
             invalidate();
         }
         previousNanos = nanos;
-        if (isShown()) {
+        if (running) {
             scheduleUpdate();
         }
     };
@@ -161,6 +180,29 @@ public class GameView extends View implements Choreographer.FrameCallback {
         if (scene != null) {
             scene.update();
         }
+    }
+
+    public void pauseGame() {
+        running = false;
+        Scene scene = getTopScene();
+        if (scene != null) {
+            scene.onPause();
+        }
+    }
+
+    public void resumeGame() {
+        if (running) return;
+        running = true;
+        previousNanos = 0;
+        scheduleUpdate();
+        Scene scene = getTopScene();
+        if (scene != null) {
+            scene.onResume();
+        }
+    }
+
+    public void destroyGame() {
+        popAllScenes();
     }
 
     private Paint borderPaint, gridPaint, fpsPaint;
@@ -185,7 +227,7 @@ public class GameView extends View implements Choreographer.FrameCallback {
             canvas.drawLine(0, y, Metrics.width, y, gridPaint);
         }
     }
-    private void drawDebugInfo(Canvas canvas) {
+    private void drawDebugInfo(Canvas canvas, Scene scene) {
         if (fpsPaint == null) {
             fpsPaint = new Paint();
             fpsPaint.setColor(Color.BLUE);
@@ -193,6 +235,7 @@ public class GameView extends View implements Choreographer.FrameCallback {
         }
 
         int fps = (int) (1.0f / frameTime);
-        canvas.drawText("FPS: " + fps, 100f, 200f, fpsPaint);
+        int count = scene != null ? scene.count() : 0;
+        canvas.drawText("FPS: " + fps + " objs: " + count, 100f, 200f, fpsPaint);
     }
 }

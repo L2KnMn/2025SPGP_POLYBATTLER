@@ -1,8 +1,8 @@
 package kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene;
 
 import android.graphics.Canvas;
-import android.util.Log;
 import android.view.MotionEvent;
+import android.util.Log;
 
 import java.util.ArrayList;
 
@@ -18,6 +18,14 @@ public class Scene {
     public void add(IGameObject gameObject) {
         gameObjects.add(gameObject);
         //Log.d(TAG, gameObjects.size() + " objects in " + this);
+    }
+
+    public void remove(IGameObject gobj) {
+        gameObjects.remove(gobj);
+    }
+
+    public int count() {
+        return gameObjects.size();
     }
 
     //////////////////////////////////////////////////
