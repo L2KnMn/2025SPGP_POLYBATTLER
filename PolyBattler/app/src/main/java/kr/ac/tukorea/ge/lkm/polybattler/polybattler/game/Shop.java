@@ -4,13 +4,13 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.util.Log;
+import android.view.MotionEvent;
 
 import kr.ac.tukorea.ge.lkm.polybattler.framework.interfaces.IGameObject;
-import kr.ac.tukorea.ge.lkm.polybattler.framework.util.RectUtil;
 import kr.ac.tukorea.ge.lkm.polybattler.framework.view.Metrics;
 
 public class Shop implements IGameObject {
-    boolean active;
+    private boolean active;
     private final RectF backboard;
     private final Paint backboardPaint;
     private final RectF boxOutline;
@@ -38,17 +38,14 @@ public class Shop implements IGameObject {
 
     @Override
     public void update() {
-        // 업데이트 로직
-//        if (active) {
-//
-//        }
+        return;
     }
+
     @Override
     public void draw(Canvas canvas) {
         // 드로잉 로직
         if (active) {
             canvas.drawRect(backboard, backboardPaint);
-
             boxOutline.offsetTo(backboard.left + interlude.x, backboard.top + interlude.y);
             for (int i = 0; i < numberOfBox; i++) {
                 canvas.drawRect(boxOutline, boxOutlinePaint);
@@ -57,7 +54,26 @@ public class Shop implements IGameObject {
         }
     }
 
-    public void SetActive(boolean b) {
+    public boolean onTouch(MotionEvent event, float x, float y) {
+        if (active) {
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                boxOutline.offsetTo(backboard.left + interlude.x, backboard.top + interlude.y);
+                for (int i = 0; i < numberOfBox; i++) {
+                    if(boxOutline.contains(x, y)) {
+                        Log.d("Shop", "clicked box no." + (i+1));
+                        return true;
+                    }
+                    boxOutline.offset(boxOutline.width() + interlude.x, 0);
+                }
+            }
+        }
+        return false;
+    }
+
+    public void setActive(boolean b) {
         this.active = b;
+    }
+    public boolean isActive(){
+        return this.active;
     }
 }

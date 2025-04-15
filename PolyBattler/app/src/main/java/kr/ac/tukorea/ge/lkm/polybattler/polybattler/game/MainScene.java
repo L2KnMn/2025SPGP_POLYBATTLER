@@ -64,12 +64,19 @@ public class MainScene extends Scene {
             case MotionEvent.ACTION_DOWN:
                 // Log.d(TAG, "Event=" + event.getAction() + " x=" + pointsBuffer[0] + " y=" + pointsBuffer[1]);
                 // check the clicked object
-                map.setOnPredictPoint(xy[0], xy[1]);
-                shop.SetActive(false);
+                if(shop.onTouch(event, xy[0], xy[1])){
+                    shop.setActive(false);
+                }else if(map.setOnPredictPoint(xy[0], xy[1]) != null){
+                    shop.setActive(false);
+                }
                 return true;
             case MotionEvent.ACTION_UP:
-                map.setOffPredictPoint(xy[0], xy[1]);
-                shop.SetActive(true);
+                if(shop.isActive()){
+                    shop.onTouch(event, xy[0], xy[1]);
+                }else {
+                    map.setOffPredictPoint(xy[0], xy[1]);
+                    shop.setActive(true);
+                }
                 return true;
             case MotionEvent.ACTION_MOVE:
                 // Log.d(TAG, "Event=" + event.getAction());

@@ -341,7 +341,10 @@ public class Map implements IGameObject {
                 bench[index] = null;
             }
         }
-        return pickedObjectTransform.getInstance();
+        if(pickedObjectTransform == null)
+            return null;
+        else
+            return pickedObjectTransform.getInstance();
     }
 
     private void activatePredictPoint(float x, float y){
@@ -409,6 +412,10 @@ public class Map implements IGameObject {
             return (int)((x - startBenchLeftTop.x) / length);
         }
         return -1;
+    }
+
+    public boolean isFloatObjectOn(){
+        return floatObjectOn;
     }
 }
 
