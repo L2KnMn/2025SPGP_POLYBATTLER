@@ -96,6 +96,7 @@ public class Transform {
         return (b1 == b2) && (b2 == b3);
     }
     public Path getTriangle(){
+        float size = this.size * 1.25f;
         path.reset();
         path.moveTo(position.x + size * (float)Math.cos(startangle), position.y + size * (float)Math.sin(startangle));
         path.lineTo(position.x + size * (float)Math.cos(unit_angle + startangle), position.y + size * (float)Math.sin(unit_angle + startangle));

@@ -3,7 +3,11 @@ package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 
+import java.lang.reflect.Member;
+
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IGameObject;
+import kr.ac.tukorea.ge.spgp2025.a2dg.framework.objects.Sprite;
+import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 
 enum ShapeType {
     RECTANGLE, CIRCLE, TRIANGLE
@@ -13,17 +17,18 @@ enum ColorType {
     RED, GREEN, BLUE, BLACK
 }
 
-public class Polyman implements IGameObject {
+public class Polyman extends Sprite {
     public Transform transform;
     private Paint paint;
     private ShapeType shape;
     private ColorType color;
-    private boolean availible;
 
     public Polyman(ShapeType shape, ColorType color) {
+        super(0);
         this.shape = shape;
         this.color = color;
         transform = new Transform(this, 0, 0);
+        transform.setSize(Metrics.GRID_UNIT * 0.5f);
         transform.setRigid(true);
         paint = new Paint();
         paint.setColor(getColor());
