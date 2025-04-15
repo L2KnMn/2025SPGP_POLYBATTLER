@@ -57,4 +57,8 @@ public class GameManager implements IGameManager {
     public boolean onTouch(MotionEvent event) {
         return true;
     }
+    @Override
+    public GameState getGameState(){
+        return currentState;
+    }
 }

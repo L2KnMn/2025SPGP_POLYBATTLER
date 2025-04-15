@@ -2,6 +2,7 @@ package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.util.Log;
 import android.view.MotionEvent;
 
 import java.util.ArrayList;
@@ -23,9 +24,10 @@ import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.IGameManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameManager;
 
 public class MainScene extends Scene {
+    private static final String TAG = "MainScene";
     private final Bitmap backgroundImage;
     private final Map map;
-    private IGameObject purchasedObject;
+    private GameState currentState;
     private ArrayList<IGameManager> managerArray;
     DragAndDropManager dragAndDropManager;
 
@@ -37,46 +39,55 @@ public class MainScene extends Scene {
         GameManager.getInstance().setGameState(GameState.PREPARE);
 
         map = new Map(4, 7, 5);
-        gameObjects.add(map);
+        add(map);
 
         Polyman polyman = new Polyman(ShapeType.CIRCLE, ColorType.RED);
         map.setObjectOnTile(polyman.transform, 1, 6);
-        gameObjects.add(polyman);
+        add(polyman);
 
         Polyman polyman2 = new Polyman(ShapeType.RECTANGLE, ColorType.BLUE);
         map.setObjectOnTile(polyman2.transform, 2, 5);
-        gameObjects.add(polyman2);
+        add(polyman2);
 
         Polyman polyman3 = new Polyman(ShapeType.TRIANGLE, ColorType.GREEN);
         map.setObjectOnTile(polyman3.transform, 3, 5);
-        gameObjects.add(polyman3);
-
-        purchasedObject = null;
-
-        setManagers(GameState.PREPARE);
+        add(polyman3);
+        
+        currentState = GameState.PREPARE;
+        setManagers();
+        add(ShopManager.getInstance().getShop());
     }
 
-    public void setManagers(GameState state){
+    public void setManagers(){
         managerArray = new ArrayList<IGameManager>();
         dragAndDropManager = new DragAndDropManager(map);
-        GameManager.getInstance().setGameState(state);
-        ShopManager.getInstance().setGameState(state);
-        managerArray.add(dragAndDropManager);
-        managerArray.add(GameManager.getInstance());
+
+        dragAndDropManager.setGameState(currentState);
+        GameManager.getInstance().setGameState(currentState);
+        ShopManager.getInstance().setGameState(currentState);
+
         managerArray.add(ShopManager.getInstance());
+        managerArray.add(GameManager.getInstance());
+        managerArray.add(dragAndDropManager);
     }
 
     public void draw(Canvas canvas) {
         canvas.drawBitmap(backgroundImage, null, Metrics.screenRect, null);
-        for (IGameObject gobj : gameObjects) {
-            gobj.draw(canvas);
-        }
+        super.draw(canvas);
     }
 
     public boolean onTouchEvent(MotionEvent event) {
         boolean keep = true;
         for (IGameManager manager : managerArray) {
             keep = manager.onTouch(event);
+            if(manager.getGameState() != currentState){
+                Log.d(TAG, "state changed");
+                currentState = manager.getGameState();
+                for (IGameManager manager2 : managerArray) {
+                    manager2.setGameState(currentState);
+                }
+                break;
+            }
             if (!keep) break;
         }
         return true;

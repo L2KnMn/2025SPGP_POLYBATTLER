@@ -11,6 +11,7 @@ import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IGameObject;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 
 public class DragAndDropManager implements IGameManager {
+    private GameState currentState;
     private final Map map;
     private boolean active;
     private Transform draggedTransform;
@@ -25,15 +26,17 @@ public class DragAndDropManager implements IGameManager {
         this.dragStartPoint = new Position();
         this.previous = new Position();
         active = true;
+        currentState = GameState.PREPARE;
     }
 
     @Override
     public void setGameState(GameState state) {
+        currentState = state;
         switch (state){
             case PREPARE:
-            case SHOPPING:
                 active = true;
                 break;
+            case SHOPPING:
             case BATTLE:
             case RESULT:
             case POST_GAME:
@@ -43,6 +46,11 @@ public class DragAndDropManager implements IGameManager {
                 }
                 break;
         }
+    }
+
+    @Override
+    public GameState getGameState() {
+        return currentState;
     }
 
     @Override
