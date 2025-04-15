@@ -24,11 +24,12 @@ public class Map implements IGameObject {
     private final Paint paintLight;
     private final Paint paintDark;
     private final Paint paintFilter;
+    final private Position startTileLeftTop;
+    private boolean activate;
+
 
     private final Transform predictPoint;
     private final Paint predictRectPaint;
-    final private Position startTileLeftTop;
-    private boolean activate;
     private boolean floatObjectOn;
 
     public Map(){

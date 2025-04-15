@@ -2,7 +2,6 @@ package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game;
 
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.view.MotionEvent;
 
@@ -18,6 +17,7 @@ public class MainScene extends Scene {
     private final Bitmap backgroundImage;
     private final Map map;
     private final Shop shop;
+    private IGameObject purchasedObject;
 
     public MainScene() {
         Metrics.setGameSize(700, 1600);
@@ -45,6 +45,7 @@ public class MainScene extends Scene {
         map.setObjectOnTile(polyman3.transform, 3, 5);
         gameObjects.add(polyman3);
 
+        purchasedObject = null;
     }
 
     public void update() {
@@ -66,14 +67,17 @@ public class MainScene extends Scene {
             case MotionEvent.ACTION_DOWN:
                 // Log.d(TAG, "Event=" + event.getAction() + " x=" + pointsBuffer[0] + " y=" + pointsBuffer[1]);
                 // check the clicked object
-                if(shop.onTouch(event, xy[0], xy[1])){
+                purchasedObject = shop.onTouch(event, xy[0], xy[1]);
+                if(purchasedObject != null)
                     return true;
-                }else if(shop.isFold()){
-                    map.setOnPredictPoint(xy[0], xy[1]);
+                if(shop.isFold()){
+                    purchasedObject = map.setOnPredictPoint(xy[0], xy[1]);
                 }
                 return true;
             case MotionEvent.ACTION_UP:
                 map.setOffPredictPoint(xy[0], xy[1]);
+                if(!map.isFloatObjectOn())
+                    purchasedObject = null;
                 if(!shop.isActive())
                     shop.setActive(true);
                 return true;

@@ -80,13 +80,13 @@ public class Shop implements IGameObject {
         }
     }
 
-    public boolean onTouch(MotionEvent event, float x, float y) {
-        if (!active) { return false; }
+    public IGameObject onTouch(MotionEvent event, float x, float y) {
+        if (!active) { return null; }
         if(fold){
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 if (IconRect.contains(x, y)) {
                     fold = false;
-                    return true;
+                    return null;
                 }
             }
         }else {
@@ -96,14 +96,15 @@ public class Shop implements IGameObject {
                     if (boxOutline.contains(x, y)) {
                         fold = true;
                         Log.d("Shop", "clicked box no." + (i + 1));
+
                         active = false;
-                        return true;
+                        return null;
                     }
                     boxOutline.offset(boxOutline.width() + interlude.x, 0);
                 }
             }
         }
-        return false;
+        return null;
     }
 
     public void setActive(boolean b) {
