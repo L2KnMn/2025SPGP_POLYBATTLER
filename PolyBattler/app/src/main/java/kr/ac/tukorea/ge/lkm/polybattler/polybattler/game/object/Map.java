@@ -28,7 +28,6 @@ public class Map implements IGameObject {
     private final Paint paintFilter;
     final private Position startTileLeftTop;
     private boolean active;
-
     private final Transform predictPoint;
     private final Paint predictRectPaint;
     private boolean floatObjectOn;
@@ -370,14 +369,7 @@ public class Map implements IGameObject {
     public void setOffPredictPoint(float x, float y) {
         if(floatObjectOn) {
             floatObjectOn = false;
-//            pickedObjectTransform.moveTo(x, y);
             predictPoint.moveTo(x, y);
-//            if(isSettable(pickedObjectTransform)){
-//                setPositionNear(pickedObjectTransform);
-//            }else{
-//                pickedObjectTransform.moveTo(origin_x, origin_y);
-//            }
-//            setPositionNear(pickedObjectTransform);
         }
     }
 

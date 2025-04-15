@@ -1,5 +1,7 @@
 package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game;
 
+import android.view.MotionEvent;
+
 public class GameManager implements IGameManager {
     private static GameManager instance;
     private GameState currentState;
@@ -19,42 +21,40 @@ public class GameManager implements IGameManager {
         return instance;
     }
 
-    @Override
     public GameState getCurrentState() {
         return currentState;
     }
 
-    @Override
     public void setGameState(GameState newState) {
         this.currentState = newState;
     }
 
-    @Override
     public int getRound() {
         return round;
     }
 
-    @Override
     public void nextRound() {
         round++;
     }
 
-    @Override
     public int getGold() {
         return gold;
     }
 
-    @Override
     public void addGold(int amount) {
         this.gold += amount;
     }
 
-    @Override
     public boolean spendGold(int amount) {
         if (this.gold >= amount) {
             this.gold -= amount;
             return true;
         }
         return false;
+    }
+
+    @Override
+    public boolean onTouch(MotionEvent event) {
+        return true;
     }
 }

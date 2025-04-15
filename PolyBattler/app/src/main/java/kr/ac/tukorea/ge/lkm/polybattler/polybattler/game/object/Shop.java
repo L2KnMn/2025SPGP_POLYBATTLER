@@ -83,25 +83,25 @@ public class Shop implements IGameObject {
     public IGameObject onTouch(MotionEvent event, float x, float y) {
         if (!active) { return null; }
         if(fold){
-            if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                if (IconRect.contains(x, y)) {
-                    fold = false;
-                    return null;
-                }
+            if(event.getAction() == MotionEvent.ACTION_DOWN
+                && IconRect.contains(x, y)) {
+                fold = false;
             }
-        }else {
-            if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                boxOutline.offsetTo(backboardRect.left + interlude.x, backboardRect.top + interlude.y);
-                for (int i = 0; i < numberOfBox; i++) {
-                    if (boxOutline.contains(x, y)) {
-                        fold = true;
-                        Log.d("Shop", "clicked box no." + (i + 1));
-
-                        active = false;
-                        return null;
+        } else {
+            if (backboardRect.contains(x, y)) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    boxOutline.offsetTo(backboardRect.left + interlude.x, backboardRect.top + interlude.y);
+                    for (int i = 0; i < numberOfBox; i++) {
+                        if (boxOutline.contains(x, y)) {
+                            fold = true;
+                            Log.d("Shop", "clicked box no." + (i + 1));
+                            return null;
+                        }
+                        boxOutline.offset(boxOutline.width() + interlude.x, 0);
                     }
-                    boxOutline.offset(boxOutline.width() + interlude.x, 0);
                 }
+            }else{
+                fold = true;
             }
         }
         return null;
@@ -116,5 +116,12 @@ public class Shop implements IGameObject {
 
     public boolean isFold(){
         return this.fold;
+    }
+
+    public void foldShop(){
+        fold = true;
+    }
+    public void openShop(){
+        fold = false;
     }
 }
