@@ -18,6 +18,11 @@
             android:configChanges="orientation|screenSize"
             android:exported="false" />
         <activity
+            android:name=".polybattler.app.BattleGameActivity"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|screenSize"
+            android:exported="false" />
+        <activity
             android:name=".polybattler.app.MainActivity"
             android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize"

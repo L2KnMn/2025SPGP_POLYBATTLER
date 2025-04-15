@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.view.MotionEvent;
 
+import kr.ac.tukorea.ge.lkm.polybattler.BuildConfig;
 import kr.ac.tukorea.ge.lkm.polybattler.R;
 import kr.ac.tukorea.ge.lkm.polybattler.framework.interfaces.IGameObject;
 import kr.ac.tukorea.ge.lkm.polybattler.framework.scene.Scene;
@@ -19,6 +20,9 @@ public class MainScene extends Scene {
 
     public MainScene() {
         Metrics.setGameSize(700, 1600);
+
+        GameView.drawsDebugStuffs = BuildConfig.DEBUG;
+
         Resources res = GameView.view.getResources();
         backgroundImage = BitmapFactory.decodeResource(res, R.mipmap.game_background);
 

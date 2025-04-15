@@ -21,4 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "PolyBattler"
 include(":app")
- 
+include(":a2dg")
