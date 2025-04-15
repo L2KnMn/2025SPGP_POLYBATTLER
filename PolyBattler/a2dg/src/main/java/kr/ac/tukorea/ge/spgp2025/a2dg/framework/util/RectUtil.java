@@ -1,4 +1,4 @@
-package kr.ac.tukorea.ge.lkm.polybattler.framework.util;
+package kr.ac.tukorea.ge.spgp2025.a2dg.framework.util;
 
 import android.graphics.RectF;
 

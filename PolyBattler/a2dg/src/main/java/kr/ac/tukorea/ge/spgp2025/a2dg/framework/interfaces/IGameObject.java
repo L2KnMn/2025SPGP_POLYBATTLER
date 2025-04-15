@@ -1,4 +1,4 @@
-package kr.ac.tukorea.ge.lkm.polybattler.framework.interfaces;
+package kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces;
 
 import android.graphics.Canvas;
 

@@ -8,10 +8,10 @@ import android.view.MotionEvent;
 
 import kr.ac.tukorea.ge.lkm.polybattler.BuildConfig;
 import kr.ac.tukorea.ge.lkm.polybattler.R;
-import kr.ac.tukorea.ge.lkm.polybattler.framework.interfaces.IGameObject;
-import kr.ac.tukorea.ge.lkm.polybattler.framework.scene.Scene;
-import kr.ac.tukorea.ge.lkm.polybattler.framework.view.GameView;
-import kr.ac.tukorea.ge.lkm.polybattler.framework.view.Metrics;
+import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IGameObject;
+import kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene.Scene;
+import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.GameView;
+import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 
 public class MainScene extends Scene {
     private final Bitmap backgroundImage;

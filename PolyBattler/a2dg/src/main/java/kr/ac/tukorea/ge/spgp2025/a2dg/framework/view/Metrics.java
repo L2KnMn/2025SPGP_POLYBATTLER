@@ -1,4 +1,4 @@
-package kr.ac.tukorea.ge.lkm.polybattler.framework.view;
+package kr.ac.tukorea.ge.spgp2025.a2dg.framework.view;
 
 import android.graphics.Canvas;
 import android.graphics.Matrix;

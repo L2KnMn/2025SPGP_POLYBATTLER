@@ -3,7 +3,7 @@ package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game;
 import android.graphics.Path;
 import android.graphics.RectF;
 
-import kr.ac.tukorea.ge.lkm.polybattler.framework.interfaces.IGameObject;
+import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IGameObject;
 
 public class Transform {
     private IGameObject instance = null;

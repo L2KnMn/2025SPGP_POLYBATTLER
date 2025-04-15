@@ -6,8 +6,8 @@ import android.graphics.RectF;
 import android.util.Log;
 import android.view.MotionEvent;
 
-import kr.ac.tukorea.ge.lkm.polybattler.framework.interfaces.IGameObject;
-import kr.ac.tukorea.ge.lkm.polybattler.framework.view.Metrics;
+import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IGameObject;
+import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 
 public class Shop implements IGameObject {
     private boolean active;

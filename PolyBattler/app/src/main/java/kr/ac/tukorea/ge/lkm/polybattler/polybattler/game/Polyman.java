@@ -3,7 +3,7 @@ package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 
-import kr.ac.tukorea.ge.lkm.polybattler.framework.interfaces.IGameObject;
+import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IGameObject;
 
 enum ShapeType {
     RECTANGLE, CIRCLE, TRIANGLE

@@ -1,14 +1,13 @@
 package kr.ac.tukorea.ge.lkm.polybattler.polybattler.app;
 
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import kr.ac.tukorea.ge.lkm.polybattler.R;
-import kr.ac.tukorea.ge.lkm.polybattler.framework.activity.GameActivity;
+import kr.ac.tukorea.ge.spgp2025.a2dg.framework.activity.GameActivity;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -17,12 +16,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
     }
-//    @Override
-//    public void onConfigurationChanged(Configuration newConfig){
-//        super.onConfigurationChanged(newConfig);
-//    }
+
     public void onBtnStartGame(View view) {
-        Intent intent = new Intent(this, GameActivity.class);
+        Intent intent = new Intent(this, BattleGameActivity.class);
         startActivity(intent);
     }
 }

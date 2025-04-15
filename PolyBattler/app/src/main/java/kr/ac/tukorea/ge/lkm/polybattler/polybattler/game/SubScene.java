@@ -3,7 +3,7 @@ package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game;
 import android.util.Log;
 import android.view.MotionEvent;
 
-import kr.ac.tukorea.ge.lkm.polybattler.framework.scene.Scene;
+import kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene.Scene;
 
 public class SubScene extends Scene {
     static final private String TAG = SubScene.class.getSimpleName();

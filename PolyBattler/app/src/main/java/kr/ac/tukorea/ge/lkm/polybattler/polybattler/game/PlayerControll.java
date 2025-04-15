@@ -2,7 +2,7 @@ package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game;
 
 import android.view.MotionEvent;
 
-import kr.ac.tukorea.ge.lkm.polybattler.framework.interfaces.IGameObject;
+import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IGameObject;
 
 public class PlayerControll {
     private IGameObject pickedObject;
