@@ -1,21 +1,12 @@
-package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game;
+package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
 
-import java.lang.reflect.Member;
-
-import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IGameObject;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.objects.Sprite;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
-
-enum ShapeType {
-    RECTANGLE, CIRCLE, TRIANGLE
-}
-
-enum ColorType {
-    RED, GREEN, BLUE, BLACK
-}
 
 public class Polyman extends Sprite {
     public Transform transform;

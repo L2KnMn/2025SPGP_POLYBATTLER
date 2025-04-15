@@ -1,4 +1,4 @@
-package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game;
+package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform;
 
 public class Position {
     public float x;

@@ -1,22 +1,28 @@
 package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game;
 
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.view.MotionEvent;
 
 import kr.ac.tukorea.ge.lkm.polybattler.BuildConfig;
 import kr.ac.tukorea.ge.lkm.polybattler.R;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.ColorType;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Map;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Polyman;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.ShapeType;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Shop;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IGameObject;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.res.BitmapPool;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene.Scene;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.GameView;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.DragAndDropManager;
 
 public class MainScene extends Scene {
     private final Bitmap backgroundImage;
     private final Map map;
     private final Shop shop;
+    private final DragAndDropManager dragAndDropManager;
     private IGameObject purchasedObject;
 
     public MainScene() {
@@ -24,15 +30,15 @@ public class MainScene extends Scene {
 
         GameView.drawsDebugStuffs = BuildConfig.DEBUG;
 
-        Resources res = GameView.view.getResources();
         backgroundImage = BitmapPool.get(R.mipmap.game_background);
 
-        map = new Map();
+        map = new Map(4, 7, 5);
         gameObjects.add(map);
         shop = new Shop();
         gameObjects.add(shop);
 
-        float size = map.getTileSize() / 2;
+        dragAndDropManager = new DragAndDropManager(map);
+
         Polyman polyman = new Polyman(ShapeType.CIRCLE, ColorType.RED);
         map.setObjectOnTile(polyman.transform, 1, 6);
         gameObjects.add(polyman);
@@ -63,29 +69,37 @@ public class MainScene extends Scene {
 
     public boolean onTouchEvent(MotionEvent event) {
         float[] xy = Metrics.fromScreen(event.getX(), event.getY());
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                // Log.d(TAG, "Event=" + event.getAction() + " x=" + pointsBuffer[0] + " y=" + pointsBuffer[1]);
-                // check the clicked object
-                purchasedObject = shop.onTouch(event, xy[0], xy[1]);
-                if(purchasedObject != null)
-                    return true;
-                if(shop.isFold()){
-                    purchasedObject = map.setOnPredictPoint(xy[0], xy[1]);
-                }
-                return true;
-            case MotionEvent.ACTION_UP:
-                map.setOffPredictPoint(xy[0], xy[1]);
-                if(!map.isFloatObjectOn())
-                    purchasedObject = null;
-                if(!shop.isActive())
-                    shop.setActive(true);
-                return true;
-            case MotionEvent.ACTION_MOVE:
-                // Log.d(TAG, "Event=" + event.getAction());
-                map.movePredictPoint(xy[0], xy[1]);
-                return true;
+//        // Shop 처리
+//        if (shop.isActive() && shop.onTouch(event, xy[0], xy[1]) != null) {
+//            return true;
+//        }
+        // DragAndDropManager 처리
+        if (dragAndDropManager.handleTouchEvent(event)) {
+            return true;
         }
-        return false;
+//        switch (event.getAction()) {
+//            case MotionEvent.ACTION_DOWN:
+//                // Log.d(TAG, "Event=" + event.getAction() + " x=" + pointsBuffer[0] + " y=" + pointsBuffer[1]);
+//                // check the clicked object
+//                purchasedObject = shop.onTouch(event, xy[0], xy[1]);
+//                if(purchasedObject != null)
+//                    return true;
+//                if(shop.isFold()){
+//                    purchasedObject = map.setOnPredictPoint(xy[0], xy[1]);
+//                }
+//                return true;
+//            case MotionEvent.ACTION_UP:
+//                map.setOffPredictPoint(xy[0], xy[1]);
+//                if(!map.isFloatObjectOn())
+//                    purchasedObject = null;
+//                if(!shop.isActive())
+//                    shop.setActive(true);
+//                return true;
+//            case MotionEvent.ACTION_MOVE:
+//                // Log.d(TAG, "Event=" + event.getAction());
+//                map.movePredictPoint(xy[0], xy[1]);
+//                return true;
+//        }
+        return true;
     }
 }

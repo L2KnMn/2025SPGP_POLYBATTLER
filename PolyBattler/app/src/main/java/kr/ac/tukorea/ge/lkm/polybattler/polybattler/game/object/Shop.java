@@ -1,13 +1,13 @@
-package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game;
+package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
-import android.graphics.drawable.Icon;
 import android.util.Log;
 import android.view.MotionEvent;
 
 import kr.ac.tukorea.ge.lkm.polybattler.R;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IGameObject;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.res.BitmapPool;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;

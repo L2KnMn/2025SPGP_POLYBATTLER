@@ -1,10 +1,12 @@
-package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game;
+package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.util.Log;
 
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IGameObject;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 
@@ -25,26 +27,25 @@ public class Map implements IGameObject {
     private final Paint paintDark;
     private final Paint paintFilter;
     final private Position startTileLeftTop;
-    private boolean activate;
-
+    private boolean active;
 
     private final Transform predictPoint;
     private final Paint predictRectPaint;
     private boolean floatObjectOn;
 
-    public Map(){
-        benchSize = 5;
-        width = 4;
-        height = 7;
+    public Map(final int width, final int height, final int benchSize){
+        this.benchSize = benchSize;
+        this.width = width;
+        this.height = height;
 
-        activate = true;
+        active = true;
 
         int width_max = Math.max(benchSize, width);
         int height_max = height + 1;
 
         float tileWidth = (Metrics.width -Metrics.GRID_UNIT/2) / width_max;
         float tileHeight = (Metrics.height -Metrics.GRID_UNIT) / height_max;
-        length = tileWidth < tileHeight ? tileWidth : tileHeight;
+        length = Math.min(tileWidth, tileHeight);
 
         float height_term = (Metrics.height - length * height_max) / 3;
 
@@ -96,6 +97,7 @@ public class Map implements IGameObject {
     @Override
     public void update() {
         // 업데이트 로직
+        if(!active) return;
     }
 
     @Override
@@ -132,7 +134,7 @@ public class Map implements IGameObject {
         }
         // 짚는 물체 예상 위치 그림
         if(floatObjectOn){
-            if(isSettable(predictPoint.getPosition().x, predictPoint.getPosition().y)){
+            if(isSettable(predictPoint)){
                 canvas.drawRect(predictPoint.getRect(), predictRectPaint);
             }else{
                 predictPoint.moveTo(origin_x, origin_y);
@@ -317,7 +319,7 @@ public class Map implements IGameObject {
 
     float origin_x;
     float origin_y;
-    private Transform pickedObjectTransform = null;
+    //private Transform pickedObjectTransform = null;
     public IGameObject setOnPredictPoint(float x, float y) {
         // 물체를 짚는 것을 지시
         // 이 때 이미 짚은 물체가 있다면 어떻게 처리할 것인지 고민해봐야됨
@@ -326,6 +328,7 @@ public class Map implements IGameObject {
             Log.d("Boardmap", "already float object is exist");
            return null;
         }
+        Transform pickedObjectTransform = null;
         if(dstRect.contains(x, y)) {
             int width = getWidth(x);
             int height = getHeight(y);
@@ -359,7 +362,7 @@ public class Map implements IGameObject {
     public void movePredictPoint(float x, float y) {
         if(!floatObjectOn)
             return;
-        pickedObjectTransform.moveTo(x, y);
+        //pickedObjectTransform.moveTo(x, y);
         predictPoint.moveTo(x, y);
         setPositionNear(predictPoint);
     }
@@ -367,14 +370,14 @@ public class Map implements IGameObject {
     public void setOffPredictPoint(float x, float y) {
         if(floatObjectOn) {
             floatObjectOn = false;
-            pickedObjectTransform.moveTo(x, y);
+//            pickedObjectTransform.moveTo(x, y);
             predictPoint.moveTo(x, y);
-            if(isSettable(pickedObjectTransform)){
-                setPositionNear(pickedObjectTransform);
-            }else{
-                pickedObjectTransform.moveTo(origin_x, origin_y);
-            }
-            setPositionNear(pickedObjectTransform);
+//            if(isSettable(pickedObjectTransform)){
+//                setPositionNear(pickedObjectTransform);
+//            }else{
+//                pickedObjectTransform.moveTo(origin_x, origin_y);
+//            }
+//            setPositionNear(pickedObjectTransform);
         }
     }
 
@@ -396,16 +399,24 @@ public class Map implements IGameObject {
         return false;
     }
 
-    public IGameObject findObject(float x, float y){
+    public Transform findTransform(float x, float y){
         if(dstRect.contains(x, y)){
             int width = getWidth(x);
             int height = getHeight(y);
-            return board[width][height].getInstance();
+            return board[width][height];
         }else if(benchRect.contains(x, y)) {
             int index = getIndex(x, y);
-            return bench[index].getInstance();
+            return bench[index];
+        }else{
+            return null;
         }
-        return null;
+    }
+
+    public IGameObject findObject(float x, float y){
+        Transform transform = findTransform(x, y);
+        if (transform == null)
+            return null;
+        return transform.getInstance();
     }
 
     private int getIndex(float x, float y) {
