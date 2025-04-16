@@ -417,6 +417,13 @@ public class Map implements IGameObject {
         }
         return -1;
     }
+    public int getEmptyBenchIndex(){
+        for(int i = 0; i < benchSize; i++){
+            if(bench[i] == null)
+                return i;
+        }
+        return -1;
+    }
 
     public boolean isFloatObjectOn(){
         return floatObjectOn;

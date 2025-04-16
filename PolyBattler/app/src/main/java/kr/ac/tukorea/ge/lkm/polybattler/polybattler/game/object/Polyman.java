@@ -9,7 +9,7 @@ import kr.ac.tukorea.ge.spgp2025.a2dg.framework.objects.Sprite;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 
 public class Polyman extends Sprite {
-    public Transform transform;
+    public final Transform transform;
     private Paint paint;
     private ShapeType shape;
     private ColorType color;

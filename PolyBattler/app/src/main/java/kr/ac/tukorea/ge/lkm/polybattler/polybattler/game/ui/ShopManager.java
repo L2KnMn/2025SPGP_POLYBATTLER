@@ -4,27 +4,34 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.widget.Toast;
 
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameState;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.IGameManager;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.ColorType;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.ShapeType;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Shop;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
+import kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene.Scene;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 
 public class ShopManager implements IGameManager {
     private static ShopManager instance;
+    private Scene master;
     private final Shop shop;
     private GameState currentState;
+    private Toast toast;
 
-    public ShopManager() {
+    public ShopManager(Scene master) {
         shop = new Shop();
         currentState = GameState.PREPARE;
+        this.master = master;
     }
 
-    public static ShopManager getInstance() {
+    public static ShopManager getInstance(Scene master) {
         if (instance == null) {
-            instance = new ShopManager();
+            instance = new ShopManager(master);
         }
         return instance;
     }
@@ -70,8 +77,15 @@ public class ShopManager implements IGameManager {
                 if (shop.getBackboardRect().contains(x, y)) {
                     int selectedBox = shop.onTouch(event, x, y);
                     if (selectedBox != -1) {
-                        shop.foldShop();
-                        currentState = GameState.PREPARE;
+                        final int price = 1;
+                        boolean result = GameManager.getInstance(master).purchaseCharactor(price, ShapeType.CIRCLE, ColorType.RED);
+                        if(result) {
+                            shop.foldShop();
+                            currentState = GameState.PREPARE;
+                        }else{
+
+                            return false;
+                        }
                     }else{
                         return false;
                     }

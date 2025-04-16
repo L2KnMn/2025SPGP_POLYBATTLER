@@ -26,7 +26,6 @@ import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameManager;
 public class MainScene extends Scene {
     private static final String TAG = "MainScene";
     private final Bitmap backgroundImage;
-    private final Map map;
     private GameState currentState;
     private ArrayList<IGameManager> managerArray;
     DragAndDropManager dragAndDropManager;
@@ -36,38 +35,22 @@ public class MainScene extends Scene {
         GameView.drawsDebugStuffs = BuildConfig.DEBUG;
         backgroundImage = BitmapPool.get(R.mipmap.game_background);
 
-        GameManager.getInstance().setGameState(GameState.PREPARE);
+        GameManager.getInstance(this).setGameState(GameState.PREPARE);
 
-        map = new Map(4, 7, 5);
-        add(map);
-
-        Polyman polyman = new Polyman(ShapeType.CIRCLE, ColorType.RED);
-        map.setObjectOnTile(polyman.transform, 1, 6);
-        add(polyman);
-
-        Polyman polyman2 = new Polyman(ShapeType.RECTANGLE, ColorType.BLUE);
-        map.setObjectOnTile(polyman2.transform, 2, 5);
-        add(polyman2);
-
-        Polyman polyman3 = new Polyman(ShapeType.TRIANGLE, ColorType.GREEN);
-        map.setObjectOnTile(polyman3.transform, 3, 5);
-        add(polyman3);
-        
         currentState = GameState.PREPARE;
         setManagers();
-        add(ShopManager.getInstance().getShop());
+        add(ShopManager.getInstance(this).getShop());
     }
 
     public void setManagers(){
         managerArray = new ArrayList<IGameManager>();
-        dragAndDropManager = new DragAndDropManager(map);
-
+        dragAndDropManager = new DragAndDropManager(GameManager.getInstance(this).getMap());
         dragAndDropManager.setGameState(currentState);
-        GameManager.getInstance().setGameState(currentState);
-        ShopManager.getInstance().setGameState(currentState);
+        GameManager.getInstance(this).setGameState(currentState);
+        ShopManager.getInstance(this).setGameState(currentState);
 
-        managerArray.add(ShopManager.getInstance());
-        managerArray.add(GameManager.getInstance());
+        managerArray.add(ShopManager.getInstance(this));
+        managerArray.add(GameManager.getInstance(this));
         managerArray.add(dragAndDropManager);
     }
 
@@ -76,12 +59,13 @@ public class MainScene extends Scene {
         super.draw(canvas);
     }
 
+    @Override
     public boolean onTouchEvent(MotionEvent event) {
-        boolean keep = true;
+        boolean keep;
         for (IGameManager manager : managerArray) {
             keep = manager.onTouch(event);
             if(manager.getGameState() != currentState){
-                Log.d(TAG, "state changed");
+//                Log.d(TAG, "state changed");
                 currentState = manager.getGameState();
                 for (IGameManager manager2 : managerArray) {
                     manager2.setGameState(currentState);

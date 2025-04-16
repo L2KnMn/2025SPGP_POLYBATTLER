@@ -5,9 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
-
 import kr.ac.tukorea.ge.lkm.polybattler.R;
-import kr.ac.tukorea.ge.spgp2025.a2dg.framework.activity.GameActivity;
 
 public class MainActivity extends AppCompatActivity {
     @Override
