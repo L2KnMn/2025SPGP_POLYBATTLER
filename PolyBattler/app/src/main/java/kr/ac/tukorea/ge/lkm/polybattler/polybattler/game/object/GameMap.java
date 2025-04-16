@@ -10,7 +10,7 @@ import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transf
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IGameObject;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 
-public class Map implements IGameObject {
+public class GameMap implements IGameObject {
 
     final private float length;
     final private int width;
@@ -32,7 +32,7 @@ public class Map implements IGameObject {
     private final Paint predictRectPaint;
     private boolean floatObjectOn;
 
-    public Map(final int width, final int height, final int benchSize){
+    public GameMap(final int width, final int height, final int benchSize){
         this.benchSize = benchSize;
         this.width = width;
         this.height = height;
@@ -361,7 +361,6 @@ public class Map implements IGameObject {
     public void movePredictPoint(float x, float y) {
         if(!floatObjectOn)
             return;
-        //pickedObjectTransform.moveTo(x, y);
         predictPoint.moveTo(x, y);
         setPositionNear(predictPoint);
     }

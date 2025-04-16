@@ -2,26 +2,18 @@ package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.util.Log;
 import android.view.MotionEvent;
 
 import java.util.ArrayList;
 
 import kr.ac.tukorea.ge.lkm.polybattler.BuildConfig;
 import kr.ac.tukorea.ge.lkm.polybattler.R;
-import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.ColorType;
-import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Map;
-import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Polyman;
-import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.ShapeType;
-import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IGameObject;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.res.BitmapPool;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene.Scene;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.GameView;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.DragAndDropManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.ShopManager;
-import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.IGameManager;
-import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameManager;
 
 public class MainScene extends Scene {
     private static final String TAG = "MainScene";

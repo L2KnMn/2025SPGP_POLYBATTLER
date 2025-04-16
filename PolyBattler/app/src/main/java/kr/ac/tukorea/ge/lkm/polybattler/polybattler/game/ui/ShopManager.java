@@ -1,10 +1,7 @@
 package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui;
 
-import android.graphics.Paint;
-import android.graphics.RectF;
 import android.util.Log;
 import android.view.MotionEvent;
-import android.widget.Toast;
 
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameState;
@@ -12,7 +9,6 @@ import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.IGameManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.ColorType;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.ShapeType;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Shop;
-import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene.Scene;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 
@@ -21,7 +17,6 @@ public class ShopManager implements IGameManager {
     private Scene master;
     private final Shop shop;
     private GameState currentState;
-    private Toast toast;
 
     public ShopManager(Scene master) {
         shop = new Shop();
@@ -75,15 +70,15 @@ public class ShopManager implements IGameManager {
                 break;
             case SHOPPING:
                 if (shop.getBackboardRect().contains(x, y)) {
-                    int selectedBox = shop.onTouch(event, x, y);
+                    int selectedBox = shop.purchase(x, y);
                     if (selectedBox != -1) {
-                        final int price = 1;
+                        final int price = 10;
                         boolean result = GameManager.getInstance(master).purchaseCharactor(price, ShapeType.CIRCLE, ColorType.RED);
                         if(result) {
                             shop.foldShop();
                             currentState = GameState.PREPARE;
                         }else{
-
+                            Log.d("ShopManager", "not enough gold");
                             return false;
                         }
                     }else{

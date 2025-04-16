@@ -4,7 +4,6 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.util.Log;
-import android.view.MotionEvent;
 
 import kr.ac.tukorea.ge.lkm.polybattler.R;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
@@ -80,18 +79,15 @@ public class Shop implements IGameObject {
         }
     }
 
-    public int onTouch(MotionEvent event, float x, float y) {
+    public int purchase(float x, float y) {
         if (!active) { return -1; }
-        if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            boxOutline.offsetTo(backboardRect.left + interlude.x, backboardRect.top + interlude.y);
-            for (int i = 0; i < numberOfBox; i++) {
-                if (boxOutline.contains(x, y)) {
-                    fold = true;
-                    Log.d("Shop", "clicked box no." + (i + 1));
-                    return i;
-                }
-                boxOutline.offset(boxOutline.width() + interlude.x, 0);
+        boxOutline.offsetTo(backboardRect.left + interlude.x, backboardRect.top + interlude.y);
+        for (int i = 0; i < numberOfBox; i++) {
+            if (boxOutline.contains(x, y)) {
+                Log.d("Shop", "clicked box no." + (i + 1));
+                return i;
             }
+            boxOutline.offset(boxOutline.width() + interlude.x, 0);
         }
         return -1;
     }

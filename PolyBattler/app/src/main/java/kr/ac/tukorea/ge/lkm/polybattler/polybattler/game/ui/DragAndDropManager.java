@@ -4,7 +4,7 @@ import android.view.MotionEvent;
 
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameState;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.IGameManager;
-import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Map;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.GameMap;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IGameObject;
@@ -12,15 +12,15 @@ import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 
 public class DragAndDropManager implements IGameManager {
     private GameState currentState;
-    private final Map map;
+    private final GameMap gameMap;
     private boolean active;
     private Transform draggedTransform;
     private final Position dragStartPoint;
     private final Position previous;
     private boolean isDragging;
 
-    public DragAndDropManager(Map map) { // private 생성자
-        this.map = map;
+    public DragAndDropManager(GameMap gameMap) { // private 생성자
+        this.gameMap = gameMap;
         this.draggedTransform = null;
         this.isDragging = false;
         this.dragStartPoint = new Position();
@@ -79,12 +79,12 @@ public class DragAndDropManager implements IGameManager {
         if (isDragging) {
             return true;
         }
-        draggedTransform = map.findTransform(x, y);
+        draggedTransform = gameMap.findTransform(x, y);
         if (draggedTransform != null && isDraggable(draggedTransform)) {
             dragStartPoint.set(x,y);
             previous.set(x,y);
             isDragging = true;
-            map.setOnPredictPoint(x, y);
+            gameMap.setOnPredictPoint(x, y);
             return false;
         }else {
             draggedTransform = null; // Transform이 없는 경우 드래그 실패
@@ -97,21 +97,22 @@ public class DragAndDropManager implements IGameManager {
             float deltaX = x - previous.x;
             float deltaY = y - previous.y;
             draggedTransform.move(deltaX, deltaY);
-            map.movePredictPoint(x, y);
+            gameMap.movePredictPoint(x, y);
             previous.x = x;
             previous.y = y;
         }
     }
 
-    private void handleActionUp(float worldX, float worldY) {
+    private void handleActionUp(float x, float y) {
         if (isDragging && draggedTransform != null) {
             isDragging = false;
-            map.setOffPredictPoint(worldX, worldY);
-            if(map.isSettable(draggedTransform)){
-                map.setPositionNear(draggedTransform);
+            draggedTransform.moveTo(x, y);
+            gameMap.setOffPredictPoint(x, y);
+            if(gameMap.isSettable(draggedTransform)){
+                gameMap.setPositionNear(draggedTransform);
             }else{
                 draggedTransform.moveTo(dragStartPoint.x, dragStartPoint.y);
-                map.setPositionNear(draggedTransform);
+                gameMap.setPositionNear(draggedTransform);
             }
             draggedTransform = null;
         }
