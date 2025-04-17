@@ -8,7 +8,6 @@ import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.ColorType;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.GameMap;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Polyman;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.ShapeType;
-import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.UiManager;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene.Scene;
 
 public class GameManager implements IGameManager {

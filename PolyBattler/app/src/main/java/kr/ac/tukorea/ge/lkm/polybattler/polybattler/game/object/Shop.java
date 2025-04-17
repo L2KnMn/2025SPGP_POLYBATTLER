@@ -1,9 +1,13 @@
 package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object;
 
+import android.content.SharedPreferences;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.util.Log;
+
+import java.util.Random;
 
 import kr.ac.tukorea.ge.lkm.polybattler.R;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
@@ -21,8 +25,30 @@ public class Shop implements IGameObject {
     private final Paint backboardPaint;
     private final RectF boxOutline;
     private final Paint boxOutlinePaint;
+    class Goods {
+        protected int price;
+        protected ShapeType shape;
+        protected ColorType color;
+        protected boolean soldOut;
+
+        Goods(int price, ShapeType shape, ColorType color){
+            this.price = price;
+            this.shape = shape;
+            this.color = color;
+            this.soldOut = false;
+        }
+    }
+
+    enum ShopEvent {
+        CLOSE, PURCHASE, REROLL, IGNORE
+    }
+
     private final int numberOfBox = 3;
+    private final Goods[] goods = new Goods[numberOfBox];
     private final Position interlude;
+    private final RectF RerollButtonRect;
+    private final Paint RerollButtonPaint;
+
 
     public Shop() {
         active = true;
@@ -45,14 +71,21 @@ public class Shop implements IGameObject {
         boxOutlinePaint.setStyle(Paint.Style.STROKE);
         boxOutlinePaint.setStrokeWidth(Metrics.GRID_UNIT / 5);
 
+        RerollButtonRect = new RectF(backboardRect.width()/2-Metrics.GRID_UNIT,
+                backboardRect.height() - Metrics.GRID_UNIT * 0.5f, backboardRect.width()/2 + Metrics.GRID_UNIT,
+                backboardRect.height() + Metrics.GRID_UNIT * 0.5f);
+        RerollButtonPaint = new Paint();
+        RerollButtonPaint.setColor(0xFF000000);
+        RerollButtonPaint.setStyle(Paint.Style.FILL);
+
         interlude = new Position();
         interlude.x = (backboardRect.width() - boxOutline.width() * numberOfBox) / (numberOfBox + 1);
         interlude.y = (backboardRect.height() - boxOutline.height()) / 2;
 
-        float textWidth = shopTextPaint.measureText("SHOP");
-        Paint.FontMetrics fontMetrics = shopTextPaint.getFontMetrics();
-        this.textOffsetX = -textWidth / 2;
-        this.textOffsetY = -(fontMetrics.ascent + fontMetrics.descent) / 2;
+        for(int i = 0; i < numberOfBox; i++){
+            goods[i] = new Goods(1, ShapeType.CIRCLE, ColorType.RED);
+        }
+        setRandomGoods();
     }
 
     @Override
@@ -65,18 +98,40 @@ public class Shop implements IGameObject {
         // 드로잉 로직
         if (active) {
             if (fold) {
-                canvas.drawBitmap(BitmapPool.get(R.mipmap.icon_shop), null, IconRect, null);
-                canvas.drawRect(IconRect, backboardPaint);
-                canvas.drawText("SHOP", IconRect.centerX() + textOffsetX, IconRect.centerY() + textOffsetY, shopTextPaint);
+                drawIconButton(canvas);
             } else {
                 canvas.drawRect(backboardRect, backboardPaint);
                 boxOutline.offsetTo(backboardRect.left + interlude.x, backboardRect.top + interlude.y);
                 for (int i = 0; i < numberOfBox; i++) {
-                    canvas.drawRect(boxOutline, boxOutlinePaint);
+                    if(!goods[i].soldOut){
+                        canvas.drawRect(boxOutline, boxOutlinePaint);
+                        setTextOffset(goods[i].shape.name());
+                        canvas.drawText(goods[i].shape.name(), boxOutline.centerX() + textOffsetX, boxOutline.centerY() + textOffsetY, shopTextPaint);
+                        setTextOffset(String.valueOf(goods[i].price));
+                        canvas.drawText(String.valueOf(goods[i].price), boxOutline.centerX() + textOffsetX, boxOutline.centerY() + textOffsetY * 2, shopTextPaint);
+                    }
                     boxOutline.offset(boxOutline.width() + interlude.x, 0);
                 }
+                canvas.drawRect(RerollButtonRect, RerollButtonPaint);
+                setTextOffset("Reroll");
+                canvas.drawText("Reroll", RerollButtonRect.centerX() + textOffsetX, RerollButtonRect.centerY() + textOffsetY, shopTextPaint);
             }
         }
+    }
+
+    private void drawText(Canvas canvas, String string, float x, float y) {
+        drawText(canvas, string, x, y, Gravity.CENTER);
+    }
+
+    private void drawText(Canvas canvas, String string, float x, float y, Gravity gravity) {
+        setTextOffset(string);
+        canvas.drawText(string, x+textOffsetX, y+textOffsetY, shopTextPaint);
+    }
+
+    private void drawIconButton(Canvas canvas) {
+        canvas.drawBitmap(BitmapPool.get(R.mipmap.icon_shop), null, IconRect, null);
+        canvas.drawRect(IconRect, backboardPaint);
+        drawText(canvas, "SHOP", IconRect.centerX(), IconRect.centerY());
     }
 
     public int purchase(float x, float y) {
@@ -92,11 +147,45 @@ public class Shop implements IGameObject {
         return -1;
     }
 
+    Random random = new Random();
+    public void setRandomGoods(){
+        for (int i = 0; i < numberOfBox; i++) {
+            goods[i].soldOut = false;
+            goods[i].price = random.nextInt(10);
+            goods[i].shape = ShapeType.values()[random.nextInt(ShapeType.values().length)];
+            goods[i].color = ColorType.values()[random.nextInt(ColorType.values().length-1)];
+        }
+    }
+
+    public int getPrice(int index){
+        return this.goods[index].price;
+    }
+    public ShapeType getShape(int index){
+        return this.goods[index].shape;
+    }
+    public ColorType getColor(int index){
+        return this.goods[index].color;
+    }
+
+    public boolean soldOut(int goods){
+        // already sold out = false
+        // sold out now = true
+        if(this.goods[goods].soldOut){
+            return false;
+        }else{
+            this.goods[goods].soldOut = true;
+            return true;
+        }
+    }
+
     public RectF getIconRect(){
         return this.IconRect;
     }
     public RectF getBackboardRect(){
         return this.backboardRect;
+    }
+    public RectF RerollButtonRect(){
+        return this.RerollButtonRect;
     }
 
     public void setActive(boolean b) {
@@ -115,5 +204,12 @@ public class Shop implements IGameObject {
     }
     public void openShop(){
         fold = false;
+    }
+
+    private void setTextOffset(String string){
+        float textWidth = shopTextPaint.measureText(string);
+        Paint.FontMetrics fontMetrics = shopTextPaint.getFontMetrics();
+        this.textOffsetX = -textWidth / 2;
+        this.textOffsetY = -(fontMetrics.ascent + fontMetrics.descent) / 2;
     }
 }

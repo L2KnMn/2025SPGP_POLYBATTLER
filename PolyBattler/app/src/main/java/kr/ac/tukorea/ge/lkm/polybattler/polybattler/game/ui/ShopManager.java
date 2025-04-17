@@ -69,24 +69,27 @@ public class ShopManager implements IGameManager {
                 }
                 break;
             case SHOPPING:
-                if (shop.getBackboardRect().contains(x, y)) {
-                    int selectedBox = shop.purchase(x, y);
-                    if (selectedBox != -1) {
-                        final int price = 10;
-                        boolean result = GameManager.getInstance(master).purchaseCharactor(price, ShapeType.CIRCLE, ColorType.RED);
-                        if(result) {
-                            shop.foldShop();
-                            currentState = GameState.PREPARE;
-                        }else{
-                            Log.d("ShopManager", "not enough gold");
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    if (shop.getBackboardRect().contains(x, y)) {
+                        int selectedBox = shop.purchase(x, y);
+                        if (selectedBox != -1 && shop.soldOut(selectedBox)) {
+                            boolean result = GameManager.getInstance(master).purchaseCharactor(shop.getPrice(selectedBox), shop.getShape(selectedBox), shop.getColor(selectedBox));
+                            if (result) {
+                                shop.soldOut(selectedBox);
+                            } else {
+                                Log.d("ShopManager", "not enough gold");
+                                return false;
+                            }
+                        } else if(shop.RerollButtonRect().contains(x, y)){
+                            shop.setRandomGoods();
+                        } else {
                             return false;
                         }
-                    }else{
-                        return false;
+                    } else {
+                        // 상품 창 밖을 터치하면 상품창 닫고 준비 단계로 돌아가기
+                        shop.foldShop();
+                        currentState = GameState.PREPARE;
                     }
-                }else{
-                    shop.foldShop();
-                    currentState = GameState.PREPARE;
                 }
                 break;
             case BATTLE:

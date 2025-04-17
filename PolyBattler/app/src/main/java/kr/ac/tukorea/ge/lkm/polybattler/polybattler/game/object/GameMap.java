@@ -154,7 +154,7 @@ public class GameMap implements IGameObject {
         return (int) ((x - startTileLeftTop.x) / length);
     }
 
-    public float getTileX(int width, TilePosition gravity) {
+    public float getTileX(int width, Gravity gravity) {
         float ax = 0.0f;
         switch (gravity){
             case CENTER:
@@ -182,7 +182,7 @@ public class GameMap implements IGameObject {
         return (int) ((y - startTileLeftTop.y) / length);
     }
 
-    public float getTileY(int height, TilePosition gravity) {
+    public float getTileY(int height, Gravity gravity) {
         float ay = 0.0f;
         switch (gravity){
             case CENTER:
@@ -205,17 +205,11 @@ public class GameMap implements IGameObject {
         }
         return startTileLeftTop.y + (height + ay) * length;
     }
-
-    public enum TilePosition{
-        CENTER, TOP, BOTTOM, LEFT, RIGHT,
-        TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT
-    }
-
     public boolean setObjectOnTile(Transform transform, int width, int height){
-        return setObjectOnTile(transform, width, height, TilePosition.CENTER);
+        return setObjectOnTile(transform, width, height, Gravity.CENTER);
     }
 
-    public boolean setObjectOnTile(Transform transform, int width, int height, TilePosition gravity){
+    public boolean setObjectOnTile(Transform transform, int width, int height, Gravity gravity){
         if(width < 0 || width >= this.width) {
             return false;
         }
@@ -252,9 +246,9 @@ public class GameMap implements IGameObject {
     }
 
     public boolean setPositionNear(Transform transform){
-        return setPositionNear(transform, TilePosition.CENTER);
+        return setPositionNear(transform, Gravity.CENTER);
     }
-    public boolean setPositionNear(Transform transform, TilePosition gravity){
+    public boolean setPositionNear(Transform transform, Gravity gravity){
         if(dstRect.contains(transform.getPosition().x, transform.getPosition().y)){
             int targetWidth = getWidth(transform.getPosition().x);
             int targetHeight = getHeight(transform.getPosition().y);
