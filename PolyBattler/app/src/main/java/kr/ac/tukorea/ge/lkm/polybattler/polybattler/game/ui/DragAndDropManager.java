@@ -116,8 +116,7 @@ public class DragAndDropManager implements IGameManager {
                 gameMap.setPositionNear(draggedTransform);
             }else{
                 draggedTransform.moveTo(dragStartPoint.x, dragStartPoint.y);
-                boolean result = gameMap.setPositionNear(draggedTransform);
-                if (result) {
+                if (gameMap.setPositionNear(draggedTransform)) {
                     // 무사히 원래 자리로 돌아갔다면 자리 바꿀 수 있는 녀석들인지 검사해서
                     // 자리 바꾸기
                     Transform target = gameMap.findTransform(x, y);
@@ -127,9 +126,9 @@ public class DragAndDropManager implements IGameManager {
                         Polyman t2 = target.getInstance() instanceof Polyman ? ((Polyman) target.getInstance()) : null;
                         // 교체 실행하기
                         if(gameMap.swapObject(draggedTransform, target)){
-                            Log.d(TAG, "두 강체 위치 교환 성공");
+                            //Log.d(TAG, "두 강체 위치 교환 성공");
                         }else{
-                            Log.d(TAG, "두 강체 위치 교환 실패 원래 자리에 있을 듯");
+                            Log.d(TAG, "두 강체 위치 교환 실패, 둘 중 하나에 문제가 있음");
                         }
                     }
                     // 이 자리에 다른 강체가 없는 데 놓는 게 실패함

@@ -2,6 +2,8 @@ package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import android.util.Log;
 import android.view.MotionEvent;
 
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.ColorType;
@@ -26,16 +28,22 @@ public class GameManager implements IGameManager {
         master.add(gameMap);
 
         Polyman polyman = new Polyman(ShapeType.CIRCLE, ColorType.RED);
-        gameMap.setObjectOnTile(polyman.transform, 1, 6);
-        master.add(polyman);
+        if(gameMap.setObjectOnTile(polyman.transform, 1, 6))
+            master.add(polyman);
+        else
+            Log.d("GameManager", "Failed to set object on tile");
 
-        Polyman polyman2 = new Polyman(ShapeType.RECTANGLE, ColorType.BLUE);
-        gameMap.setObjectOnTile(polyman2.transform, 2, 5);
-        master.add(polyman2);
+        polyman = new Polyman(ShapeType.RECTANGLE, ColorType.BLUE);
+        if(gameMap.setObjectOnTile(polyman.transform, 2, 5))
+            master.add(polyman);
+        else
+            Log.d("GameManager", "Failed to set object on tile");
 
-        Polyman polyman3 = new Polyman(ShapeType.TRIANGLE, ColorType.GREEN);
-        gameMap.setObjectOnTile(polyman3.transform, 3, 5);
-        master.add(polyman3);
+        polyman = new Polyman(ShapeType.TRIANGLE, ColorType.GREEN);
+        if(gameMap.setObjectOnTile(polyman.transform, 3, 5)){
+            master.add(polyman);
+        }else
+            Log.d("GameManager", "Failed to set object on tile");
     }
 
     public static GameManager getInstance(Scene master) {

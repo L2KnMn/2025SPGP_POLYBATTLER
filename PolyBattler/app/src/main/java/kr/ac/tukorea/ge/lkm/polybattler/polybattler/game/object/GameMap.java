@@ -181,11 +181,7 @@ public class GameMap implements IGameObject {
     }
 
     @Override
-    public void update() {
-        // 업데이트 로직
-        if(!active) {
-        }
-    }
+    public void update() {}
 
     @Override
     public void draw(Canvas canvas) {
@@ -352,8 +348,7 @@ public class GameMap implements IGameObject {
     }
 
     public boolean setObjectOnBench(Transform transform, int index){
-        bench.isCorrectWidth(index);
-        if(transform.isRigid() && bench.get(index) != null){
+        if(!bench.isCorrectWidth(index) || (transform.isRigid() && bench.get(index) != null)){
             return false;
         }
         float x = bench.leftTop.x + length * (index + 0.5f);
@@ -369,8 +364,6 @@ public class GameMap implements IGameObject {
     }
     public boolean setPositionNear(Transform transform, Gravity gravity){
         if(field.dstRect.contains(transform.getPosition().x, transform.getPosition().y)){
-            if(field.full())
-                return false;
             int targetWidth = getWidth(transform.getPosition().x);
             int targetHeight = getHeight(transform.getPosition().y);
             return setObjectOnTile(transform, targetWidth, targetHeight, gravity);
@@ -480,7 +473,7 @@ public class GameMap implements IGameObject {
         if(field.dstRect.contains(x, y)){
             int width = getWidth(x);
             int height = getHeight(y);
-            if(!field.block(width, height))
+            if(!field.block(width, height) && !field.full())
                 return (field.get(width, height) == null);
             else
                 return false;
