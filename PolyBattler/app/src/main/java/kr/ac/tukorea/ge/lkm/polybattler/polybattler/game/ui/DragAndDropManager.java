@@ -1,10 +1,13 @@
 package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui;
 
+import android.util.Log;
 import android.view.MotionEvent;
 
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameState;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.IGameManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.GameMap;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Polyman;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Shop;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IGameObject;
@@ -18,6 +21,7 @@ public class DragAndDropManager implements IGameManager {
     private final Position dragStartPoint;
     private final Position previous;
     private boolean isDragging;
+    private String TAG = "DragAndDropManager";
 
     public DragAndDropManager(GameMap gameMap) { // private 생성자
         this.gameMap = gameMap;
@@ -112,7 +116,31 @@ public class DragAndDropManager implements IGameManager {
                 gameMap.setPositionNear(draggedTransform);
             }else{
                 draggedTransform.moveTo(dragStartPoint.x, dragStartPoint.y);
-                gameMap.setPositionNear(draggedTransform);
+                boolean result = gameMap.setPositionNear(draggedTransform);
+                if (result) {
+                    // 무사히 원래 자리로 돌아갔다면 자리 바꿀 수 있는 녀석들인지 검사해서
+                    // 자리 바꾸기
+                    Transform target = gameMap.findTransform(x, y);
+                    // 놓으려 한 자리에 다른 물체가 있으면
+                    if(target != null && target.isRigid()){
+                        // 교체해도 되는 물체인지 확인하고 (일단은 지금은 캐릭터들만 있으니 그냥 교체하자)
+                        Polyman t2 = target.getInstance() instanceof Polyman ? ((Polyman) target.getInstance()) : null;
+                        // 교체 실행하기
+                        if(gameMap.swapObject(draggedTransform, target)){
+                            Log.d(TAG, "두 강체 위치 교환 성공");
+                        }else{
+                            Log.d(TAG, "두 강체 위치 교환 실패 원래 자리에 있을 듯");
+                        }
+                    }
+                    // 이 자리에 다른 강체가 없는 데 놓는 게 실패함
+                    // -> block된 타일이나, 교환 불가능한 객체가 있는 것
+                    // 그냥 뭐 더 하지 말자
+                } else {
+                    // 원래 자리로 돌려놓으려 했는데 실패한 것이면 뭔가 프로그램이 잘못 돌아가고 있는 것이다
+                    // 일단 화면 밖으로 날려버려서 정상적인 척 하자
+                    draggedTransform.moveTo(-100, -100);
+                    Log.d("Drag And Drop Manager", "드랍 했을 때, 원래 자리로 되돌려 놓기가 실패하여 화면 밖에 버림");
+                }
             }
             draggedTransform = null;
         }

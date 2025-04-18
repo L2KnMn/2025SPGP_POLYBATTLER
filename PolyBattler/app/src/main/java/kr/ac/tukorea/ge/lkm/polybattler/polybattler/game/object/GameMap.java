@@ -11,65 +11,150 @@ import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IGameObject;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 
 public class GameMap implements IGameObject {
+    protected class Tiles{
+        protected final Transform[] transforms;
+        protected final int width;
+        protected int count;
+        Tiles(int width){
+            this.width = width;
+            count = 0;
+            transforms = new Transform[width];
+        }
+    }
+    protected class MapPart{
+        final int width;
+        final int height;
+        private final Tiles[] tiles;
+        protected final RectF dstRect;
+        protected final Position leftTop;
 
-    final private float length;
-    final private int width;
-    final private int height;
-    private final Transform[][] board;
-    private final boolean[][] boardState;
-    private final Transform[] bench;
-    final private int benchSize;
-    final private Position startBenchLeftTop;
-    private final RectF dstRect;
-    private final RectF benchRect;
+        protected MapPart(int width, int height){
+            this.width = width; this.height = height;
+            tiles = new Tiles[height];
+            for (int i = 0; i < height; i++) {
+                tiles[i] = new Tiles(width);
+            }
+            dstRect = new RectF();
+            leftTop = new Position();
+        }
+
+
+        protected Transform get(int width, int height){
+            return tiles[height].transforms[width];
+        }
+
+        protected Transform get(int width){
+            if(height > 0)
+                return tiles[0].transforms[width];
+            else
+                return null;
+        }
+
+
+        protected void set(int width, Transform transform){
+            set(width, 0, transform);
+        }
+
+        protected void set(int width, int height, Transform transform){
+            tiles[height].transforms[width] = transform;
+            tiles[height].count++;
+        }
+
+
+        public boolean isCorrectWidth(int width) {
+            return width >= 0 && width < field.width;
+        }
+
+        public boolean isCorrectHeight(int height) {
+            return height >= 0 && height < field.height;
+        }
+
+        protected boolean isCorrect(int width, int height){
+            return isCorrectWidth(width) && isCorrectHeight(height);
+        }
+    }
+
+    protected class Field extends MapPart {
+        private final boolean[][] blocked;
+        private int count;
+        private int countMax;
+        Field(int width, int height){
+            super(width, height);
+            count = 0;
+            countMax = 5;
+            blocked = new boolean[height][width];
+            for (int i = 0; i < width; i++) {
+                for (int j = 0; j < height-3; j++) {
+                    blocked[j][i] = true;
+                }
+                for (int j = height-3; j < height; j++) {
+                    blocked[j][i] = false;
+                }
+            }
+        }
+
+        boolean block(int width, int height){
+            return blocked[height][width];
+        }
+
+        boolean full(){
+            return count >= countMax;
+        }
+
+        @Override
+        protected void set(int width, int height, Transform transform){
+            if(transform == null){
+//                blocked[height][width] = false;
+                count--;
+            }else{
+//                blocked[height][width] = true;
+                count++;
+            }
+            super.set(width, height, transform);
+        }
+    }
+    private final Field field;
+    private final MapPart bench;
+
+
+    private final float length;
     private final RectF tileRect;
+
     private final Paint paintLight;
     private final Paint paintDark;
     private final Paint paintFilter;
-    final private Position startTileLeftTop;
-    private boolean active;
+
+    private final boolean active;
+
     private final Transform predictPoint;
     private final Paint predictRectPaint;
     private boolean floatObjectOn;
 
     public GameMap(final int width, final int height, final int benchSize){
-        this.benchSize = benchSize;
-        this.width = width;
-        this.height = height;
+        field = new Field(width, height);
+        bench = new MapPart(benchSize, 1);
 
         active = true;
 
         int width_max = Math.max(benchSize, width);
         int height_max = height + 1;
 
-        float tileWidth = (Metrics.width -Metrics.GRID_UNIT/2) / width_max;
-        float tileHeight = (Metrics.height -Metrics.GRID_UNIT) / height_max;
-        length = Math.min(tileWidth, tileHeight);
+        float mapWidthLength = (Metrics.width -Metrics.GRID_UNIT/2);
+        float mapHeightLength= (Metrics.height -Metrics.GRID_UNIT);
+        length = Math.min(mapWidthLength / width_max, mapHeightLength / height_max);
 
         float height_term = (Metrics.height - length * height_max) / 3;
 
         tileRect = new RectF(0, 0, length, length);
-        startTileLeftTop = new Position( (Metrics.width - tileRect.width()*width)/2, height_term);
-        startBenchLeftTop = new Position((Metrics.width - tileRect.width()*benchSize)/2, Metrics.height -tileRect.height() - height_term);
+        field.leftTop.set((Metrics.width - tileRect.width()*width)/2, height_term);
+        bench.leftTop.set((Metrics.width - tileRect.width()*benchSize)/2, Metrics.height -tileRect.height() - height_term);
 
-        dstRect  = new RectF(startTileLeftTop.x, startTileLeftTop.y,
-                startTileLeftTop.x + tileRect.width() * width,
-                startTileLeftTop.y + tileRect.height() * height);
-        benchRect = new RectF(startBenchLeftTop.x, startBenchLeftTop.y,
-                startBenchLeftTop.x + tileRect.width() * benchSize,
-                startBenchLeftTop.y + tileRect.height());
-
-        boardState = new boolean[width][height];
-        for (int i = 0; i < width; i++) {
-            for (int j = 0; j < height-3; j++) {
-                boardState[i][j] = false;
-            }
-            for (int j = height-3; j < height; j++) {
-                boardState[i][j] = true;
-            }
-        }
-        board = new Transform[width][height];
-        bench = new Transform[benchSize];
+        field.dstRect.set(field.leftTop.x, field.leftTop.y,
+                field.leftTop.x + tileRect.width() * width,
+                field.leftTop.y + tileRect.height() * height);
+        bench.dstRect.set(bench.leftTop.x, bench.leftTop.y,
+                bench.leftTop.x + tileRect.width() * benchSize,
+                bench.leftTop.y + tileRect.height());
 
         paintLight = new Paint();
         paintLight.setColor(0xFFD2944A);
@@ -86,50 +171,52 @@ public class GameMap implements IGameObject {
         predictPoint = new Transform(this);
         predictPoint.setSize(length/2);
         predictPoint.setRigid(false);
+
         predictRectPaint = new Paint();
         predictRectPaint.setColor(0xA0FFEF82);
         predictRectPaint.setStyle(Paint.Style.STROKE);
         predictRectPaint.setStrokeWidth(Metrics.GRID_UNIT * 0.1f);
+
         floatObjectOn = false;
     }
 
     @Override
     public void update() {
         // 업데이트 로직
-        if(!active) return;
+        if(!active) {
+        }
     }
 
     @Override
     public void draw(Canvas canvas) {
         // 드로잉 로직
         // 맵 그림
-        canvas.drawRect(dstRect, predictRectPaint);
-        for (int i = 0; i < width; i++) {
-            for (int j = 0; j < height; j++) {
-                float sx = startTileLeftTop.x + i * tileRect.width();
-                float sy = startTileLeftTop.y + j * tileRect.height();
-                tileRect.set(sx, sy, sx + tileRect.width(), sy + tileRect.height());
+        canvas.drawRect(field.dstRect, predictRectPaint);
+        tileRect.offsetTo(field.leftTop.x, field.leftTop.y);
+        for (int i = 0; i < field.width; i++) {
+            for (int j = 0; j < field.height; j++) {
                 if((i+j)%2 == 0){
                     canvas.drawRect(tileRect, paintLight);
                 }else{
                     canvas.drawRect(tileRect, paintDark);
                 }
-                if(!boardState[i][j]){
+                if(field.block(i, j)){
                     canvas.drawRect(tileRect, paintFilter);
                 }
+                tileRect.offset(0,length);
             }
+            tileRect.offset(length, -length * field.height);
         }
         // 벤치 그림
-        canvas.drawRect(benchRect, predictRectPaint);
-        for (int i = 0; i < benchSize; i++) {
-            float sx = startBenchLeftTop.x + i * tileRect.width();
-            float sy = startBenchLeftTop.y;
-            tileRect.set(sx, sy, sx + tileRect.width(), sy + tileRect.height());
+        canvas.drawRect(bench.dstRect, predictRectPaint);
+        tileRect.offsetTo(bench.leftTop.x, bench.leftTop.y);
+        for (int i = 0; i < bench.width; i++) {
             if(i%2 == 0){
                 canvas.drawRect(tileRect, paintLight);
             }else{
                 canvas.drawRect(tileRect, paintDark);
             }
+            tileRect.offset(tileRect.width(),0);
         }
         // 짚는 물체 예상 위치 그림
         if(floatObjectOn){
@@ -146,12 +233,8 @@ public class GameMap implements IGameObject {
         return length;
     }
 
-    public Position getTileLeftTop() {
-        return startTileLeftTop;
-    }
-
     public int getWidth(float x) {
-        return (int) ((x - startTileLeftTop.x) / length);
+        return (int) ((x - field.leftTop.x) / length);
     }
 
     public float getTileX(int width, Gravity gravity) {
@@ -175,11 +258,11 @@ public class GameMap implements IGameObject {
             default:
                 Log.d("Boardmap", "gravity error");
         }
-        return startTileLeftTop.x + (width + ax) * length;
+        return field.leftTop.x + (width + ax) * length;
     }
 
     public int getHeight(float y) {
-        return (int) ((y - startTileLeftTop.y) / length);
+        return (int) ((y - field.leftTop.y) / length);
     }
 
     public float getTileY(int height, Gravity gravity) {
@@ -203,20 +286,54 @@ public class GameMap implements IGameObject {
             default:
                 Log.d("Boardmap", "gravity error");
         }
-        return startTileLeftTop.y + (height + ay) * length;
+        return field.leftTop.y + (height + ay) * length;
     }
     public boolean setObjectOnTile(Transform transform, int width, int height){
         return setObjectOnTile(transform, width, height, Gravity.CENTER);
     }
 
+    public  boolean swapObject(Transform t1, Transform t2){
+        // 전제 : 두 객체 모두 field 혹은 bench에 있고, rigid_body라서 등록되어 있음
+        if(t1.isRigid() && t2.isRigid()){
+            int width = getWidth(t2.getPosition().x);
+            int height = getHeight(t2.getPosition().y);
+            int index = getIndex(t2.getPosition().x, t2.getPosition().y);
+            int origin_width = getWidth(t1.getPosition().x);
+            int origin_height = getHeight(t1.getPosition().y);
+            int origin_index = getIndex(t1.getPosition().x, t1.getPosition().y);
+
+            // 두 놈 다 field, bench에 있는지 확인
+            // 만약 둘 다 온전하게 등록된 상태로 있다면
+            // 둘의 등록 상태를 지워버리고
+            if(bench.isCorrectWidth(index))
+                bench.set(index, null);
+            else if(field.isCorrect(width, height) &&
+                    field.get(width, height) != null)
+                field.set(width, height, null);
+            else
+                return false;
+
+            if(bench.isCorrectWidth(origin_index))
+                bench.set(origin_index, null);
+            else if(field.isCorrect(origin_width, origin_height) &&
+                    field.get(origin_width, origin_height) != null)
+                field.set(origin_width, origin_height, null);
+            else
+                return false;
+            // 위치를 바꿔서 등록한다
+            float temp_x = t1.getPosition().x;
+            float temp_y = t1.getPosition().y;
+            t1.moveTo(t2.getPosition().x, t2.getPosition().y);
+            t2.moveTo(temp_x, temp_y);
+
+            return setPositionNear(t1) && setPositionNear(t2);
+        }
+        return false;
+    }
+
     public boolean setObjectOnTile(Transform transform, int width, int height, Gravity gravity){
-        if(width < 0 || width >= this.width) {
-            return false;
-        }
-        if(height < 0 || height >= this.height) {
-            return false;
-        }
-        if(transform.isRigid() && board[width][height] != null){
+        if(!field.isCorrect(width, height) || (transform.isRigid() && field.get(width, height) != null)
+         || field.block(width, height)){
             return false;
         }
 
@@ -231,14 +348,14 @@ public class GameMap implements IGameObject {
     }
 
     public boolean setObjectOnBench(Transform transform, int index){
-        if(index < 0 || index >= this.benchSize) {
+        if(index < 0 || index >= bench.width) {
             return false;
         }
-        if(transform.isRigid() && bench[index] != null){
+        if(transform.isRigid() && bench.get(index) != null){
             return false;
         }
-        float x = startBenchLeftTop.x + length * (index + 0.5f);
-        float y = startBenchLeftTop.y + length/2;
+        float x = bench.leftTop.x + length * (index + 0.5f);
+        float y = bench.leftTop.y + length/2;
         transform.moveTo(x, y);
         if(transform.isRigid())
             putOnBench(transform);
@@ -249,99 +366,87 @@ public class GameMap implements IGameObject {
         return setPositionNear(transform, Gravity.CENTER);
     }
     public boolean setPositionNear(Transform transform, Gravity gravity){
-        if(dstRect.contains(transform.getPosition().x, transform.getPosition().y)){
+        if(field.dstRect.contains(transform.getPosition().x, transform.getPosition().y)){
+            if(field.full())
+                return false;
             int targetWidth = getWidth(transform.getPosition().x);
             int targetHeight = getHeight(transform.getPosition().y);
             return setObjectOnTile(transform, targetWidth, targetHeight, gravity);
-        }else if(benchRect.contains(transform.getPosition().x, transform.getPosition().y)){
+        }else if(bench.dstRect.contains(transform.getPosition().x, transform.getPosition().y)){
             return setObjectOnBench(transform, getIndex(transform.getPosition().x, transform.getPosition().y));
         }else{
             return false;
         }
     }
 
-    public IGameObject pickUpObject(int width, int height){
-        if(width < 0 || width >= this.width){
-            return null;
-        }
-        if(height < 0 || height >= this.height) {
-            return null;
-        }
-        IGameObject temp = board[width][height].getInstance();
-        board[width][height] = null;
-        return temp;
-    }
+//    public IGameObject pickUpObject(int width, int height){
+//        if(width < 0 || width >= this.width){
+//            return null;
+//        }
+//        if(height < 0 || height >= this.height) {
+//            return null;
+//        }
+//        IGameObject temp = board[width][height].getInstance();
+//        board[width][height] = null;
+//        boardCount--;
+//        return temp;
+//    }
 
     private boolean putOnBoard(Transform transform){
         int width = getWidth(transform.getPosition().x);
         int height = getHeight(transform.getPosition().y);
 
-        if(width < 0 || width >= this.width){
+        if(width < 0 || width >= field.width){
             return false;
         }
-        if(height < 0 || height >= this.height) {
+        if(height < 0 || height >= field.height) {
             return false;
         }
 
-        if(board[width][height] == null) {
-            board[width][height] = transform;
+        if(field.get(width, height) == null &&
+            field.count < field.countMax) {
+            field.set(width, height, transform);
             return true;
         }
         return false;
     }
     private boolean putOnBench(Transform transform){
         int index = getIndex(transform.getPosition().x, transform.getPosition().y);
-        if(index < 0 || index >= this.benchSize) {
+        if(index < 0 || index >= bench.width) {
             return false;
         }
-        if(bench[index] == null) {
-            bench[index] = transform;
+        if(bench.get(index) == null) {
+            bench.set(index, transform);
             return true;
         }
         return false;
     }
 
-    private boolean putOnMap(Transform transform){
-        if(dstRect.contains(transform.getPosition().x, transform.getPosition().y)){
-            return putOnBoard(transform);
-        }else if(benchRect.contains(transform.getPosition().x, transform.getPosition().y)){
-            return putOnBench(transform);
-        }
-        return false;
-    }
-
-    float origin_x;
-    float origin_y;
+    private float origin_x;
+    private float origin_y;
     //private Transform pickedObjectTransform = null;
-    public IGameObject setOnPredictPoint(float x, float y) {
+    public void setOnPredictPoint(float x, float y) {
         // 물체를 짚는 것을 지시
         // 이 때 이미 짚은 물체가 있다면 어떻게 처리할 것인지 고민해봐야됨
         // 일단은 에러 로그를 표시하고, 그냥 새 짚는 명령 무시하는 걸로
         if(floatObjectOn){
             Log.d("Boardmap", "already float object is exist");
-           return null;
+           return;
         }
-        Transform pickedObjectTransform = null;
-        if(dstRect.contains(x, y)) {
+        if(field.dstRect.contains(x, y)) {
             int width = getWidth(x);
             int height = getHeight(y);
-            if(board[width][height] != null) {
-                pickedObjectTransform = board[width][height];
+            if(field.get(width, height) != null) {
                 activatePredictPoint(x, y);
-                board[width][height] = null;
+                field.set(width, height, null);
             }
-        }else if (benchRect.contains(x, y)) {
+        }else if (bench.dstRect.contains(x, y)) {
             int index = getIndex(x, y);
-            if(index >= 0 && index < benchSize && bench[index] != null) {
-                pickedObjectTransform = bench[index];
+            if(index >= 0 && index < bench.width && bench.get(index) != null) {
                 activatePredictPoint(x, y);
-                bench[index] = null;
+                bench.set(index, null);
             }
         }
-        if(pickedObjectTransform == null)
-            return null;
-        else
-            return pickedObjectTransform.getInstance();
     }
 
     private void activatePredictPoint(float x, float y){
@@ -366,32 +471,41 @@ public class GameMap implements IGameObject {
         }
     }
 
+    public void SwapTransform(float x1, float y1, float x2, float y2){
+        // 월드 좌표를 기반으로 field 및 bench에 올라가 있는 rigid_body인 두 Transform의 위치를 바꿈
+        // 따라서 만일의 버그가 발생할 수 잇음
+        // case 1 field 간 교환
+        // case 2 bench 간 교환
+        // case 3 field와 bench 간 교환
+
+    }
+
     public boolean isSettable(Transform transform){
         return isSettable(transform.getPosition().x, transform.getPosition().y);
     }
     public boolean isSettable(float x, float y){
-        if(dstRect.contains(x, y)){
+        if(field.dstRect.contains(x, y)){
             int width = getWidth(x);
             int height = getHeight(y);
-            if(boardState[width][height])
-                return (board[width][height] == null);
+            if(!field.block(width, height))
+                return (field.get(width, height) == null);
             else
                 return false;
-        }else if(benchRect.contains(x, y)){
+        }else if(bench.dstRect.contains(x, y)){
             int width = getIndex(x, y);
-            return (bench[width] == null);
+            return (bench.get(width) == null);
         }
         return false;
     }
 
     public Transform findTransform(float x, float y){
-        if(dstRect.contains(x, y)){
+        if(field.dstRect.contains(x, y)){
             int width = getWidth(x);
             int height = getHeight(y);
-            return board[width][height];
-        }else if(benchRect.contains(x, y)) {
+            return field.get(width, height);
+        }else if(bench.dstRect.contains(x, y)) {
             int index = getIndex(x, y);
-            return bench[index];
+            return bench.get(index);
         }else{
             return null;
         }
@@ -405,17 +519,21 @@ public class GameMap implements IGameObject {
     }
 
     private int getIndex(float x, float y) {
-        if(benchRect.contains(x, y)){
-            return (int)((x - startBenchLeftTop.x) / length);
+        if(bench.dstRect.contains(x, y)){
+            return (int)((x - bench.leftTop.x) / length);
         }
         return -1;
     }
     public int getEmptyBenchIndex(){
-        for(int i = 0; i < benchSize; i++){
-            if(bench[i] == null)
+        for(int i = 0; i < bench.width; i++){
+            if(bench.get(i) == null)
                 return i;
         }
         return -1;
+    }
+
+    public boolean isFullField(){
+        return field.full();
     }
 
     public boolean isFloatObjectOn(){
