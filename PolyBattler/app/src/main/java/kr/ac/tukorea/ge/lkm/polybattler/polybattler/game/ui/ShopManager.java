@@ -6,8 +6,6 @@ import android.view.MotionEvent;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameState;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.IGameManager;
-import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.ColorType;
-import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.ShapeType;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Shop;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene.Scene;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
@@ -72,10 +70,10 @@ public class ShopManager implements IGameManager {
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
                     if (shop.getBackboardRect().contains(x, y)) {
                         int selectedBox = shop.purchase(x, y);
-                        if (selectedBox != -1 && shop.soldOut(selectedBox)) {
+                        if (selectedBox != -1 && !shop.isSoldOut(selectedBox)) {
                             boolean result = GameManager.getInstance(master).purchaseCharactor(shop.getPrice(selectedBox), shop.getShape(selectedBox), shop.getColor(selectedBox));
                             if (result) {
-                                shop.soldOut(selectedBox);
+                                shop.makeSoldOut(selectedBox);
                             } else {
                                 Log.d("ShopManager", "not enough gold");
                                 return false;

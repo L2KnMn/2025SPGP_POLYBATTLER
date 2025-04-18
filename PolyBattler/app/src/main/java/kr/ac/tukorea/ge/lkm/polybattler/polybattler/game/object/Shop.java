@@ -1,8 +1,6 @@
 package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object;
 
-import android.content.SharedPreferences;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.util.Log;
@@ -105,16 +103,13 @@ public class Shop implements IGameObject {
                 for (int i = 0; i < numberOfBox; i++) {
                     if(!goods[i].soldOut){
                         canvas.drawRect(boxOutline, boxOutlinePaint);
-                        setTextOffset(goods[i].shape.name());
-                        canvas.drawText(goods[i].shape.name(), boxOutline.centerX() + textOffsetX, boxOutline.centerY() + textOffsetY, shopTextPaint);
-                        setTextOffset(String.valueOf(goods[i].price));
-                        canvas.drawText(String.valueOf(goods[i].price), boxOutline.centerX() + textOffsetX, boxOutline.centerY() + textOffsetY * 2, shopTextPaint);
+                        drawText(canvas,goods[i].shape.name(), boxOutline.centerX(), boxOutline.centerY() - boxOutline.height() / 4);
+                        drawText(canvas, String.valueOf(goods[i].price), boxOutline.centerX(), boxOutline.centerY() + boxOutline.height() / 4);
                     }
                     boxOutline.offset(boxOutline.width() + interlude.x, 0);
                 }
                 canvas.drawRect(RerollButtonRect, RerollButtonPaint);
-                setTextOffset("Reroll");
-                canvas.drawText("Reroll", RerollButtonRect.centerX() + textOffsetX, RerollButtonRect.centerY() + textOffsetY, shopTextPaint);
+                drawText(canvas, "REROLL", RerollButtonRect.centerX(), RerollButtonRect.centerY());
             }
         }
     }
@@ -167,15 +162,12 @@ public class Shop implements IGameObject {
         return this.goods[index].color;
     }
 
-    public boolean soldOut(int goods){
-        // already sold out = false
-        // sold out now = true
-        if(this.goods[goods].soldOut){
-            return false;
-        }else{
-            this.goods[goods].soldOut = true;
-            return true;
-        }
+    public boolean isSoldOut(int goods){
+        return this.goods[goods].soldOut;
+    }
+
+    public void makeSoldOut(int goods){
+        this.goods[goods].soldOut = true;
     }
 
     public RectF getIconRect(){
