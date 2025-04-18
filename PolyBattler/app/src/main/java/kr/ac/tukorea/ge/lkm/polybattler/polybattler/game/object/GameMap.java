@@ -62,11 +62,11 @@ public class GameMap implements IGameObject {
 
 
         public boolean isCorrectWidth(int width) {
-            return width >= 0 && width < field.width;
+            return width >= 0 && width < this.width;
         }
 
         public boolean isCorrectHeight(int height) {
-            return height >= 0 && height < field.height;
+            return height >= 0 && height < this.height;
         }
 
         protected boolean isCorrect(int width, int height){
@@ -298,23 +298,27 @@ public class GameMap implements IGameObject {
             int width = getWidth(t2.getPosition().x);
             int height = getHeight(t2.getPosition().y);
             int index = getIndex(t2.getPosition().x, t2.getPosition().y);
+
             int origin_width = getWidth(t1.getPosition().x);
             int origin_height = getHeight(t1.getPosition().y);
             int origin_index = getIndex(t1.getPosition().x, t1.getPosition().y);
-
             // 두 놈 다 field, bench에 있는지 확인
             // 만약 둘 다 온전하게 등록된 상태로 있다면
             // 둘의 등록 상태를 지워버리고
-            if(bench.isCorrectWidth(index))
+            if(bench.isCorrectWidth(index)) {
+                Log.d("Bench", "t2 index : " + index);
                 bench.set(index, null);
+            }
             else if(field.isCorrect(width, height) &&
                     field.get(width, height) != null)
                 field.set(width, height, null);
             else
                 return false;
 
-            if(bench.isCorrectWidth(origin_index))
+            if(bench.isCorrectWidth(origin_index)){
+                Log.d("Bench", "t1 index : " + origin_index);
                 bench.set(origin_index, null);
+            }
             else if(field.isCorrect(origin_width, origin_height) &&
                     field.get(origin_width, origin_height) != null)
                 field.set(origin_width, origin_height, null);
@@ -348,9 +352,7 @@ public class GameMap implements IGameObject {
     }
 
     public boolean setObjectOnBench(Transform transform, int index){
-        if(index < 0 || index >= bench.width) {
-            return false;
-        }
+        bench.isCorrectWidth(index);
         if(transform.isRigid() && bench.get(index) != null){
             return false;
         }
@@ -469,15 +471,6 @@ public class GameMap implements IGameObject {
             floatObjectOn = false;
             predictPoint.moveTo(x, y);
         }
-    }
-
-    public void SwapTransform(float x1, float y1, float x2, float y2){
-        // 월드 좌표를 기반으로 field 및 bench에 올라가 있는 rigid_body인 두 Transform의 위치를 바꿈
-        // 따라서 만일의 버그가 발생할 수 잇음
-        // case 1 field 간 교환
-        // case 2 bench 간 교환
-        // case 3 field와 bench 간 교환
-
     }
 
     public boolean isSettable(Transform transform){
