@@ -36,10 +36,10 @@ public class MainScene extends Scene {
 
     public void setManagers(){
         managerArray = new ArrayList<IGameManager>();
-        dragAndDropManager = new DragAndDropManager(GameManager.getInstance(this).getMap());
-        dragAndDropManager.setGameState(currentState);
         GameManager.getInstance(this).setGameState(currentState);
         ShopManager.getInstance(this).setGameState(currentState);
+        dragAndDropManager = new DragAndDropManager(GameManager.getInstance(this).getMap());
+        dragAndDropManager.setGameState(currentState);
 
         managerArray.add(ShopManager.getInstance(this));
         managerArray.add(GameManager.getInstance(this));

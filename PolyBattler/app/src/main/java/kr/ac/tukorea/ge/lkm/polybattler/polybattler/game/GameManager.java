@@ -11,7 +11,7 @@ import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.ShapeType;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene.Scene;
 
 public class GameManager implements IGameManager {
-    private static Map<Scene, GameManager> instances = new HashMap<>();
+    private static final Map<Scene, GameManager> instances = new HashMap<>();
     private final Scene master;
     private GameState currentState;
     private int round;

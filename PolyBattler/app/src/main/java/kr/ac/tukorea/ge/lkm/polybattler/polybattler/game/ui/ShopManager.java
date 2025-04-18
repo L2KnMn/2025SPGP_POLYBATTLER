@@ -1,18 +1,28 @@
 package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui;
 
+import android.graphics.Color;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.MotionEvent;
+import android.view.View;
+import android.widget.TextView;
+
+import com.google.android.material.snackbar.Snackbar;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameState;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.IGameManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Shop;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene.Scene;
+import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.GameView;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 
 public class ShopManager implements IGameManager {
-    private static ShopManager instance;
-    private Scene master;
+    private static final Map<Scene, ShopManager> instances = new HashMap<>();
+    private final Scene master;
     private final Shop shop;
     private GameState currentState;
 
@@ -23,10 +33,7 @@ public class ShopManager implements IGameManager {
     }
 
     public static ShopManager getInstance(Scene master) {
-        if (instance == null) {
-            instance = new ShopManager(master);
-        }
-        return instance;
+        return instances.computeIfAbsent(master, ShopManager::new);
     }
 
     @Override
@@ -75,7 +82,15 @@ public class ShopManager implements IGameManager {
                             if (result) {
                                 shop.makeSoldOut(selectedBox);
                             } else {
-                                Log.d("ShopManager", "not enough gold");
+                                String text = "not enough gold";
+                                Log.d("ShopManager", text);
+                                Snackbar snackbar = Snackbar.make(GameView.view, text, Snackbar.LENGTH_SHORT);
+                                View snackbarView = snackbar.getView();
+                                snackbarView.setBackgroundColor(Color.DKGRAY); // 배경색 설정
+                                TextView textView = (TextView) snackbarView.findViewById(com.google.android.material.R.id.snackbar_text);
+                                textView.setTextColor(Color.YELLOW); // 텍스트 색상 설정
+                                textView.setGravity(Gravity.CENTER);
+                                snackbar.show();
                                 return false;
                             }
                         } else if(shop.RerollButtonRect().contains(x, y)){
