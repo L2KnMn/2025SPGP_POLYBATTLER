@@ -87,13 +87,13 @@ public class ShopManager implements IGameManager {
                         // 상품 창 밖을 터치하면 상품창 닫고 준비 단계로 돌아가기
                         shop.foldShop();
                         currentState = GameState.PREPARE;
+                        return true;
                     }
                 }
-                break;
             case BATTLE:
             case RESULT:
             case POST_GAME:
-                break;
+                return true;
         }
         return true;
     }

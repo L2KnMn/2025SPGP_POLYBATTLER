@@ -70,8 +70,8 @@ public class Shop implements IGameObject {
         boxOutlinePaint.setStrokeWidth(Metrics.GRID_UNIT / 5);
 
         RerollButtonRect = new RectF(backboardRect.width()/2-Metrics.GRID_UNIT,
-                backboardRect.height() - Metrics.GRID_UNIT * 0.5f, backboardRect.width()/2 + Metrics.GRID_UNIT,
-                backboardRect.height() + Metrics.GRID_UNIT * 0.5f);
+                backboardRect.height() - Metrics.GRID_UNIT, backboardRect.width()/2 + Metrics.GRID_UNIT,
+                backboardRect.height());
         RerollButtonPaint = new Paint();
         RerollButtonPaint.setColor(0xFF000000);
         RerollButtonPaint.setStyle(Paint.Style.FILL);
