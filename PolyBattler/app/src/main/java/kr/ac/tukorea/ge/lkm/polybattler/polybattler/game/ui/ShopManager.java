@@ -38,7 +38,6 @@ public class ShopManager implements IGameManager {
 
     @Override
     public void setGameState(GameState newState){
-        currentState = newState;
         switch (newState){
          case PREPARE:
              shop.setActive(true);
@@ -55,6 +54,7 @@ public class ShopManager implements IGameManager {
             shop.setActive(false);
             break;
         }
+        currentState = newState;
     }
 
     @Override

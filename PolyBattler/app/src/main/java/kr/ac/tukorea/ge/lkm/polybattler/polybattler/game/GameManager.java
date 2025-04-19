@@ -17,10 +17,12 @@ public class GameManager implements IGameManager {
     private int round;
     private int gold;
     private final GameMap gameMap;
+    private final Polyman[] battlers;
+
     private GameManager(Scene master) {
         currentState = GameState.PREPARE;
         round = 1;
-        gold = 10; // 초기 골드
+        gold = 100; // 초기 골드
         gameMap = new GameMap(4, 7, 5);
         this.master = master;
         master.add(gameMap);
@@ -42,6 +44,8 @@ public class GameManager implements IGameManager {
             master.add(polyman);
         }else
             Log.d("GameManager", "Failed to set object on tile");
+
+        battlers = new Polyman[gameMap.getCountMax()];
     }
 
     public static GameManager getInstance(Scene master) {
@@ -109,10 +113,10 @@ public class GameManager implements IGameManager {
 
     @Override
     public void setGameState(GameState newState) {
-        this.currentState = newState;
         switch (newState){
             case PREPARE:
-                gameMap.restore();
+                if(currentState == GameState.RESULT || currentState == GameState.BATTLE)
+                    gameMap.restore();
                 break;
             case SHOPPING:
                 break;
@@ -122,5 +126,6 @@ public class GameManager implements IGameManager {
             case POST_GAME:
                 break;
         }
+        this.currentState = newState;
     }
 }

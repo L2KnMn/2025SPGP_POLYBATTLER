@@ -537,5 +537,9 @@ public class GameMap implements IGameObject {
             }
         }
     }
+
+    public int getCountMax() {
+        return field.countMax;
+    }
 }
 
