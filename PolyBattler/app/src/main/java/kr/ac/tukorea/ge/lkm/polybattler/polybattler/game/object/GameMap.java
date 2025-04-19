@@ -11,7 +11,7 @@ import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IGameObject;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 
 public class GameMap implements IGameObject {
-    protected class Tiles{
+    protected static class Tiles{
         protected final Transform[] transforms;
         protected final int width;
         protected int count;
@@ -21,7 +21,7 @@ public class GameMap implements IGameObject {
             transforms = new Transform[width];
         }
     }
-    protected class MapPart{
+    protected static class MapPart{
         final int width;
         final int height;
         private final Tiles[] tiles;
@@ -74,7 +74,7 @@ public class GameMap implements IGameObject {
         }
     }
 
-    protected class Field extends MapPart {
+    protected static class Field extends MapPart {
         private final boolean[][] blocked;
         private int count;
         private int countMax;
@@ -112,6 +112,10 @@ public class GameMap implements IGameObject {
             }
             super.set(width, height, transform);
         }
+
+        protected void setCountMax(int max){
+            countMax = max;
+        }
     }
     private final Field field;
     private final MapPart bench;
@@ -124,7 +128,7 @@ public class GameMap implements IGameObject {
     private final Paint paintDark;
     private final Paint paintFilter;
 
-    private final boolean active;
+//    private final boolean active;
 
     private final Transform predictPoint;
     private final Paint predictRectPaint;
@@ -134,7 +138,7 @@ public class GameMap implements IGameObject {
         field = new Field(width, height);
         bench = new MapPart(benchSize, 1);
 
-        active = true;
+//        active = true;
 
         int width_max = Math.max(benchSize, width);
         int height_max = height + 1;
@@ -169,7 +173,7 @@ public class GameMap implements IGameObject {
         paintFilter.setStyle(Paint.Style.FILL);
 
         predictPoint = new Transform(this);
-        predictPoint.setSize(length/2);
+        predictPoint.setSize(length * 0.9f);
         predictPoint.setRigid(false);
 
         predictRectPaint = new Paint();
@@ -355,7 +359,7 @@ public class GameMap implements IGameObject {
         float y = bench.leftTop.y + length/2;
         transform.moveTo(x, y);
         if(transform.isRigid())
-            putOnBench(transform);
+            return putOnBench(transform);
         return true;
     }
 
@@ -407,10 +411,7 @@ public class GameMap implements IGameObject {
     }
     private boolean putOnBench(Transform transform){
         int index = getIndex(transform.getPosition().x, transform.getPosition().y);
-        if(index < 0 || index >= bench.width) {
-            return false;
-        }
-        if(bench.get(index) == null) {
+        if(bench.isCorrectWidth(index) && bench.get(index) == null) {
             bench.set(index, transform);
             return true;
         }
@@ -497,12 +498,12 @@ public class GameMap implements IGameObject {
         }
     }
 
-    public IGameObject findObject(float x, float y){
-        Transform transform = findTransform(x, y);
-        if (transform == null)
-            return null;
-        return transform.getInstance();
-    }
+//    public IGameObject findObject(float x, float y){
+//        Transform transform = findTransform(x, y);
+//        if (transform == null)
+//            return null;
+//        return transform.getInstance();
+//    }
 
     private int getIndex(float x, float y) {
         if(bench.dstRect.contains(x, y)){

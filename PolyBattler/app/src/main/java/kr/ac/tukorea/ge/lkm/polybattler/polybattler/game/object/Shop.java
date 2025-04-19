@@ -23,13 +23,13 @@ public class Shop implements IGameObject {
     private final Paint backboardPaint;
     private final RectF boxOutline;
     private final Paint boxOutlinePaint;
-    class Goods {
+    static class Goods {
         protected int price;
-        protected ShapeType shape;
-        protected ColorType color;
+        protected Polyman.ShapeType shape;
+        protected Polyman.ColorType color;
         protected boolean soldOut;
 
-        Goods(int price, ShapeType shape, ColorType color){
+        Goods(int price, Polyman.ShapeType shape, Polyman.ColorType color){
             this.price = price;
             this.shape = shape;
             this.color = color;
@@ -81,15 +81,13 @@ public class Shop implements IGameObject {
         interlude.y = (backboardRect.height() - boxOutline.height()) / 2;
 
         for(int i = 0; i < numberOfBox; i++){
-            goods[i] = new Goods(1, ShapeType.CIRCLE, ColorType.RED);
+            goods[i] = new Goods(1, Polyman.ShapeType.CIRCLE, Polyman.ColorType.RED);
         }
         setRandomGoods();
     }
 
     @Override
-    public void update() {
-        return;
-    }
+    public void update() {}
 
     @Override
     public void draw(Canvas canvas) {
@@ -109,16 +107,14 @@ public class Shop implements IGameObject {
                     boxOutline.offset(boxOutline.width() + interlude.x, 0);
                 }
                 canvas.drawRect(RerollButtonRect, RerollButtonPaint);
-                drawText(canvas, "REROLL", RerollButtonRect.centerX(), RerollButtonRect.centerY());
+                float height_offset = RerollButtonRect.height() / 4;
+                drawText(canvas, "REROLL", RerollButtonRect.centerX(), RerollButtonRect.centerY()-height_offset);
+                drawText(canvas, "1", RerollButtonRect.centerX(), RerollButtonRect.centerY() + height_offset);
             }
         }
     }
 
     private void drawText(Canvas canvas, String string, float x, float y) {
-        drawText(canvas, string, x, y, Gravity.CENTER);
-    }
-
-    private void drawText(Canvas canvas, String string, float x, float y, Gravity gravity) {
         setTextOffset(string);
         canvas.drawText(string, x+textOffsetX, y+textOffsetY, shopTextPaint);
     }
@@ -147,18 +143,18 @@ public class Shop implements IGameObject {
         for (int i = 0; i < numberOfBox; i++) {
             goods[i].soldOut = false;
             goods[i].price = random.nextInt(10);
-            goods[i].shape = ShapeType.values()[random.nextInt(ShapeType.values().length)];
-            goods[i].color = ColorType.values()[random.nextInt(ColorType.values().length-1)];
+            goods[i].shape = Polyman.ShapeType.values()[random.nextInt(Polyman.ShapeType.values().length)];
+            goods[i].color = Polyman.ColorType.values()[random.nextInt(Polyman.ColorType.values().length-1)];
         }
     }
 
     public int getPrice(int index){
         return this.goods[index].price;
     }
-    public ShapeType getShape(int index){
+    public Polyman.ShapeType getShape(int index){
         return this.goods[index].shape;
     }
-    public ColorType getColor(int index){
+    public Polyman.ColorType getColor(int index){
         return this.goods[index].color;
     }
 

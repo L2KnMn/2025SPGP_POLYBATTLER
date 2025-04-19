@@ -55,7 +55,7 @@ public class MainScene extends Scene {
     public boolean onTouchEvent(MotionEvent event) {
         boolean keep;
         for (IGameManager manager : managerArray) {
-            keep = manager.onTouch(event);
+            keep = !manager.onTouch(event);
             if(manager.getGameState() != currentState){
 //                Log.d(TAG, "state changed");
                 currentState = manager.getGameState();

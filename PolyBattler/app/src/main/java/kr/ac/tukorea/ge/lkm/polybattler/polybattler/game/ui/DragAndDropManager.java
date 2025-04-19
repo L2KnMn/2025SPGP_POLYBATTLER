@@ -70,18 +70,18 @@ public class DragAndDropManager implements IGameManager {
                 return handleActionDown(x, y);
             case MotionEvent.ACTION_MOVE:
                 handleActionMove(x, y);
-                return !isDragging;
+                return isDragging;
             case MotionEvent.ACTION_UP:
                 handleActionUp(x, y);
-                return !isDragging;
+                return isDragging;
         }
         previous.set(x,y);
-        return true;
+        return false ;
     }
 
     private boolean handleActionDown(float x, float y) {
         if (isDragging) {
-            return true;
+            return false;
         }
         draggedTransform = gameMap.findTransform(x, y);
         if (draggedTransform != null && isDraggable(draggedTransform)) {
@@ -89,10 +89,10 @@ public class DragAndDropManager implements IGameManager {
             previous.set(x,y);
             isDragging = true;
             gameMap.setOnPredictPoint(x, y);
-            return false;
+            return true;
         }else {
             draggedTransform = null; // Transform이 없는 경우 드래그 실패
-            return true;
+            return false;
         }
     }
 

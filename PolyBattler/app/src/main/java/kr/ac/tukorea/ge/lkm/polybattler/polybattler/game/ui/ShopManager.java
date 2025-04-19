@@ -65,52 +65,44 @@ public class ShopManager implements IGameManager {
 
         if (!shop.isActive()) { return true; }
         switch (currentState){
-            case PREPARE:
-                if(event.getAction() == MotionEvent.ACTION_DOWN
-                        && shop.getIconRect().contains(x, y)) {
-                    shop.openShop();
-                    currentState = GameState.SHOPPING;
+        case PREPARE:
+            if(event.getAction() == MotionEvent.ACTION_DOWN
+                    && shop.getIconRect().contains(x, y)) {
+                shop.openShop();
+                currentState = GameState.SHOPPING;
+                return true;
+            }
+        case SHOPPING:
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                if (shop.getBackboardRect().contains(x, y)) {
+                    // 상점 배경 안을 터치 했으니 일단은 상점과 관련된 것이라 판단
+                    int selectedBox = shop.purchase(x, y);
+                    if (selectedBox != -1 && !shop.isSoldOut(selectedBox)) {
+                        boolean result = GameManager.getInstance(master).purchaseCharactor(shop.getPrice(selectedBox), shop.getShape(selectedBox), shop.getColor(selectedBox));
+                        if (result) {
+                            shop.makeSoldOut(selectedBox);
+                        } else {
+                            UiManager.getInstance(master).showToast("not enough gold");
+                        }
+                        return true;
+                    } else if(shop.RerollButtonRect().contains(x, y)){
+                        if(GameManager.getInstance(master).spendGold(1)) {
+                            shop.setRandomGoods();
+                        }else{
+                            UiManager.getInstance(master).showToast("not enough gold");
+                        }
+                    }
+                    // 일단 이벤트를 소비하긴 해서 다른 거 작동 안 하게 만듦
+                    return true;
+                } else {
+                    // 상품 창 밖을 터치하면 상품창 닫고 준비 단계로 돌아가기
+                    shop.foldShop();
+                    currentState = GameState.PREPARE;
                     return false;
                 }
-                break;
-            case SHOPPING:
-                if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    if (shop.getBackboardRect().contains(x, y)) {
-                        int selectedBox = shop.purchase(x, y);
-                        if (selectedBox != -1 && !shop.isSoldOut(selectedBox)) {
-                            boolean result = GameManager.getInstance(master).purchaseCharactor(shop.getPrice(selectedBox), shop.getShape(selectedBox), shop.getColor(selectedBox));
-                            if (result) {
-                                shop.makeSoldOut(selectedBox);
-                            } else {
-                                String text = "not enough gold";
-                                Log.d("ShopManager", text);
-                                Snackbar snackbar = Snackbar.make(GameView.view, text, Snackbar.LENGTH_SHORT);
-                                View snackbarView = snackbar.getView();
-                                snackbarView.setBackgroundColor(Color.DKGRAY); // 배경색 설정
-                                TextView textView = (TextView) snackbarView.findViewById(com.google.android.material.R.id.snackbar_text);
-                                textView.setTextColor(Color.YELLOW); // 텍스트 색상 설정
-                                textView.setGravity(Gravity.CENTER);
-                                snackbar.show();
-                                return false;
-                            }
-                        } else if(shop.RerollButtonRect().contains(x, y)){
-                            shop.setRandomGoods();
-                        } else {
-                            return false;
-                        }
-                    } else {
-                        // 상품 창 밖을 터치하면 상품창 닫고 준비 단계로 돌아가기
-                        shop.foldShop();
-                        currentState = GameState.PREPARE;
-                        return true;
-                    }
-                }
-            case BATTLE:
-            case RESULT:
-            case POST_GAME:
-                return true;
+            }
         }
-        return true;
+        return false;
     }
 
     @Override

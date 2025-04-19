@@ -6,10 +6,10 @@ import android.graphics.RectF;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IGameObject;
 
 public class Transform {
-    private IGameObject instance = null;
+    private final IGameObject instance;
     public final Position position;
     private float radian;
-    private float size;
+    private float width, height;
 
     private Path path;
     private RectF body;
@@ -53,7 +53,12 @@ public class Transform {
         this.radian += radian;
     }
     public void setSize(float size){
-        this.size = size;
+        width = size;
+        height = size;
+    }
+    public void setSize(float width, float height) {
+        this.width = width;
+        this.height = height;
     }
     public Position getPosition(){ return position; }
     public boolean isRigid(){
@@ -63,11 +68,17 @@ public class Transform {
         return this.radian;
     }
     public float getSize(){
-        return this.size;
+        return Math.min(this.width, this.height);
+    }
+    public float getWidth(){
+        return this.width;
+    }
+    public float getHeight(){
+        return this.height;
     }
     public RectF getRect(){
-        body.set(position.x-size, position.y-size,
-                position.x+size, position.y+size);
+        body.set(position.x-width/2, position.y-height/2,
+                position.x+width/2, position.y+height/2);
         return body;
     }
 
@@ -78,14 +89,14 @@ public class Transform {
     final static double startangle = 150.0f / 360.0f * 2 * Math.PI;
     final static double unit_angle = 2 * Math.PI / 3; // 정삼각형의 각 점 사이의 각도 (120도 라디안)
     public boolean isPointInTriangle(Position p) {
-        float ax = position.x + size * (float)Math.cos(startangle);
-        float ay = position.y + size * (float)Math.sin(startangle);
+        float ax = position.x + getSize() * (float)Math.cos(startangle);
+        float ay = position.y + getSize() * (float)Math.sin(startangle);
 
-        float bx = position.x + size * (float)Math.cos(unit_angle + startangle);
-        float by = position.y + size * (float)Math.sin(unit_angle + startangle);
+        float bx = position.x + getSize() * (float)Math.cos(unit_angle + startangle);
+        float by = position.y + getSize() * (float)Math.sin(unit_angle + startangle);
 
-        float cx = position.x + size * (float)Math.cos(unit_angle * 2 + startangle);
-        float cy = position.y + size * (float)Math.sin(unit_angle * 2 + startangle);
+        float cx = position.x + getSize() * (float)Math.cos(unit_angle * 2 + startangle);
+        float cy = position.y + getSize() * (float)Math.sin(unit_angle * 2 + startangle);
 
         float abp = crossProduct(ax, ay, bx, by, p);
         float bcp = crossProduct(bx, by, cx, cy, p);
@@ -96,7 +107,8 @@ public class Transform {
         return (b1 == b2) && (b2 == b3);
     }
     public Path getTriangle(){
-        float size = this.size * 1.25f;
+        float size = this.getSize() * 0.7f;
+//        double startangle = this.radian + Transform.startangle;
         path.reset();
         path.moveTo(position.x + size * (float)Math.cos(startangle), position.y + size * (float)Math.sin(startangle));
         path.lineTo(position.x + size * (float)Math.cos(unit_angle + startangle), position.y + size * (float)Math.sin(unit_angle + startangle));
