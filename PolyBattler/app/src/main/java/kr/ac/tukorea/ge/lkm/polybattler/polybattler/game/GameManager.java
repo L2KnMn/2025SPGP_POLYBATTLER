@@ -154,21 +154,22 @@ public class GameManager implements IGameManager {
         return false;
     }
 
-    public boolean addCharactor(int price, Polyman.ShapeType shape, Polyman.ColorType color) {
+    public boolean addCharacter(int price, Polyman.ShapeType shape, Polyman.ColorType color) {
         if (spendGold(price)) {
-            generateCharacterBench(shape, color);
-            return true;
+            return generateCharacterBench(shape, color);
         }
         return false;
     }
 
-    public void generateCharacterBench(Polyman.ShapeType shape, Polyman.ColorType color){
+    public boolean generateCharacterBench(Polyman.ShapeType shape, Polyman.ColorType color){
         int index = gameMap.getEmptyBenchIndex();
         if(index >= 0) {
             Polyman polyman = new Polyman(shape, color);
             gameMap.setObjectOnBench(polyman.transform, index);
             master.add(polyman);
+            return true;
         }
+        return false;
     }
 
     @Override

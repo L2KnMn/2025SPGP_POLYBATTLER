@@ -70,11 +70,14 @@ public class ShopManager implements IGameManager {
                     // 상점 배경 안을 터치 했으니 일단은 상점과 관련된 것이라 판단
                     int selectedBox = shop.purchase(x, y);
                     if (selectedBox != -1 && !shop.isSoldOut(selectedBox)) {
-                        boolean result = GameManager.getInstance(master).addCharactor(shop.getPrice(selectedBox), shop.getShape(selectedBox), shop.getColor(selectedBox));
+                        boolean result = GameManager.getInstance(master).addCharacter(shop.getPrice(selectedBox), shop.getShape(selectedBox), shop.getColor(selectedBox));
                         if (result) {
                             shop.makeSoldOut(selectedBox);
                         } else {
-                            UiManager.getInstance(master).showToast("not enough gold");
+                            if(!GameManager.getInstance(master).spendGold(shop.getPrice(selectedBox)))
+                                UiManager.getInstance(master).showToast("not enough gold");
+                            else
+                                UiManager.getInstance(master).showToast("full bench");
                         }
                         return true;
                     } else if(shop.RerollButtonRect().contains(x, y)){

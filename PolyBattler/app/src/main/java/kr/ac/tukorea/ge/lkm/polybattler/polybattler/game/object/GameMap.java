@@ -31,6 +31,7 @@ public class GameMap implements IGameObject {
         private final Tiles[] tiles;
         protected final RectF dstRect;
         protected final Position leftTop;
+        private int count;
 
         protected MapPart(int width, int height){
             this.width = width; this.height = height;
@@ -40,6 +41,8 @@ public class GameMap implements IGameObject {
             }
             dstRect = new RectF();
             leftTop = new Position();
+
+            count = 0;
         }
 
 
@@ -60,6 +63,11 @@ public class GameMap implements IGameObject {
         }
 
         protected void set(int width, int height, Transform transform){
+            if(transform == null){
+                count--;
+            }else{
+                count++;
+            }
             tiles[height].transforms[width] = transform;
             tiles[height].count++;
         }
@@ -79,11 +87,9 @@ public class GameMap implements IGameObject {
     }
     protected static class Field extends MapPart {
         private final boolean[][] blocked;
-        private int count;
         private int countMax;
         Field(int width, int height){
             super(width, height);
-            count = 0;
             countMax = 5;
             blocked = new boolean[height][width];
             for (int i = 0; i < width; i++) {
@@ -101,18 +107,11 @@ public class GameMap implements IGameObject {
         }
 
         boolean full(){
-            return count >= countMax;
+            return super.count >= countMax;
         }
 
         @Override
         protected void set(int width, int height, Transform transform){
-            if(transform == null){
-//                blocked[height][width] = false;
-                count--;
-            }else{
-//                blocked[height][width] = true;
-                count++;
-            }
             super.set(width, height, transform);
         }
 
@@ -405,7 +404,7 @@ public class GameMap implements IGameObject {
         }
 
         if(field.get(width, height) == null &&
-            field.count < field.countMax) {
+            !field.full()) {
             field.set(width, height, transform);
             return true;
         }
@@ -527,6 +526,9 @@ public class GameMap implements IGameObject {
 
     public boolean isFullField(){
         return field.full();
+    }
+    public boolean isFullBench(){
+        return bench.count >= bench.width;
     }
 
     public boolean isFloatObjectOn(){

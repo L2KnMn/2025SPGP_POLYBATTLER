@@ -259,8 +259,6 @@ public class UiManager implements IGameManager {
 
         // 터치 이벤트 처리 (UiManager의 onTouch에서 호출될 것)
         public boolean handleTouchEvent(MotionEvent event, float x, float y) {
-            if(!visible[currentState.ordinal()])
-                return false;
             RectF area = getTouchArea();
             boolean contains = area.contains(x, y);
 
@@ -332,12 +330,11 @@ public class UiManager implements IGameManager {
         // 버튼들에 터치 이벤트 전달 (역순으로 전달하여 위에 있는 버튼이 먼저 받도록 함)
         for (int i = buttons.size() - 1; i >= 0; i--) {
             Button button = buttons.get(i);
-            // 현재 게임 상태에서 버튼이 활성화되어 있는지 확인 (필요하다면 Button 클래스에 상태별 활성화 기능 추가)
-            // 예: if (button.isVisibleInState(currentState)) { ... }
-            if (button.handleTouchEvent(event, x, y)) {
+            if(button.visible[currentState.ordinal()])
+                if (button.handleTouchEvent(event, x, y)) {
                 // 특정 버튼이 터치 이벤트를 처리했다면 더 이상 다른 UI 요소나 게임 로직으로 전달하지 않음
-                return true;
-            }
+                    return true;
+                }
         }
 
         // 어떤 버튼도 이벤트를 처리하지 않았으면 다른 Manager가 처리하도록 함
