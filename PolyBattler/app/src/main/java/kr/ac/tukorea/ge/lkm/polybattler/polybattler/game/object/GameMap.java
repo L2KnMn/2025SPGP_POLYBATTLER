@@ -11,6 +11,10 @@ import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IGameObject;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 
 public class GameMap implements IGameObject {
+    public float getButtonLine() {
+        return ((field.leftTop.y + field.dstRect.height()) + (bench.leftTop.y))/2;
+    }
+
     protected static class Tiles{
         protected final Transform[] transforms;
         protected final int width;
@@ -149,7 +153,7 @@ public class GameMap implements IGameObject {
 
         tileRect = new RectF(0, 0, length, length);
         field.leftTop.set((Metrics.width - tileRect.width()*width)/2, height_term);
-        bench.leftTop.set((Metrics.width - tileRect.width()*benchSize)/2, Metrics.height -tileRect.height() - height_term);
+        bench.leftTop.set((Metrics.width - tileRect.width()*benchSize)/2, Metrics.height - tileRect.height() - height_term);
 
         field.dstRect.set(field.leftTop.x, field.leftTop.y,
                 field.leftTop.x + tileRect.width() * width,
@@ -494,6 +498,10 @@ public class GameMap implements IGameObject {
         }else{
             return null;
         }
+    }
+
+    public Transform findTransform(int width, int height){
+        return field.get(width, height);
     }
 
 //    public IGameObject findObject(float x, float y){

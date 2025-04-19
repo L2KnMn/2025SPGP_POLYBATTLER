@@ -8,6 +8,7 @@ import java.util.ArrayList;
 
 import kr.ac.tukorea.ge.lkm.polybattler.BuildConfig;
 import kr.ac.tukorea.ge.lkm.polybattler.R;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.UiManager;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.res.BitmapPool;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene.Scene;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.GameView;
@@ -26,9 +27,6 @@ public class MainScene extends Scene {
         Metrics.setGameSize(700, 1600);
         GameView.drawsDebugStuffs = BuildConfig.DEBUG;
         backgroundImage = BitmapPool.get(R.mipmap.game_background);
-
-        GameManager.getInstance(this).setGameState(GameState.PREPARE);
-
         currentState = GameState.PREPARE;
         setManagers();
         add(ShopManager.getInstance(this).getShop());
@@ -38,10 +36,12 @@ public class MainScene extends Scene {
         managerArray = new ArrayList<IGameManager>();
         GameManager.getInstance(this).setGameState(currentState);
         ShopManager.getInstance(this).setGameState(currentState);
+        UiManager.getInstance(this).setGameState(currentState);
         dragAndDropManager = new DragAndDropManager(GameManager.getInstance(this).getMap());
         dragAndDropManager.setGameState(currentState);
 
         managerArray.add(ShopManager.getInstance(this));
+        managerArray.add(UiManager.getInstance(this));
         managerArray.add(GameManager.getInstance(this));
         managerArray.add(dragAndDropManager);
     }
@@ -60,7 +60,8 @@ public class MainScene extends Scene {
 //                Log.d(TAG, "state changed");
                 currentState = manager.getGameState();
                 for (IGameManager manager2 : managerArray) {
-                    manager2.setGameState(currentState);
+                    if (manager2.getGameState() != currentState)
+                        manager2.setGameState(currentState);
                 }
                 break;
             }

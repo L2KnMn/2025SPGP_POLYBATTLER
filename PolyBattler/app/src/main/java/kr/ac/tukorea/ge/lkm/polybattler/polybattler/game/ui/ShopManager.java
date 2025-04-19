@@ -1,13 +1,6 @@
 package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui;
 
-import android.graphics.Color;
-import android.util.Log;
-import android.view.Gravity;
 import android.view.MotionEvent;
-import android.view.View;
-import android.widget.TextView;
-
-import com.google.android.material.snackbar.Snackbar;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +10,6 @@ import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameState;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.IGameManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Shop;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene.Scene;
-import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.GameView;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 
 public class ShopManager implements IGameManager {
@@ -78,7 +70,7 @@ public class ShopManager implements IGameManager {
                     // 상점 배경 안을 터치 했으니 일단은 상점과 관련된 것이라 판단
                     int selectedBox = shop.purchase(x, y);
                     if (selectedBox != -1 && !shop.isSoldOut(selectedBox)) {
-                        boolean result = GameManager.getInstance(master).purchaseCharactor(shop.getPrice(selectedBox), shop.getShape(selectedBox), shop.getColor(selectedBox));
+                        boolean result = GameManager.getInstance(master).addCharactor(shop.getPrice(selectedBox), shop.getShape(selectedBox), shop.getColor(selectedBox));
                         if (result) {
                             shop.makeSoldOut(selectedBox);
                         } else {

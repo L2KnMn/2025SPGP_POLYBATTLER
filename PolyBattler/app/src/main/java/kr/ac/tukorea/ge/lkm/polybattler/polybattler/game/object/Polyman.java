@@ -3,6 +3,7 @@ package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameState;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.objects.Sprite;
@@ -14,6 +15,34 @@ public class Polyman extends Sprite {
     private final Paint paint;
     private final ShapeType shape;
     private final ColorType color;
+    protected static class UnitData{
+        int hp;
+        int hpMax;
+
+        int attack;
+        float attackPerSecond;
+        int defense;
+
+        int speed;
+
+        UnitData(){
+            hp = 100;
+            hpMax = 100;
+            attack = 10;
+            attackPerSecond = 1;
+            defense = 0;
+        }
+    }
+    private enum ObjectState {
+        IDLE, BATTLE, WAIT
+    }
+    private enum BattleState {
+        IDLE, MOVE, ATTACK, DEAD
+    }
+    private UnitData unitData;
+    private ObjectState state = ObjectState.IDLE;
+    private BattleState battleState = BattleState.IDLE;
+    private int level;
 
     public Polyman(ShapeType shape, ColorType color) {
         super(0);
@@ -25,11 +54,34 @@ public class Polyman extends Sprite {
         paint = new Paint();
         paint.setColor(getColor());
         paint.setStyle(Paint.Style.FILL);
+        unitData = new UnitData();
     }
 
     @Override
     public void update() {
-        transform.turnLeft(30 * GameView.frameTime);
+        switch (state) {
+            case IDLE:
+                transform.turnLeft(30 * GameView.frameTime);
+                break;
+            case BATTLE:
+                BattleAction();
+                break;
+            case WAIT:
+                break;
+        }
+    }
+
+    private void BattleAction() {
+        switch (battleState){
+            case IDLE: // 타겟 탐색
+                break;
+            case MOVE: // 공격 가능 거리까지 이동
+                break;
+            case ATTACK: // 공격
+                break;
+            case DEAD: // 죽음
+                break;
+        }
     }
 
     @Override
@@ -83,6 +135,27 @@ public class Polyman extends Sprite {
                 }
             default:
                 return false;
+        }
+    }
+
+    public void startBattle() {
+        state = ObjectState.BATTLE;
+        battleState = BattleState.IDLE;
+        // IDLE 애니메이션 초기화
+        transform.setAngle(0);
+    }
+
+    public void endBattle(){
+        state = ObjectState.IDLE;
+        battleState = BattleState.IDLE;
+    }
+
+    public void damage(int damage){
+        if(state == ObjectState.BATTLE) {
+            unitData.hp -= damage;
+            if (unitData.hp <= 0) {
+                battleState = BattleState.DEAD;
+            }
         }
     }
 

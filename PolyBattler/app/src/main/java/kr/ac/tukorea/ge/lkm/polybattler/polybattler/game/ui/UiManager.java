@@ -32,7 +32,7 @@ public class UiManager implements IGameManager {
     private final String TAG = "UiManager";
 
     // ToastMessenger 구현
-    protected class ToastMessenger implements IGameObject {
+    private class ToastMessenger implements IGameObject {
         private String message = null;
         private float displayTime = 0; // 남은 표시 시간 (초)
         private final float DURATION = 2.0f; // 토스트 메시지 표시 시간
@@ -110,7 +110,7 @@ public class UiManager implements IGameManager {
     ToastMessenger toast;
 
     // Signage 구현
-    protected class Signage implements IGameObject {
+    public class Signage implements IGameObject {
         String text;
         Transform transform; // 위치와 크기 관리
         boolean[] visible; // 게임 상태별 가시성
@@ -188,12 +188,13 @@ public class UiManager implements IGameManager {
         }
     }
     // Button 구현
-    protected class Button implements IGameObject {
+    public class Button implements IGameObject {
         private final Transform transform;
         private final String text; // 버튼 텍스트 (이미지 버튼도 가능하도록 확장 가능)
         private final Runnable action; // 버튼 클릭 시 실행될 동작
         private final Paint buttonPaint;
         private final Paint buttonTextPaint;
+        boolean[] visible; // 게임 상태별 가시 상태
         private boolean isPressed = false; // 버튼이 눌린 상태인지
         private final RectF touchArea = new RectF(); // 터치 영역
 
@@ -203,6 +204,9 @@ public class UiManager implements IGameManager {
             this.transform = new Transform(this, x, y);
             this.transform.setSize(width, height);
             this.action = action;
+            visible = new boolean[GameState.values().length];
+            // 기본적으로 모든 상태에서 보이지 않도록 설정
+            Arrays.fill(visible, false);
 
             this.buttonPaint = new Paint();
             this.buttonTextPaint = new Paint(textPaint); // 기본 텍스트 페인트 복사 사용
@@ -217,6 +221,13 @@ public class UiManager implements IGameManager {
         // 이미지 기반 버튼 생성자 (추가 구현 필요)
         // Button(int bitmapResId, float x, float y, float width, float height, Runnable action) { ... }
 
+        // 버튼 어떤 상태에서 활성화
+        public void setVisibility(GameState state, boolean isVisible) {
+            if (state.ordinal() < visible.length) {
+                visible[state.ordinal()] = isVisible;
+            }
+        }
+
         @Override
         public void update() {
             // 버튼 상태에 따른 시각적 변화 등 (예: 눌렸을 때 색 변경)
@@ -224,20 +235,20 @@ public class UiManager implements IGameManager {
 
         @Override
         public void draw(Canvas canvas) {
-            RectF drawRect = transform.getRect();
-
-            // 상태에 따라 버튼 색상 변경
-            if (isPressed) {
-                buttonPaint.setColor(Color.LTGRAY); // 눌렸을 때 색
-            } else {
-                buttonPaint.setColor(Color.GRAY); // 기본 색
+            if(visible[currentState.ordinal()]){
+                RectF drawRect = transform.getRect();
+                // 상태에 따라 버튼 색상 변경
+                if (isPressed) {
+                    buttonPaint.setColor(Color.LTGRAY); // 눌렸을 때 색
+                } else {
+                    buttonPaint.setColor(Color.GRAY); // 기본 색
+                }
+                canvas.drawRect(drawRect, buttonPaint);
+                // 텍스트 그리기
+                Paint.FontMetrics fm = buttonTextPaint.getFontMetrics();
+                float textY = drawRect.centerY() - (fm.ascent + fm.descent) / 2;
+                canvas.drawText(text, drawRect.centerX(), textY, buttonTextPaint);
             }
-            canvas.drawRect(drawRect, buttonPaint);
-
-            // 텍스트 그리기
-            Paint.FontMetrics fm = buttonTextPaint.getFontMetrics();
-            float textY = drawRect.centerY() - (fm.ascent + fm.descent) / 2;
-            canvas.drawText(text, drawRect.centerX(), textY, buttonTextPaint);
         }
 
         public RectF getTouchArea() {
@@ -248,6 +259,8 @@ public class UiManager implements IGameManager {
 
         // 터치 이벤트 처리 (UiManager의 onTouch에서 호출될 것)
         public boolean handleTouchEvent(MotionEvent event, float x, float y) {
+            if(!visible[currentState.ordinal()])
+                return false;
             RectF area = getTouchArea();
             boolean contains = area.contains(x, y);
 
@@ -323,12 +336,12 @@ public class UiManager implements IGameManager {
             // 예: if (button.isVisibleInState(currentState)) { ... }
             if (button.handleTouchEvent(event, x, y)) {
                 // 특정 버튼이 터치 이벤트를 처리했다면 더 이상 다른 UI 요소나 게임 로직으로 전달하지 않음
-                return false; // 이벤트 소비됨 (false 반환 시 Scene의 다른 객체는 받지 않음)
+                return true;
             }
         }
 
         // 어떤 버튼도 이벤트를 처리하지 않았으면 다른 Manager가 처리하도록 함
-        return true; // 이벤트 계속 전파 (true 반환 시 Scene의 다른 객체도 받음)
+        return false; // 이벤트 계속 전파
     }
 
     // IGameManager 인터페이스 구현: 게임 상태 설정
