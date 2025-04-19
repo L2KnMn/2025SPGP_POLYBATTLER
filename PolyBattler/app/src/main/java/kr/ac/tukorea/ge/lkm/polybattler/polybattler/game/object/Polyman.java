@@ -64,7 +64,7 @@ public class Polyman extends Sprite {
             case BLACK:
                 return 0xFF000000;
             default:
-                return 0xFFFF0000;
+                return 0xFFFFFFFF;
         }
     }
     public boolean inPoint(Position point){

@@ -55,9 +55,7 @@ public class GameManager implements IGameManager {
         return currentState;
     }
 
-    public void setGameState(GameState newState) {
-        this.currentState = newState;
-    }
+
 
     public int getRound() {
         return round;
@@ -102,10 +100,27 @@ public class GameManager implements IGameManager {
 
     @Override
     public boolean onTouch(MotionEvent event) {
-        return true;
+        return false;
     }
     @Override
     public GameState getGameState(){
         return currentState;
+    }
+
+    @Override
+    public void setGameState(GameState newState) {
+        this.currentState = newState;
+        switch (newState){
+            case PREPARE:
+                gameMap.restore();
+                break;
+            case SHOPPING:
+                break;
+            case BATTLE:
+            case RESULT:
+                break;
+            case POST_GAME:
+                break;
+        }
     }
 }

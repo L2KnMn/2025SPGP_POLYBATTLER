@@ -10,7 +10,7 @@ public class Transform {
     public final Position position;
     private float radian;
     private float width, height;
-
+    private boolean active;
     private Path path;
     private RectF body;
     private boolean rigid;
@@ -139,8 +139,16 @@ public class Transform {
         float dy = Math.abs(this.position.y - y);
         return (float) Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
     }
-
     public IGameObject getInstance() {
         return instance;
+    }
+    public void sleep(){
+        active = false;
+    }
+    public void wakeUp(){
+        active = true;
+    }
+    public boolean isActive(){
+        return active;
     }
 }

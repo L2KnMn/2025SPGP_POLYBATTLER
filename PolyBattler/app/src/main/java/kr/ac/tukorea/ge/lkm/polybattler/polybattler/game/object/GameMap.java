@@ -73,7 +73,6 @@ public class GameMap implements IGameObject {
             return isCorrectWidth(width) && isCorrectHeight(height);
         }
     }
-
     protected static class Field extends MapPart {
         private final boolean[][] blocked;
         private int count;
@@ -119,7 +118,6 @@ public class GameMap implements IGameObject {
     }
     private final Field field;
     private final MapPart bench;
-
 
     private final float length;
     private final RectF tileRect;
@@ -525,6 +523,19 @@ public class GameMap implements IGameObject {
 
     public boolean isFloatObjectOn(){
         return floatObjectOn;
+    }
+
+    public void restore(){ // Battle 후 다시 prepare 상태로 되돌려 놓는 함수
+        for(int i = 0; i < field.width; i++){
+            for(int j = 0; j < field.height; j++){
+                Transform transform = field.get(i, j);
+                if(transform != null){
+                    // 위치를 먼저 복구하자 전투 동안 움직였을 테니
+                    transform.wakeUp();
+                    transform.set(getTileX(i, Gravity.CENTER), getTileY(j, Gravity.CENTER));
+                }
+            }
+        }
     }
 }
 
