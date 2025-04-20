@@ -55,7 +55,7 @@ public class ShopManager implements IGameManager {
         float x = xy[0];
         float y = xy[1];
 
-        if (!shop.isActive()) { return true; }
+        if (!shop.isActive()) { return false; }
         switch (currentState){
         case PREPARE:
             if(event.getAction() == MotionEvent.ACTION_DOWN

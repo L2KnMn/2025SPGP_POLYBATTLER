@@ -10,6 +10,7 @@ import android.view.MotionEvent;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.GameMap;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Polyman;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.DragAndDropManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.UiManager;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene.Scene;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
@@ -17,6 +18,7 @@ import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 public class GameManager implements IGameManager {
     private static final Map<Scene, GameManager> instances = new HashMap<>();
     private final Scene master;
+    private final DragAndDropManager dragAndDropManager;
     private GameState currentState;
     private int round;
     private int gold;
@@ -32,6 +34,9 @@ public class GameManager implements IGameManager {
         gameMap = new GameMap(width, height, benchSize);
         this.master = master;
         master.add(gameMap);
+
+        dragAndDropManager = new DragAndDropManager(gameMap);
+        dragAndDropManager.setGameState(currentState);
 
         Polyman polyman = new Polyman(Polyman.ShapeType.CIRCLE, Polyman.ColorType.RED);
         if(gameMap.setObjectOnTile(polyman.transform, 1, 6))
@@ -88,7 +93,7 @@ public class GameManager implements IGameManager {
         button.setVisibility(GameState.PREPARE, true);
         Log.d("GameManager", "전투 시작 버튼 생성 완료 at (" + battleButtonX + ", " + battleButtonY + ")");
 
-        button = UiManager.getInstance(master).addButton("항복", battleButtonX-100, battleButtonY,
+        button = UiManager.getInstance(master).addButton("항복", battleButtonX, battleButtonY,
                 buttonWidth, buttonHeight,
                 () -> {            // 버튼 클릭 시 실행될 동작
                     Log.d("BATTLE SURRENDER BUTTON", "전투 종료 버튼 클릭됨!");
@@ -103,7 +108,7 @@ public class GameManager implements IGameManager {
         );
         button.setVisibility(GameState.BATTLE, true);
 
-        button = UiManager.getInstance(master).addButton("확인", battleButtonX-200, battleButtonY,
+        button = UiManager.getInstance(master).addButton("확인", battleButtonX, battleButtonY,
                 buttonWidth, buttonHeight,
                 () -> {            // 버튼 클릭 시 실행될 동작
                     Log.d("PREPARE BUTTON", "준비 시작 버튼 클릭됨!");
@@ -174,8 +179,9 @@ public class GameManager implements IGameManager {
 
     @Override
     public boolean onTouch(MotionEvent event) {
-        return false;
+        return dragAndDropManager.onTouch(event);
     }
+
     @Override
     public GameState getGameState(){
         return currentState;
@@ -185,8 +191,14 @@ public class GameManager implements IGameManager {
     public void setGameState(GameState newState) {
         switch (newState){
             case PREPARE:
-                if(currentState == GameState.RESULT || currentState == GameState.BATTLE)
+                // 전투로 인한 위치 변경 및 상태 변경을 초기화
+                if(currentState == GameState.RESULT || currentState == GameState.BATTLE) {
                     gameMap.restore();
+                    for (Polyman polyman : battlers) {
+                        polyman.resetBattleStatus();
+                    }
+                    battlers.clear();
+                }
                 break;
             case SHOPPING:
                 break;
@@ -198,6 +210,7 @@ public class GameManager implements IGameManager {
             case POST_GAME:
                 break;
         }
+        dragAndDropManager.setGameState(newState);
         this.currentState = newState;
     }
 

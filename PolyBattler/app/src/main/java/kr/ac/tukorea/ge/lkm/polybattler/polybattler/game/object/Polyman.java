@@ -145,18 +145,19 @@ public class Polyman extends Sprite {
         transform.setAngle(0);
     }
 
-    public void endBattle(){
-        state = ObjectState.IDLE;
-        battleState = BattleState.IDLE;
-    }
-
     public void damage(int damage){
         if(state == ObjectState.BATTLE) {
-            unitData.hp -= damage;
+            unitData.hp -= damage - unitData.defense;
             if (unitData.hp <= 0) {
                 battleState = BattleState.DEAD;
             }
         }
+    }
+
+    public void resetBattleStatus(){
+        unitData.hp = unitData.hpMax;
+        state = ObjectState.IDLE;
+        battleState = BattleState.IDLE;
     }
 
     public enum ShapeType {

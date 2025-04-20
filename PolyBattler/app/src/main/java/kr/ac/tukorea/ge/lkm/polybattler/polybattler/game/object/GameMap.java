@@ -541,7 +541,6 @@ public class GameMap implements IGameObject {
                 Transform transform = field.get(i, j);
                 if(transform != null){
                     // 위치를 먼저 복구하자 전투 동안 움직였을 테니
-                    transform.wakeUp();
                     transform.set(getTileX(i, Gravity.CENTER), getTileY(j, Gravity.CENTER));
                 }
             }

@@ -21,7 +21,6 @@ public class MainScene extends Scene {
     private final Bitmap backgroundImage;
     private GameState currentState;
     private ArrayList<IGameManager> managerArray;
-    DragAndDropManager dragAndDropManager;
 
     public MainScene() {
         Metrics.setGameSize(700, 1600);
@@ -37,13 +36,10 @@ public class MainScene extends Scene {
         GameManager.getInstance(this).setGameState(currentState);
         ShopManager.getInstance(this).setGameState(currentState);
         UiManager.getInstance(this).setGameState(currentState);
-        dragAndDropManager = new DragAndDropManager(GameManager.getInstance(this).getMap());
-        dragAndDropManager.setGameState(currentState);
 
         managerArray.add(ShopManager.getInstance(this));
         managerArray.add(UiManager.getInstance(this));
         managerArray.add(GameManager.getInstance(this));
-        managerArray.add(dragAndDropManager);
     }
 
     public void draw(Canvas canvas) {
@@ -57,7 +53,6 @@ public class MainScene extends Scene {
         for (IGameManager manager : managerArray) {
             keep = !manager.onTouch(event);
             if(manager.getGameState() != currentState){
-//                Log.d(TAG, "state changed");
                 currentState = manager.getGameState();
                 for (IGameManager manager2 : managerArray) {
                     if (manager2.getGameState() != currentState)
