@@ -73,7 +73,7 @@ public class ShopManager implements IGameManager {
                         if(GameManager.getInstance(master).getGold() < shop.getPrice(selectedBox))
                             UiManager.getInstance(master).showToast("not enough gold");
                         else{
-                            boolean result = GameManager.getInstance(master).addCharacter(shop.getPrice(selectedBox), shop.getShape(selectedBox), shop.getColor(selectedBox));
+                            boolean result = GameManager.getInstance(master).purchaseCharacter(shop.getPrice(selectedBox), shop.getShape(selectedBox), shop.getColor(selectedBox));
                             if (result) {
                                 shop.makeSoldOut(selectedBox);
                             } else {

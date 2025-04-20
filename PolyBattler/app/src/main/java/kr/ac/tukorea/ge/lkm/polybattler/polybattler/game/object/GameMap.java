@@ -375,21 +375,18 @@ public class GameMap implements IGameObject {
         }
     }
 
-    public IGameObject pickUpObject(float x, float y){
+    public void removeObject(float x, float y){
         int width = getWidth(x);
         int height = getHeight(y);
         int index = getIndex(x, y);
-
-        if(!field.isCorrect(width, height) || field.get(width, height) != null){
+        Log.d("GameMap Remove Function", "width : " + width + ", height : " + height + ", index : " + index);
+        if(field.isCorrect(width, height) && field.get(width, height) != null){
             IGameObject temp = field.get(width, height).getInstance();
             field.set(width, height, null);
-            return temp;
-        }else if(!bench.isCorrectWidth(index) || bench.get(index) != null){
+        }else if(bench.isCorrectWidth(index) && bench.get(index) != null){
             IGameObject temp = bench.get(width).getInstance();
             bench.set(width, null);
-            return temp;
         }
-        return null;
     }
 
     private boolean putOnBoard(Transform transform){
@@ -510,12 +507,19 @@ public class GameMap implements IGameObject {
 //        return transform.getInstance();
 //    }
 
-    private int getIndex(float x, float y) {
+    public int getIndex(float x, float y) {
         if(bench.dstRect.contains(x, y)){
             return (int)((x - bench.leftTop.x) / length);
         }
         return -1;
     }
+    public float getBenchX(int index){
+        return bench.leftTop.x + length * (index + 0.5f);
+    }
+    public float getBenchY(){
+        return bench.leftTop.y + length/2;
+    }
+
     public int getEmptyBenchIndex(){
         for(int i = 0; i < bench.width; i++){
             if(bench.get(i) == null)
@@ -555,8 +559,8 @@ public class GameMap implements IGameObject {
         return ((field.leftTop.y + field.dstRect.height()) + (bench.leftTop.y))/2;
     }
 
-    public void removeObject(Transform transform) {
+    public Transform getBenchTransform(int i) {
+        return bench.get(i);
     }
-
 }
 

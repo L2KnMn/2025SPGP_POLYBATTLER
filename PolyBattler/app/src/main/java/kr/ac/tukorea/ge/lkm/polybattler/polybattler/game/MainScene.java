@@ -37,8 +37,8 @@ public class MainScene extends Scene {
         ShopManager.getInstance(this).setGameState(currentState);
         UiManager.getInstance(this).setGameState(currentState);
 
-        managerArray.add(ShopManager.getInstance(this));
         managerArray.add(UiManager.getInstance(this));
+        managerArray.add(ShopManager.getInstance(this));
         managerArray.add(GameManager.getInstance(this));
     }
 
