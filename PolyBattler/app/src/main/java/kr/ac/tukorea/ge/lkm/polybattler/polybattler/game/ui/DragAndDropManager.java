@@ -58,7 +58,7 @@ public class DragAndDropManager implements IGameManager {
 
     @Override
     public boolean onTouch(MotionEvent event) {
-        if (!active) return true;
+        if (!active) return false;
 
         float[] xy = Metrics.fromScreen(event.getX(), event.getY());
         float x = xy[0];
@@ -148,9 +148,9 @@ public class DragAndDropManager implements IGameManager {
         return transform.isRigid();
     }
 
-    public IGameObject getDraggedObjectInstance() {
+    public Transform getDragged() {
         if (draggedTransform != null) {
-            return draggedTransform.getInstance();
+            return draggedTransform;
         }
         return null;
     }

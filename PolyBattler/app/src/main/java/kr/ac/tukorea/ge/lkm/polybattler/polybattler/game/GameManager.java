@@ -202,7 +202,9 @@ public class GameManager implements IGameManager {
 
     @Override
     public boolean onTouch(MotionEvent event) {
-        return dragAndDropManager.onTouch(event);
+        if(currentState == GameState.PREPARE)
+            return dragAndDropManager.onTouch(event);
+        return false;
     }
 
     @Override
