@@ -41,23 +41,11 @@ public class GameManager implements IGameManager {
         dragAndDropManager = new DragAndDropManager(gameMap);
         dragAndDropManager.setGameState(currentState);
 
-        Polyman polyman = new Polyman(Polyman.ShapeType.CIRCLE, Polyman.ColorType.RED);
-        if(gameMap.setObjectOnTile(polyman.transform, 1, 6))
-            master.add(polyman);
-        else
-            Log.d("GameManager", "Failed to set object on tile");
-
-        polyman = new Polyman(Polyman.ShapeType.RECTANGLE, Polyman.ColorType.BLUE);
-        if(gameMap.setObjectOnTile(polyman.transform, 2, 5))
-            master.add(polyman);
-        else
-            Log.d("GameManager", "Failed to set object on tile");
-
-        polyman = new Polyman(Polyman.ShapeType.TRIANGLE, Polyman.ColorType.GREEN);
-        if(gameMap.setObjectOnTile(polyman.transform, 3, 5)){
-            master.add(polyman);
-        }else
-            Log.d("GameManager", "Failed to set object on tile");
+//        Polyman polyman = new Polyman(Polyman.ShapeType.CIRCLE, Polyman.ColorType.RED);
+//        if(gameMap.setObjectOnTile(polyman.transform, 1, 6))
+//            master.add(polyman);
+//        else
+//            Log.d("GameManager", "Failed to set object on tile");
 
         battlers = new ArrayList<Polyman>();
         // 미리 10개 생성해두기 (벤치 사이즈 + 필드 배치 최대 개수)
