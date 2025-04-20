@@ -59,7 +59,7 @@ public class Shop implements IGameObject {
         shopTextPaint.setColor(0xffffffff);
         shopTextPaint.setTextSize(Metrics.GRID_UNIT*0.25f);
 
-        backboardRect = new RectF(0, 0, Metrics.width, Metrics.height / 2);
+        backboardRect = new RectF(0, Metrics.GRID_UNIT, Metrics.width, Metrics.height / 2);
         backboardPaint = new Paint();
         backboardPaint.setColor(0x33000000);
 

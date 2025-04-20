@@ -64,6 +64,7 @@ public class ShopManager implements IGameManager {
                 currentState = GameState.SHOPPING;
                 return true;
             }
+            break;
         case SHOPPING:
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 if (shop.getBackboardRect().contains(x, y)) {
