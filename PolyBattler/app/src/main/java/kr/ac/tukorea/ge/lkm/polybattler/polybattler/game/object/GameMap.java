@@ -11,10 +11,6 @@ import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IGameObject;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 
 public class GameMap implements IGameObject {
-    public float getButtonLine() {
-        return ((field.leftTop.y + field.dstRect.height()) + (bench.leftTop.y))/2;
-    }
-
     protected static class Tiles{
         protected final Transform[] transforms;
         protected final int width;
@@ -379,18 +375,22 @@ public class GameMap implements IGameObject {
         }
     }
 
-//    public IGameObject pickUpObject(int width, int height){
-//        if(width < 0 || width >= this.width){
-//            return null;
-//        }
-//        if(height < 0 || height >= this.height) {
-//            return null;
-//        }
-//        IGameObject temp = board[width][height].getInstance();
-//        board[width][height] = null;
-//        boardCount--;
-//        return temp;
-//    }
+    public IGameObject pickUpObject(float x, float y){
+        int width = getWidth(x);
+        int height = getHeight(y);
+        int index = getIndex(x, y);
+
+        if(!field.isCorrect(width, height) || field.get(width, height) != null){
+            IGameObject temp = field.get(width, height).getInstance();
+            field.set(width, height, null);
+            return temp;
+        }else if(!bench.isCorrectWidth(index) || bench.get(index) != null){
+            IGameObject temp = bench.get(width).getInstance();
+            bench.set(width, null);
+            return temp;
+        }
+        return null;
+    }
 
     private boolean putOnBoard(Transform transform){
         int width = getWidth(transform.getPosition().x);
@@ -550,5 +550,13 @@ public class GameMap implements IGameObject {
     public int getCountMax() {
         return field.countMax;
     }
+
+    public float getButtonLine() {
+        return ((field.leftTop.y + field.dstRect.height()) + (bench.leftTop.y))/2;
+    }
+
+    public void removeObject(Transform transform) {
+    }
+
 }
 

@@ -12,7 +12,9 @@ import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Polyman;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.DragAndDropManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.UiManager;
+import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IGameObject;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene.Scene;
+import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.GameView;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 
 public class GameManager implements IGameManager {
@@ -166,13 +168,34 @@ public class GameManager implements IGameManager {
         return false;
     }
 
+    public boolean removeCharacter(IGameObject gameObject){
+        if(gameObject instanceof Polyman) {
+            master.remove(gameObject);
+            Polyman polyman = (Polyman) gameObject;
+            gameMap.pickUpObject(polyman.transform.getPosition().x, polyman.transform.getPosition().y);
+            charactersPool.add(polyman);
+            return true;
+        }
+        return false;
+    }
+
+    private Polyman getCharacterFromPool(Polyman.ShapeType shape, Polyman.ColorType color) {
+        if (!charactersPool.isEmpty()) {
+            charactersPool.get(0).init(shape, color);
+            return charactersPool.remove(0);
+        }
+        return null;
+    }
+
     public boolean generateCharacterBench(Polyman.ShapeType shape, Polyman.ColorType color){
         int index = gameMap.getEmptyBenchIndex();
         if(index >= 0) {
-            Polyman polyman = new Polyman(shape, color);
-            gameMap.setObjectOnBench(polyman.transform, index);
-            master.add(polyman);
-            return true;
+            Polyman polyman = getCharacterFromPool(shape, color);
+            if(polyman != null) {
+                gameMap.setObjectOnBench(polyman.transform, index);
+                master.add(polyman);
+                return true;
+            }
         }
         return false;
     }

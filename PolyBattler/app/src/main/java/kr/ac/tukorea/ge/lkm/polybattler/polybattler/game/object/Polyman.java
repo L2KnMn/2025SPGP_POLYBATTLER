@@ -13,24 +13,23 @@ import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 public class Polyman extends Sprite {
     public final Transform transform;
     private final Paint paint;
-    private final ShapeType shape;
-    private final ColorType color;
+    private ShapeType shape;
+    private ColorType color;
+
     protected static class UnitData{
-        int hp;
-        int hpMax;
+        int hp = 100;
+        int hpMax = 100;
+        int attack = 10;
+        float attackPerSecond = 1;
+        int defense = 0;
+        int speed = 1; // 1초에 몇 칸 움직일 수 있는가
 
-        int attack;
-        float attackPerSecond;
-        int defense;
-
-        int speed;
-
-        UnitData(){
-            hp = 100;
-            hpMax = 100;
-            attack = 10;
-            attackPerSecond = 1;
-            defense = 0;
+        protected void reset(){
+            hp=hpMax;
+            attack=10;
+            attackPerSecond=1;
+            defense=0;
+            speed=1;
         }
     }
     private enum ObjectState {
@@ -46,15 +45,27 @@ public class Polyman extends Sprite {
 
     public Polyman(ShapeType shape, ColorType color) {
         super(0);
-        this.shape = shape;
-        this.color = color;
-        transform = new Transform(this, 0, 0);
+        transform = new Transform(this);
         transform.setSize(Metrics.GRID_UNIT);
         transform.setRigid(true);
+
         paint = new Paint();
+        unitData = new UnitData();
+
+        init(shape, color);
+    }
+
+    // ObjectPool에서 초기화 하기 위해 호출
+    public void init(ShapeType shape, ColorType color){
+        this.shape = shape;
+        this.color = color;
+
+        transform.set(0, 0);
+
         paint.setColor(getColor());
         paint.setStyle(Paint.Style.FILL);
-        unitData = new UnitData();
+
+        unitData.reset();
     }
 
     @Override
@@ -73,14 +84,58 @@ public class Polyman extends Sprite {
 
     private void BattleAction() {
         switch (battleState){
-            case IDLE: // 타겟 탐색
+            case IDLE:
+//                // 타겟 찾기 (GameManager에게 위임)
+//                currentTarget = findTarget();
+//                if (currentTarget != null) {
+//                    if (isInAttackRange(currentTarget)) {
+//                        battleState = BattleState.ATTACK;
+//                        attackCooldownTimer = 0f; // 바로 공격 가능하도록
+//                    } else {
+//                        battleState = BattleState.MOVE;
+//                    }
+//                    // Log.d("Polyman", this + " found target: " + currentTarget);
+//                }
                 break;
-            case MOVE: // 공격 가능 거리까지 이동
-                break;
-            case ATTACK: // 공격
+            case MOVE:
+//                if (currentTarget == null || currentTarget.battleState == BattleState.DEAD) {
+//                    battleState = BattleState.IDLE; // 타겟 없어짐/죽음
+//                    currentTarget = null;
+//                    break;
+//                }
+//                if (isInAttackRange(currentTarget)) {
+//                    battleState = BattleState.ATTACK;
+//                    attackCooldownTimer = 0f;
+//                } else {
+//                    // 이동 로직 (GameMap 정보 활용 가능)
+//                    moveTowardsTarget(currentTarget);
+//                }
+                 break;
+            case ATTACK:
+//                if (currentTarget == null || currentTarget.battleState == BattleState.DEAD) {
+//                    battleState = BattleState.IDLE; // 타겟 없어짐/죽음
+//                    currentTarget = null;
+//                    break;
+//                }
+//                if (!isInAttackRange(currentTarget)) {
+//                    battleState = BattleState.MOVE; // 타겟이 범위 벗어남
+//                    break;
+//                }
+//
+//                // 공격 쿨다운 처리
+//                attackCooldownTimer -= GameView.frameTime; // 프레임 시간 사용
+//                if (attackCooldownTimer <= 0f) {
+//                    performAttack(currentTarget);
+//                    // 쿨다운 초기화 (공격 속도에 따라)
+//                    if (unitData.attackPerSecond > 0) {
+//                        attackCooldownTimer = 1.0f / unitData.attackPerSecond;
+//                    } else {
+//                        attackCooldownTimer = Float.MAX_VALUE; // 공격 불가
+//                    }
+//                }
                 break;
             case DEAD: // 죽음
-                break;
+                return;
         }
     }
 
