@@ -271,7 +271,7 @@ public class Enemy extends Sprite {
     private Polyman findTarget() {
         if (gameManager != null) {
             // GameManager에 플레이어 유닛(Polyman) 목록을 검색하는 메서드 필요
-            return gameManager.findClosestPlayerUnit(this.transform.getPosition());
+            //return gameManager.findClosestPlayerUnit(this.transform.getPosition());
         }
         return null;
     }

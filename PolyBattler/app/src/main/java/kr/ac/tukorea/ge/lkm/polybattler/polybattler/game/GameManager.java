@@ -43,14 +43,7 @@ public class GameManager implements IGameManager {
         dragAndDropManager = new DragAndDropManager(gameMap);
         dragAndDropManager.setGameState(currentState);
 
-//        Polyman polyman = new Polyman(Polyman.ShapeType.CIRCLE, Polyman.ColorType.RED);
-//        if(gameMap.setObjectOnTile(polyman.transform, 1, 6))
-//            master.add(polyman);
-//        else
-//            Log.d("GameManager", "Failed to set object on tile");
-
         battlers = new ArrayList<Polyman>();
-        // 미리 10개 생성해두기 (벤치 사이즈 + 필드 배치 최대 개수)
         enemies = new ArrayList<Enemy>();
 
         cellButtons = new ArrayList<UiManager.Button>();
@@ -298,18 +291,5 @@ public class GameManager implements IGameManager {
                 }
             }
         }
-    }
-
-    public Polyman findClosestPlayerUnit(Position position) {
-        float minDistance = Float.MAX_VALUE;
-        Polyman closestUnit = null;
-        for (Polyman unit : battlers) {
-            float distance = unit.transform.distance(position);
-            if (distance < minDistance) {
-                minDistance = distance;
-                closestUnit = unit;
-            }
-        }
-        return closestUnit;
     }
 }
