@@ -1,4 +1,4 @@
-package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui;
+package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.shop;
 
 import android.view.MotionEvent;
 
@@ -8,7 +8,7 @@ import java.util.Map;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameState;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.IGameManager;
-import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Shop;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.UiManager;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene.Scene;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 

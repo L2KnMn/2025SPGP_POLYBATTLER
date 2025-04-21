@@ -13,8 +13,7 @@ import kr.ac.tukorea.ge.spgp2025.a2dg.framework.res.BitmapPool;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene.Scene;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.GameView;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
-import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.DragAndDropManager;
-import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.ShopManager;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.shop.ShopManager;
 
 public class MainScene extends Scene {
     private static final String TAG = "MainScene";

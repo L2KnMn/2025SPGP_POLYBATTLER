@@ -1,4 +1,4 @@
-package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object;
+package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.GameMap;
 
 public enum Gravity {
     CENTER, TOP, BOTTOM, LEFT, RIGHT,

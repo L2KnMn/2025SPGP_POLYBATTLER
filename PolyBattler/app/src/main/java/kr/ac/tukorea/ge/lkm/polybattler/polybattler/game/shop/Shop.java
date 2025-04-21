@@ -1,4 +1,4 @@
-package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object;
+package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.shop;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -8,6 +8,7 @@ import android.util.Log;
 import java.util.Random;
 
 import kr.ac.tukorea.ge.lkm.polybattler.R;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Polyman;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IGameObject;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.res.BitmapPool;

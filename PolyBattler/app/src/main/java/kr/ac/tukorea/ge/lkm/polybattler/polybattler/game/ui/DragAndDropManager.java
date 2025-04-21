@@ -5,12 +5,10 @@ import android.view.MotionEvent;
 
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameState;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.IGameManager;
-import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.GameMap;
-import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Polyman;
-import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Shop;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.GameMap.GameMap;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Polyman;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
-import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IGameObject;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 
 public class DragAndDropManager implements IGameManager {

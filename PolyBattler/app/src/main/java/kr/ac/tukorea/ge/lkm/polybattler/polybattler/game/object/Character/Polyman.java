@@ -1,24 +1,25 @@
-package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object;
+package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-
-import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameState;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
+import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IRecyclable;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.objects.Sprite;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.GameView;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 
-public class Polyman extends Sprite {
+public class Polyman extends Sprite implements IRecyclable {
     public final Transform transform;
     private final Paint paint;
     private ShapeType shape;
     private ColorType color;
 
+    @Override
+    public void onRecycle() {
+        
+    }
 
     protected static class UnitData{
         int hp = 100;

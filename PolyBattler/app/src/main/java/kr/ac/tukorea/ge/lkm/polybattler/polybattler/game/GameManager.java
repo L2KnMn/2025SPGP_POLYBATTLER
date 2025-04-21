@@ -8,8 +8,8 @@ import android.util.Log;
 import android.view.MotionEvent;
 
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Enemy;
-import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.GameMap;
-import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Polyman;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.GameMap.GameMap;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Polyman;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.DragAndDropManager;
@@ -27,8 +27,6 @@ public class GameManager implements IGameManager {
     private int gold;
     private final int width = 4, height = 7, benchSize = 5;
     private final GameMap gameMap;
-    private final ArrayList<Polyman> charactersPool;
-    private final ArrayList<Enemy> enemiesPool;
     private final ArrayList<Polyman> battlers;
     private final ArrayList<Enemy> enemies;
     private final ArrayList<UiManager.Button> cellButtons;
@@ -53,16 +51,6 @@ public class GameManager implements IGameManager {
 
         battlers = new ArrayList<Polyman>();
         // 미리 10개 생성해두기 (벤치 사이즈 + 필드 배치 최대 개수)
-        charactersPool = new ArrayList<Polyman>();
-        for (int i = 0; i < benchSize + gameMap.getCountMax(); ++i) {
-            charactersPool.add(new Polyman(Polyman.ShapeType.CIRCLE, Polyman.ColorType.BLACK));
-        }
-
-
-        enemiesPool = new ArrayList<Enemy>();
-        for (int i = 0; i < 15; ++i) {
-            enemiesPool.add(new Enemy(Enemy.ShapeType.CIRCLE, this, gameMap));
-        }
         enemies = new ArrayList<Enemy>();
 
         cellButtons = new ArrayList<UiManager.Button>();
@@ -207,11 +195,10 @@ public class GameManager implements IGameManager {
 
     public boolean cellCharacter(int index) {
         Transform transform = gameMap.getBenchTransform(index);
-        if (transform.getInstance() instanceof Polyman) {
-            if (removeCharacter(transform.getInstance())) {
-                addGold(1);
-                return true;
-            }
+        if (transform != null) {
+            removeCharacter(transform.getInstance());
+            addGold(1);
+            return true;
         }
         return false;
     }
@@ -224,30 +211,29 @@ public class GameManager implements IGameManager {
             if (temp == polyman.transform) {
                 gameMap.removeObject(polyman.transform.getPosition().x, polyman.transform.getPosition().y);
             }
-            charactersPool.add(polyman);
             return true;
         }
         return false;
     }
 
     private Polyman getCharacterFromPool(Polyman.ShapeType shape, Polyman.ColorType color) {
-        if (!charactersPool.isEmpty()) {
-            charactersPool.get(0).init(shape, color);
-            return charactersPool.remove(0);
+        Polyman polyman = (Polyman) master.getRecyclable(Polyman.class);
+        if(polyman == null){
+            polyman = new Polyman(shape, color);
+        } else {
+            polyman.init(shape, color);
         }
-        return null;
+        return polyman;
     }
 
     public boolean generateCharacterBench(Polyman.ShapeType shape, Polyman.ColorType color) {
         int index = gameMap.getEmptyBenchIndex();
         if (index >= 0) {
             Polyman polyman = getCharacterFromPool(shape, color);
-            if (polyman != null) {
-                gameMap.setObjectOnBench(polyman.transform, index);
-                cellButtons.get(index).setVisibility(GameState.SHOPPING, true);
-                master.add(polyman);
-                return true;
-            }
+            gameMap.setObjectOnBench(polyman.transform, index);
+            cellButtons.get(index).setVisibility(GameState.SHOPPING, true);
+            master.add(polyman);
+            return true;
         }
         return false;
     }
