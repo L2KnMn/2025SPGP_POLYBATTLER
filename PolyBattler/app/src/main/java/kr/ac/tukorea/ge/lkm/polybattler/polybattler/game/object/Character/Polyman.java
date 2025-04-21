@@ -3,6 +3,7 @@ package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.BehaviorTree.BattleUnit;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IRecyclable;
@@ -15,35 +16,13 @@ public class Polyman extends Sprite implements IRecyclable {
     private final Paint paint;
     private ShapeType shape;
     private ColorType color;
-
-    @Override
-    public void onRecycle() {
-        
-    }
-
-    protected static class UnitData{
-        int hp = 100;
-        int hpMax = 100;
-        int attack = 10;
-        float attackPerSecond = 1;
-        int defense = 0;
-        int speed = 1; // 1초에 몇 칸 움직일 수 있는가
-
-        protected void reset(){
-            hp=hpMax;
-            attack=10;
-            attackPerSecond=1;
-            defense=0;
-            speed=1;
-        }
-    }
     private enum ObjectState {
         IDLE, BATTLE, WAIT
     }
     private enum BattleState {
         IDLE, MOVE, ATTACK, DEAD
     }
-    private UnitData unitData;
+    private BattleUnit unitData;
     private ObjectState state = ObjectState.IDLE;
     private BattleState battleState = BattleState.IDLE;
     private int level;
@@ -55,7 +34,7 @@ public class Polyman extends Sprite implements IRecyclable {
         transform.setRigid(true);
 
         paint = new Paint();
-        unitData = new UnitData();
+        unitData = new BattleUnit();
 
         init(shape, color);
     }
@@ -207,15 +186,15 @@ public class Polyman extends Sprite implements IRecyclable {
 
     public void damage(int damage){
         if(state == ObjectState.BATTLE) {
-            unitData.hp -= damage - unitData.defense;
-            if (unitData.hp <= 0) {
+            unitData.damage(damage);
+            if (unitData.isDead()) {
                 battleState = BattleState.DEAD;
             }
         }
     }
 
     public void resetBattleStatus(){
-        unitData.hp = unitData.hpMax;
+        unitData.fillHp(unitData.getMaxHp());
         state = ObjectState.IDLE;
         battleState = BattleState.IDLE;
     }
@@ -228,5 +207,10 @@ public class Polyman extends Sprite implements IRecyclable {
     }
     public boolean isDead() {
         return battleState == BattleState.DEAD;
+    }
+
+    @Override
+    public void onRecycle() {
+
     }
 }

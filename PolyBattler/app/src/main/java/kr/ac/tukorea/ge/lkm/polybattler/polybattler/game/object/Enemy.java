@@ -6,7 +6,8 @@ import android.graphics.Paint;
 
 // Polyman에서 사용했던 필요한 클래스들을 임포트합니다.
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameManager; // AI를 위해 필요
-import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.GameMap;   // AI를 위해 필요
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Polyman;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.GameMap.GameMap;   // AI를 위해 필요
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.objects.Sprite;
