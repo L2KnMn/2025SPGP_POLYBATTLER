@@ -3,6 +3,9 @@ package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameState;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
@@ -15,6 +18,7 @@ public class Polyman extends Sprite {
     private final Paint paint;
     private ShapeType shape;
     private ColorType color;
+
 
     protected static class UnitData{
         int hp = 100;
@@ -220,5 +224,8 @@ public class Polyman extends Sprite {
     }
     public enum ColorType {
         RED, GREEN, BLUE, BLACK
+    }
+    public boolean isDead() {
+        return battleState == BattleState.DEAD;
     }
 }

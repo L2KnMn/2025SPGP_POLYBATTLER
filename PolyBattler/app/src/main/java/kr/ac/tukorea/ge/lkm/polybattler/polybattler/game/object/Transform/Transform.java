@@ -134,10 +134,18 @@ public class Transform {
         float dy = Math.abs(this.position.y - pos.position.y);
         return (float) Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
     }
+    public float distance(Position pos){
+        return distance(this.position.x, this.position.y);
+    }
     public float distance(float x, float y) {
         float dx = Math.abs(this.position.x - x);
         float dy = Math.abs(this.position.y - y);
         return (float) Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
+    }
+    public float distanceSq(Position position) {
+        float dx = Math.abs(this.position.x - position.x);
+        float dy = Math.abs(this.position.y - position.y);
+        return (float) Math.pow(dx, 2) + (float) Math.pow(dy, 2);
     }
     public IGameObject getInstance() {
         return instance;

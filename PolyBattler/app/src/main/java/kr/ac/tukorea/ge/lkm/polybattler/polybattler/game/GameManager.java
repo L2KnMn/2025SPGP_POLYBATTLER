@@ -7,8 +7,10 @@ import java.util.Map;
 import android.util.Log;
 import android.view.MotionEvent;
 
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Enemy;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.GameMap;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Polyman;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.DragAndDropManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.UiManager;
@@ -26,7 +28,9 @@ public class GameManager implements IGameManager {
     private final int width = 4, height = 7, benchSize = 5;
     private final GameMap gameMap;
     private final ArrayList<Polyman> charactersPool;
+    private final ArrayList<Enemy> enemiesPool;
     private final ArrayList<Polyman> battlers;
+    private final ArrayList<Enemy> enemies;
     private final ArrayList<UiManager.Button> cellButtons;
     private UiManager.Signage goldSignage;
 
@@ -54,12 +58,19 @@ public class GameManager implements IGameManager {
             charactersPool.add(new Polyman(Polyman.ShapeType.CIRCLE, Polyman.ColorType.BLACK));
         }
 
+
+        enemiesPool = new ArrayList<Enemy>();
+        for (int i = 0; i < 15; ++i) {
+            enemiesPool.add(new Enemy(Enemy.ShapeType.CIRCLE, this, gameMap));
+        }
+        enemies = new ArrayList<Enemy>();
+
         cellButtons = new ArrayList<UiManager.Button>();
         AddUI();
     }
 
-    private void AddUI(){
-        goldSignage = UiManager.getInstance(master).addSignage("GOLD:"+gold, Metrics.width/2, 50, 100, 100);
+    private void AddUI() {
+        goldSignage = UiManager.getInstance(master).addSignage("GOLD:" + gold, Metrics.width / 2, 50, 100, 100);
         goldSignage.setColors(0x00000000, 0xFFFFFFFF);
         goldSignage.setVisibility(GameState.PREPARE, true);
         goldSignage.setVisibility(GameState.SHOPPING, true);
@@ -88,7 +99,7 @@ public class GameManager implements IGameManager {
                     }
                 }
         ).setVisibility(GameState.PREPARE, true);
-        Log.d("GameManager", "전투 시작 버튼 생성 완료 at (" + battleButtonX + ", " + battleButtonY + ")");
+//        Log.d("GameManager", "전투 시작 버튼 생성 완료 at (" + battleButtonX + ", " + battleButtonY + ")");
 
         UiManager.getInstance(master).addButton("항복", battleButtonX, battleButtonY,
                 buttonWidth, buttonHeight,
@@ -98,7 +109,7 @@ public class GameManager implements IGameManager {
                         UiManager.getInstance(master).showToast("전투를 종료합니다."); // 사용자 피드백
                         UiManager.getInstance(master).setGameState(GameState.RESULT); // 게임 상태 변경
                     } else {
-                        Log.d("BATTLE SURRENDER BUTTON", "현재 상태(" + currentState + ")에서는 전투를 종료할 수 없습니다.");
+                        //Log.d("BATTLE SURRENDER BUTTON", "현재 상태(" + currentState + ")에서는 전투를 종료할 수 없습니다.");
                         UiManager.getInstance(master).showToast("지금은 전투를 종료할 수 없습니다."); // 사용자 피드백
                     }
                 }
@@ -112,35 +123,34 @@ public class GameManager implements IGameManager {
                         UiManager.getInstance(master).showToast("전투를 준비합니다."); // 사용자 피드백
                         UiManager.getInstance(master).setGameState(GameState.PREPARE); // 게임 상태 변경
                     } else {
-                        Log.d("PREPARE BUTTON", "현재 상태(" + currentState + ")에서는 RESULT 상태를 종료할 수 없습니다.");
+//                        Log.d("PREPARE BUTTON", "현재 상태(" + currentState + ")에서는 RESULT 상태를 종료할 수 없습니다.");
                         UiManager.getInstance(master).showToast("지금은 준비 단계를 시작할 수 없습니다."); // 사용자 피드백
                     }
                 }
         ).setVisibility(GameState.RESULT, true);
 
-        for(int i = 0; i < benchSize; ++i){
+        for (int i = 0; i < benchSize; ++i) {
             final int benchIndex = i;
             final float centerX = gameMap.getBenchX(benchIndex);
             final float centerY = gameMap.getBenchY();
             buttonWidth = gameMap.getTileSize();
             buttonHeight = gameMap.getTileSize() / 2;
             cellButtons.add(
-            UiManager.getInstance(master).addButton("판매", centerX, centerY+gameMap.getTileSize(),
-                    buttonWidth, buttonHeight,
-                    () -> {            // 버튼 클릭 시 실행될 동작
-                        if (currentState == GameState.SHOPPING) {
-                            boolean result = cellCharacter(benchIndex);
-                            if(result) {
-                                UiManager.getInstance(master).showToast("판매되었습니다."); // 사용자 피드백
-                                cellButtons.get(benchIndex).setVisibility(GameState.SHOPPING, false);
+                    UiManager.getInstance(master).addButton("판매", centerX, centerY + gameMap.getTileSize(),
+                            buttonWidth, buttonHeight,
+                            () -> {            // 버튼 클릭 시 실행될 동작
+                                if (currentState == GameState.SHOPPING) {
+                                    boolean result = cellCharacter(benchIndex);
+                                    if (result) {
+                                        UiManager.getInstance(master).showToast("판매되었습니다."); // 사용자 피드백
+                                        cellButtons.get(benchIndex).setVisibility(GameState.SHOPPING, false);
+                                    } else
+                                        UiManager.getInstance(master).showToast("판매할 수 없습니다."); // 사용자 피드백
+                                } else {
+                                    Log.d("판매 버튼", "제거될 수 없는 오브젝트를 가져와서 판매 하려 함");
+                                }
                             }
-                            else
-                                UiManager.getInstance(master).showToast("판매할 수 없습니다."); // 사용자 피드백
-                        }else {
-                            Log.d("판매 버튼", "제거될 수 없는 오브젝트를 가져와서 판매 하려 함");
-                        }
-                    }
-            ));
+                    ));
         }
     }
 
@@ -151,6 +161,7 @@ public class GameManager implements IGameManager {
     public GameMap getMap() {
         return gameMap;
     }
+
     public GameState getCurrentState() {
         return currentState;
     }
@@ -167,9 +178,12 @@ public class GameManager implements IGameManager {
         return gold;
     }
 
+    StringBuilder stringBuilder = new StringBuilder();
     public void addGold(int amount) {
         this.gold += amount;
-        goldSignage.setText("GOLD:"+gold);
+        stringBuilder.setLength(5);
+        stringBuilder.append("GOLD:").append(gold);
+        goldSignage.setText(stringBuilder.toString());
     }
 
     public boolean spendGold(int amount) {
@@ -191,10 +205,10 @@ public class GameManager implements IGameManager {
         return generateCharacterBench(shape, color);
     }
 
-    public boolean cellCharacter(int index){
+    public boolean cellCharacter(int index) {
         Transform transform = gameMap.getBenchTransform(index);
-        if(transform.getInstance() instanceof Polyman) {
-            if(removeCharacter(transform.getInstance())) {
+        if (transform.getInstance() instanceof Polyman) {
+            if (removeCharacter(transform.getInstance())) {
                 addGold(1);
                 return true;
             }
@@ -202,12 +216,12 @@ public class GameManager implements IGameManager {
         return false;
     }
 
-    public boolean removeCharacter(IGameObject gameObject){
-        if(gameObject instanceof Polyman) {
+    public boolean removeCharacter(IGameObject gameObject) {
+        if (gameObject instanceof Polyman) {
             master.remove(gameObject);
             Polyman polyman = (Polyman) gameObject;
             Transform temp = gameMap.findTransform(polyman.transform.getPosition().x, polyman.transform.getPosition().y);
-            if(temp == polyman.transform) {
+            if (temp == polyman.transform) {
                 gameMap.removeObject(polyman.transform.getPosition().x, polyman.transform.getPosition().y);
             }
             charactersPool.add(polyman);
@@ -224,11 +238,11 @@ public class GameManager implements IGameManager {
         return null;
     }
 
-    public boolean generateCharacterBench(Polyman.ShapeType shape, Polyman.ColorType color){
+    public boolean generateCharacterBench(Polyman.ShapeType shape, Polyman.ColorType color) {
         int index = gameMap.getEmptyBenchIndex();
-        if(index >= 0) {
+        if (index >= 0) {
             Polyman polyman = getCharacterFromPool(shape, color);
-            if(polyman != null) {
+            if (polyman != null) {
                 gameMap.setObjectOnBench(polyman.transform, index);
                 cellButtons.get(index).setVisibility(GameState.SHOPPING, true);
                 master.add(polyman);
@@ -240,28 +254,28 @@ public class GameManager implements IGameManager {
 
     @Override
     public boolean onTouch(MotionEvent event) {
-        if(currentState == GameState.PREPARE)
+        if (currentState == GameState.PREPARE)
             return dragAndDropManager.onTouch(event);
         return false;
     }
 
     @Override
-    public GameState getGameState(){
+    public GameState getGameState() {
         return currentState;
     }
 
     @Override
     public void setGameState(GameState newState) {
-        if(currentState == GameState.SHOPPING) {
+        if (currentState == GameState.SHOPPING) {
             for (int i = 0; i < benchSize; ++i) {
                 cellButtons.get(i).setVisibility(GameState.SHOPPING, false);
             }
         }
 
-        switch (newState){
+        switch (newState) {
             case PREPARE:
                 // 전투로 인한 위치 변경 및 상태 변경을 초기화
-                if(currentState == GameState.RESULT || currentState == GameState.BATTLE) {
+                if (currentState == GameState.RESULT || currentState == GameState.BATTLE) {
                     gameMap.restore();
                     for (Polyman polyman : battlers) {
                         polyman.resetBattleStatus();
@@ -270,8 +284,8 @@ public class GameManager implements IGameManager {
                 }
                 break;
             case SHOPPING:
-                for(int i = 0; i < benchSize; ++i){
-                    if(gameMap.getBenchTransform(i) != null)
+                for (int i = 0; i < benchSize; ++i) {
+                    if (gameMap.getBenchTransform(i) != null)
                         cellButtons.get(i).setVisibility(GameState.SHOPPING, true);
                 }
                 break;
@@ -287,16 +301,29 @@ public class GameManager implements IGameManager {
         this.currentState = newState;
     }
 
-    private void startBattlePhase(){
-        for(int i = 0; i < width; ++i){
-            for(int j = 0; j < height; ++j) {
+    private void startBattlePhase() {
+        for (int i = 0; i < width; ++i) {
+            for (int j = 0; j < height; ++j) {
                 Transform transform = gameMap.findTransform(i, j);
-                if(transform != null && transform.getInstance() instanceof Polyman){
+                if (transform != null && transform.getInstance() instanceof Polyman) {
                     Polyman polyman = (Polyman) transform.getInstance();
                     polyman.startBattle();
                     battlers.add(polyman);
                 }
             }
         }
+    }
+
+    public Polyman findClosestPlayerUnit(Position position) {
+        float minDistance = Float.MAX_VALUE;
+        Polyman closestUnit = null;
+        for (Polyman unit : battlers) {
+            float distance = unit.transform.distance(position);
+            if (distance < minDistance) {
+                minDistance = distance;
+                closestUnit = unit;
+            }
+        }
+        return closestUnit;
     }
 }
