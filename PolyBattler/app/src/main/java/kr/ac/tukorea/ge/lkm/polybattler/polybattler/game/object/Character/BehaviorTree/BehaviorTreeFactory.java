@@ -1,10 +1,8 @@
 package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.BehaviorTree;
 
 // 필요한 클래스들을 임포트합니다.
-import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Polyman;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Polyman.ShapeType; // ShapeType Enum 경로 확인
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.BattleManager;
-import kr.ac.tukorea.ge.spgp2025.a2dg.framework.res.BitmapPool;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -12,7 +10,7 @@ import java.util.Map;
 import java.util.function.BiPredicate;
 
 public class BehaviorTreeFactory {
-    private static Map<ShapeType, ArrayList<BehaviorTree>> treePools;
+    private final static Map<ShapeType, ArrayList<BehaviorTree>> treePools;
 
     // 생성된 트리를 캐싱하기 위한 Map (EnumMap 사용 추천)
     //private static final Map<ShapeType, BehaviorTree> treeCache = new EnumMap<>(ShapeType.class);
@@ -180,7 +178,7 @@ public class BehaviorTreeFactory {
     }
     public static BehaviorTree getTreeForShape(ShapeType shapeType) {
         ArrayList<BehaviorTree> pool = treePools.get(shapeType);
-        BehaviorTree tree = null;
+        BehaviorTree tree;
 
         if (pool != null && !pool.isEmpty()) {
             tree = pool.get(0); // 풀에서 하나 꺼냄
