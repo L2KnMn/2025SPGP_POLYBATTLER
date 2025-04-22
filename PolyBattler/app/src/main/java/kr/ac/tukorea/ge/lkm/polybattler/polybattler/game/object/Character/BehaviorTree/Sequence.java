@@ -9,9 +9,10 @@ import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.BattleManager;
  */
 public class Sequence extends CompositeNode {
     private int runningChildIndex = 0; // 현재 실행 중이거나 다음에 실행할 자식 인덱스
-
-    public Sequence(BTNode... children) {
+    private String name;
+    public Sequence(String name, BTNode... children) {
         super(children);
+        this.name = name;
     }
 
     @Override
@@ -20,7 +21,7 @@ public class Sequence extends CompositeNode {
             BTNode child = children.get(i);
             BTStatus status = child.tick(unit, battleManager);
 
-            // System.out.println("Sequence child " + i + " returned " + status);
+            //System.out.println("Sequence " + name + ": child "  + i + " returned " + status);
 
             if (status == BTStatus.FAILURE) {
                 // System.out.println("Sequence failed at child " + i);

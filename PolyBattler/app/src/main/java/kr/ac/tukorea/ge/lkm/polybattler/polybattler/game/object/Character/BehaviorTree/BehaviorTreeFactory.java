@@ -1,6 +1,8 @@
 package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.BehaviorTree;
 
 // 필요한 클래스들을 임포트합니다.
+import android.util.Log;
+
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Polyman.ShapeType; // ShapeType Enum 경로 확인
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.BattleManager;
 
@@ -36,6 +38,7 @@ public class BehaviorTreeFactory {
 
         // Action: 타겟 찾기 (성공/실패)
         findTargetAction = new ActionNode((unit, manager) -> {
+            //Log.d("find target action", String.valueOf(System.identityHashCode(unit)));
             if (manager == null) return BTStatus.FAILURE;
             // BattleManager에게 가장 가까운 적 찾기 요청 (BattleUnit 타입 반환 가정)
             BattleUnit target = manager.findClosestEnemy(unit);
@@ -71,7 +74,7 @@ public class BehaviorTreeFactory {
 //             for (BattleUnit enemy : targetsInArea) {
 //                 unit.applyAreaDamage(enemy); // 범위 데미지 적용 메서드 호출
 //             }
-            System.out.println(unit + " performs AREA ATTACK around " + target);
+            //System.out.println(unit + " performs AREA ATTACK around " + target);
             unit.resetAttackCooldown();
             return BTStatus.SUCCESS;
         });
@@ -104,7 +107,6 @@ public class BehaviorTreeFactory {
     }
 
     private BehaviorTreeFactory(){}
-
     /**
      * 지정된 ShapeType에 맞는 BehaviorTree를 반환합니다.
      * @param shapeType 유닛의 ShapeType
@@ -116,8 +118,10 @@ public class BehaviorTreeFactory {
             case CIRCLE:
                 treeCache = new BehaviorTree(
                         new Selector(
+                                "Route Node",
                                 // 1순위: 공격 가능하면 범위 공격
                                 new Sequence(
+                                        "Attack Area",
                                         new ConditionNode(hasTarget), // 범위 공격을 위한 타겟 선정 방식 필요시 수정
                                         new ConditionNode(isTargetInRange), // 범위 공격 사거리
                                         new ConditionNode(isAttackReady),
@@ -125,6 +129,7 @@ public class BehaviorTreeFactory {
                                 ),
                                 // 2순위: 타겟 있으면 이동 (최적 위치 선정 로직 추가 가능)
                                 new Sequence(
+                                        "Move to target",
                                         new ConditionNode(hasTarget),
                                         moveToTargetAction
                                 ),
@@ -136,8 +141,10 @@ public class BehaviorTreeFactory {
             case RECTANGLE:
                 treeCache = new BehaviorTree(
                         new Selector( // 우선순위대로 시도
+                                "Route Node",
                                 // 1순위: 공격 가능하면 공격
                                 new Sequence(
+                                        "Attack Single",
                                         new ConditionNode(hasTarget),
                                         new ConditionNode(isTargetInRange), // 근접해야 함
                                         new ConditionNode(isAttackReady),
@@ -145,6 +152,7 @@ public class BehaviorTreeFactory {
                                 ),
                                 // 2순위: 타겟 있으면 이동
                                 new Sequence(
+                                        "Move to target",
                                         new ConditionNode(hasTarget),
                                         moveToTargetAction
                                 ),
@@ -156,8 +164,10 @@ public class BehaviorTreeFactory {
             case TRIANGLE:
                 treeCache = new BehaviorTree(
                         new Selector( // 동일한 구조, 단지 유닛의 attackRange가 다름
+                                "Route Node",
                                 // 1순위: 공격 가능하면 공격
                                 new Sequence(
+                                        "Attack Single",
                                         new ConditionNode(hasTarget),
                                         new ConditionNode(isTargetInRange), // 원거리
                                         new ConditionNode(isAttackReady),
@@ -165,6 +175,7 @@ public class BehaviorTreeFactory {
                                 ),
                                 // 2순위: 타겟 있으면 이동 (추후 Kiting 등 추가 가능)
                                 new Sequence(
+                                        "Move to target",
                                         new ConditionNode(hasTarget),
                                         moveToTargetAction
                                 ),

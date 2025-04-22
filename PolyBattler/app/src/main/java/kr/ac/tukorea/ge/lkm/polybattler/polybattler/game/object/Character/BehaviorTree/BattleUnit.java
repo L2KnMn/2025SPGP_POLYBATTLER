@@ -1,5 +1,7 @@
 package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.BehaviorTree;
 
+import android.util.Log;
+
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.BattleManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Polyman;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
@@ -76,7 +78,9 @@ public class BattleUnit {
     }
 
     public boolean isTargetInRange() {
-        return target != null && target.getTransform().distance(transform.getPosition()) <= attackRange;
+        boolean result = target != null && target.getTransform().distance(transform.getPosition()) <= attackRange;
+        Log.d(System.identityHashCode(this) + "isTargetInRange", "target:" + result);
+        return result;
     }
 
     public boolean isAttackReady() {

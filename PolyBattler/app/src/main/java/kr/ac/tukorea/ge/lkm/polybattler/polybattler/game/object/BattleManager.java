@@ -43,8 +43,8 @@ public class BattleManager implements IGameManager {
         if (enemy == null){
             enemy = new Polyman(Polyman.ShapeType.CIRCLE, Polyman.ColorType.BLACK);
         }
-        enemy.transform.set(Metrics.width/2, 400);
         enemy.init(Polyman.ShapeType.CIRCLE, Polyman.ColorType.BLACK);
+        enemy.transform.set(Metrics.width/2, 400);
         units.add(enemy.getBattleUnit());
         Log.d("BattleManager", "addEnemy() called");
         enemies.add(enemy);
@@ -58,8 +58,8 @@ public class BattleManager implements IGameManager {
     @Override
     public void setGameState(GameState state) {
         if (state == GameState.BATTLE) {
-            // 전투 상태로 만들어서 행동 트리로 머시기 저시기 함
-            Log.d("BattleManager", "setGameState() called" + state.name());
+            // 전투 상태로 만들고, 행동 트리 삽입
+            // Log.d("BattleManager", "setGameState() called" + state.name());
             for(Team team : Team.values()) {
                 ArrayList<BattleUnit> units = battlers.get(team);
                 if(units == null)
@@ -68,6 +68,7 @@ public class BattleManager implements IGameManager {
                    unit.setBehaviorTree(BehaviorTreeFactory.getTreeForShape(unit.getShapeType()), this);
                 }
             }
+            // 에너미 master에 포함시키기
             for (IGameObject enemyIGameObject : enemies) {
                 Polyman enemy = (Polyman)enemyIGameObject;
                 enemy.startBattle();
@@ -97,6 +98,7 @@ public class BattleManager implements IGameManager {
     }
 
     public BattleUnit findClosestEnemy(BattleUnit unit) {
+        //Log.d("BattleManager", "findClosestEnemy() called");
         ArrayList<BattleUnit> enemies = battlers.get(unit.getTeam() == Team.PLAYER ? Team.ENEMY : Team.PLAYER);
 
         if (enemies == null)
@@ -113,6 +115,7 @@ public class BattleManager implements IGameManager {
                 }
             }
         }
+        //Log.d("BattleManager", "return target (" + closestEnemy.getTransform().getPosition().x + ", " + closestEnemy.getTransform().getPosition().y + ")");
         return closestEnemy;
     }
 }

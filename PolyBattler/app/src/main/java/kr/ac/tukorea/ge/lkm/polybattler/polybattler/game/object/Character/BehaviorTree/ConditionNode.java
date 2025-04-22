@@ -1,5 +1,7 @@
 package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.BehaviorTree;
 
+import android.util.Log;
+
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.BattleManager;
 import java.util.function.BiPredicate; // Predicate 사용 예시
 
@@ -20,9 +22,9 @@ public class ConditionNode implements BTNode {
 
     @Override
     public BTStatus tick(BattleUnit unit, BattleManager battleManager) {
-        // System.out.println("Ticking ConditionNode");
+        //System.out.println("Ticking ConditionNode");
         boolean result = conditionLogic.test(unit, battleManager);
-        // System.out.println("Condition result: " + result);
+        //System.out.println("Condition result: " + result);
         return result ? BTStatus.SUCCESS : BTStatus.FAILURE;
     }
 
