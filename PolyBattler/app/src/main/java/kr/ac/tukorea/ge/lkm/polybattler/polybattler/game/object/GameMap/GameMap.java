@@ -25,6 +25,7 @@ public class GameMap implements IGameObject {
     private final Transform predictPoint;
     private final Paint predictRectPaint;
     private boolean floatObjectOn;
+    private boolean drawBlocked;
 
     public GameMap(final int width, final int height, final int benchSize){
         field = new Field(width, height);
@@ -74,6 +75,8 @@ public class GameMap implements IGameObject {
         predictRectPaint.setStrokeWidth(Metrics.GRID_UNIT * 0.1f);
 
         floatObjectOn = false;
+
+        drawBlocked = true;
     }
 
     @Override
@@ -92,7 +95,7 @@ public class GameMap implements IGameObject {
                 }else{
                     canvas.drawRect(tileRect, paintDark);
                 }
-                if(field.block(i, j)){
+                if(drawBlocked && field.block(i, j)){
                     canvas.drawRect(tileRect, paintFilter);
                 }
                 tileRect.offset(0,length);
@@ -115,7 +118,7 @@ public class GameMap implements IGameObject {
             if(isSettable(predictPoint)){
                 canvas.drawRect(predictPoint.getRect(), predictRectPaint);
             }else{
-                predictPoint.moveTo(origin_x, origin_y);
+                predictPoint.goTo(origin_x, origin_y);
                 canvas.drawRect(predictPoint.getRect(), predictRectPaint);
             }
         }
@@ -219,8 +222,8 @@ public class GameMap implements IGameObject {
             // 위치를 바꿔서 등록한다
             float temp_x = t1.getPosition().x;
             float temp_y = t1.getPosition().y;
-            t1.moveTo(t2.getPosition().x, t2.getPosition().y);
-            t2.moveTo(temp_x, temp_y);
+            t1.goTo(t2.getPosition().x, t2.getPosition().y);
+            t2.goTo(temp_x, temp_y);
 
             return setPositionNear(t1) && setPositionNear(t2);
         }
@@ -235,7 +238,7 @@ public class GameMap implements IGameObject {
 
         float x = getTileX(width, gravity);
         float y = getTileY(height, gravity);
-        transform.moveTo(x, y);
+        transform.goTo(x, y);
 
         if(transform.isRigid()) {
             return putOnBoard(transform);
@@ -249,7 +252,7 @@ public class GameMap implements IGameObject {
         }
         float x = bench.leftTop.x + length * (index + 0.5f);
         float y = bench.leftTop.y + length/2;
-        transform.moveTo(x, y);
+        transform.goTo(x, y);
         if(transform.isRigid())
             return putOnBench(transform);
         return true;
@@ -339,7 +342,7 @@ public class GameMap implements IGameObject {
     }
 
     private void activatePredictPoint(float x, float y){
-        predictPoint.moveTo(x, y);
+        predictPoint.goTo(x, y);
         setPositionNear(predictPoint);
         origin_x = predictPoint.getPosition().x;
         origin_y = predictPoint.getPosition().y;
@@ -349,14 +352,14 @@ public class GameMap implements IGameObject {
     public void movePredictPoint(float x, float y) {
         if(!floatObjectOn)
             return;
-        predictPoint.moveTo(x, y);
+        predictPoint.goTo(x, y);
         setPositionNear(predictPoint);
     }
 
     public void setOffPredictPoint(float x, float y) {
         if(floatObjectOn) {
             floatObjectOn = false;
-            predictPoint.moveTo(x, y);
+            predictPoint.goTo(x, y);
         }
     }
 
@@ -456,6 +459,10 @@ public class GameMap implements IGameObject {
 
     public Transform getBenchTransform(int i) {
         return bench.get(i);
+    }
+
+    public void setDrawBlocked(boolean drawBlocked) {
+        this.drawBlocked = drawBlocked;
     }
 }
 

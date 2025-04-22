@@ -6,7 +6,6 @@ import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.BattleManager;
  */
 public class BehaviorTree {
     private final BTNode rootNode;
-
     /**
      * @param rootNode 트리의 최상위 루트 노드.
      */
@@ -17,7 +16,6 @@ public class BehaviorTree {
     /**
      * Behavior Tree를 실행합니다 (매 프레임 호출).
      * @param unit 이 트리를 사용하는 유닛.
-     * @param battleManager 컨텍스트 정보.
      */
     public void tick(BattleUnit unit, BattleManager battleManager) {
         if (rootNode != null) {

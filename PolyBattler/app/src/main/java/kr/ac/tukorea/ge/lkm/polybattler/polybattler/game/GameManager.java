@@ -7,10 +7,9 @@ import java.util.Map;
 import android.util.Log;
 import android.view.MotionEvent;
 
-import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Enemy;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.BattleManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.GameMap.GameMap;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Polyman;
-import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.DragAndDropManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.UiManager;
@@ -27,10 +26,9 @@ public class GameManager implements IGameManager {
     private int gold;
     private final int width = 4, height = 7, benchSize = 5;
     private final GameMap gameMap;
-    private final ArrayList<Polyman> battlers;
-    private final ArrayList<Enemy> enemies;
     private final ArrayList<UiManager.Button> cellButtons;
     private UiManager.Signage goldSignage;
+    private final BattleManager battleManager;
 
     private GameManager(Scene master) {
         currentState = GameState.PREPARE;
@@ -43,10 +41,9 @@ public class GameManager implements IGameManager {
         dragAndDropManager = new DragAndDropManager(gameMap);
         dragAndDropManager.setGameState(currentState);
 
-        battlers = new ArrayList<Polyman>();
-        enemies = new ArrayList<Enemy>();
-
         cellButtons = new ArrayList<UiManager.Button>();
+
+        battleManager = new BattleManager(master);
         AddUI();
     }
 
@@ -131,7 +128,8 @@ public class GameManager implements IGameManager {
                                     Log.d("판매 버튼", "제거될 수 없는 오브젝트를 가져와서 판매 하려 함");
                                 }
                             }
-                    ));
+                    )
+            );
         }
     }
 
@@ -250,16 +248,12 @@ public class GameManager implements IGameManager {
                 cellButtons.get(i).setVisibility(GameState.SHOPPING, false);
             }
         }
-
         switch (newState) {
             case PREPARE:
                 // 전투로 인한 위치 변경 및 상태 변경을 초기화
+                gameMap.setDrawBlocked(true);
                 if (currentState == GameState.RESULT || currentState == GameState.BATTLE) {
                     gameMap.restore();
-                    for (Polyman polyman : battlers) {
-                        polyman.resetBattleStatus();
-                    }
-                    battlers.clear();
                 }
                 break;
             case SHOPPING:
@@ -272,24 +266,32 @@ public class GameManager implements IGameManager {
                 startBattlePhase();
                 break;
             case RESULT:
+                endBattlePhase();
                 break;
             case POST_GAME:
                 break;
         }
         dragAndDropManager.setGameState(newState);
+        battleManager.setGameState(newState);
         this.currentState = newState;
     }
 
+    private void endBattlePhase() {
+
+    }
+
     private void startBattlePhase() {
+        gameMap.setDrawBlocked(false);
         for (int i = 0; i < width; ++i) {
             for (int j = 0; j < height; ++j) {
                 Transform transform = gameMap.findTransform(i, j);
                 if (transform != null && transform.getInstance() instanceof Polyman) {
                     Polyman polyman = (Polyman) transform.getInstance();
                     polyman.startBattle();
-                    battlers.add(polyman);
+                    battleManager.addBattler(polyman);
                 }
             }
         }
+        battleManager.addEnemy();
     }
 }

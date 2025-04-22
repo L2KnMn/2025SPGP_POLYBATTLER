@@ -26,13 +26,13 @@ public class GameView extends View implements Choreographer.FrameCallback {
     public static boolean drawsDebugStuffs = false;
 
     public interface OnEmptyStackListener {
-        public void onEmptyStack();
+        void onEmptyStack();
     }
     private OnEmptyStackListener emptyStackListener;
     public void setEmptyStackListener(OnEmptyStackListener emptyStackListener) {
         this.emptyStackListener = emptyStackListener;
     }
-    private ArrayList<Scene> sceneStack = new ArrayList<>();
+    private final ArrayList<Scene> sceneStack = new ArrayList<>();
 
     public GameView(Context context) {
         super(context);
@@ -173,7 +173,7 @@ public class GameView extends View implements Choreographer.FrameCallback {
         if (running) {
             scheduleUpdate();
         }
-    };
+    }
 
     private void update() {
         Scene scene = getTopScene();

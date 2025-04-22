@@ -16,11 +16,11 @@ public class JoyStick implements IGameObject {
     private final Bitmap bgBitmap;
     private final Bitmap thumbBitmap;
 
-    private float x; // = 200f;
-    private float y; //CENTER_Y = 1400f;
-    private float bg_radius; //BG_RADIUS = 200f;
-    private float thumb_radius; //THUMB_RADIUS = 60f;
-    private float move_radius; //MOVE_RADIUS = BG_RADIUS - THUMB_RADIUS;
+    private final float x; // = 200f;
+    private final float y; //CENTER_Y = 1400f;
+    private final float bg_radius; //BG_RADIUS = 200f;
+    private final float thumb_radius; //THUMB_RADIUS = 60f;
+    private final float move_radius; //MOVE_RADIUS = BG_RADIUS - THUMB_RADIUS;
     private final RectF bgRect;
     private final RectF thumbRect;
 

@@ -2,6 +2,7 @@ package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.util.Log;
 
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.BehaviorTree.BattleUnit;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
@@ -19,12 +20,8 @@ public class Polyman extends Sprite implements IRecyclable {
     private enum ObjectState {
         IDLE, BATTLE, WAIT
     }
-    private enum BattleState {
-        IDLE, MOVE, ATTACK, DEAD
-    }
-    private BattleUnit unitData;
+    private final BattleUnit unit;
     private ObjectState state = ObjectState.IDLE;
-    private BattleState battleState = BattleState.IDLE;
     private int level;
 
     public Polyman(ShapeType shape, ColorType color) {
@@ -34,7 +31,7 @@ public class Polyman extends Sprite implements IRecyclable {
         transform.setRigid(true);
 
         paint = new Paint();
-        unitData = new BattleUnit();
+        unit = new BattleUnit(transform);
 
         init(shape, color);
     }
@@ -49,7 +46,7 @@ public class Polyman extends Sprite implements IRecyclable {
         paint.setColor(getColor());
         paint.setStyle(Paint.Style.FILL);
 
-        unitData.reset();
+        resetBattleStatus();
     }
 
     @Override
@@ -59,67 +56,10 @@ public class Polyman extends Sprite implements IRecyclable {
                 transform.turnLeft(30 * GameView.frameTime);
                 break;
             case BATTLE:
-                BattleAction();
+                unit.tick();
                 break;
             case WAIT:
                 break;
-        }
-    }
-
-    private void BattleAction() {
-        switch (battleState){
-            case IDLE:
-//                // 타겟 찾기 (GameManager에게 위임)
-//                currentTarget = findTarget();
-//                if (currentTarget != null) {
-//                    if (isInAttackRange(currentTarget)) {
-//                        battleState = BattleState.ATTACK;
-//                        attackCooldownTimer = 0f; // 바로 공격 가능하도록
-//                    } else {
-//                        battleState = BattleState.MOVE;
-//                    }
-//                    // Log.d("Polyman", this + " found target: " + currentTarget);
-//                }
-                break;
-            case MOVE:
-//                if (currentTarget == null || currentTarget.battleState == BattleState.DEAD) {
-//                    battleState = BattleState.IDLE; // 타겟 없어짐/죽음
-//                    currentTarget = null;
-//                    break;
-//                }
-//                if (isInAttackRange(currentTarget)) {
-//                    battleState = BattleState.ATTACK;
-//                    attackCooldownTimer = 0f;
-//                } else {
-//                    // 이동 로직 (GameMap 정보 활용 가능)
-//                    moveTowardsTarget(currentTarget);
-//                }
-                 break;
-            case ATTACK:
-//                if (currentTarget == null || currentTarget.battleState == BattleState.DEAD) {
-//                    battleState = BattleState.IDLE; // 타겟 없어짐/죽음
-//                    currentTarget = null;
-//                    break;
-//                }
-//                if (!isInAttackRange(currentTarget)) {
-//                    battleState = BattleState.MOVE; // 타겟이 범위 벗어남
-//                    break;
-//                }
-//
-//                // 공격 쿨다운 처리
-//                attackCooldownTimer -= GameView.frameTime; // 프레임 시간 사용
-//                if (attackCooldownTimer <= 0f) {
-//                    performAttack(currentTarget);
-//                    // 쿨다운 초기화 (공격 속도에 따라)
-//                    if (unitData.attackPerSecond > 0) {
-//                        attackCooldownTimer = 1.0f / unitData.attackPerSecond;
-//                    } else {
-//                        attackCooldownTimer = Float.MAX_VALUE; // 공격 불가
-//                    }
-//                }
-                break;
-            case DEAD: // 죽음
-                return;
         }
     }
 
@@ -179,24 +119,21 @@ public class Polyman extends Sprite implements IRecyclable {
 
     public void startBattle() {
         state = ObjectState.BATTLE;
-        battleState = BattleState.IDLE;
         // IDLE 애니메이션 초기화
         transform.setAngle(0);
     }
 
     public void damage(int damage){
         if(state == ObjectState.BATTLE) {
-            unitData.damage(damage);
-            if (unitData.isDead()) {
-                battleState = BattleState.DEAD;
+            unit.damage(damage);
+            if (unit.isDead()) {
             }
         }
     }
 
     public void resetBattleStatus(){
-        unitData.fillHp(unitData.getMaxHp());
+        unit.reset(shape, color);
         state = ObjectState.IDLE;
-        battleState = BattleState.IDLE;
     }
 
     public enum ShapeType {
@@ -206,7 +143,11 @@ public class Polyman extends Sprite implements IRecyclable {
         RED, GREEN, BLUE, BLACK
     }
     public boolean isDead() {
-        return battleState == BattleState.DEAD;
+        return unit.isDead();
+    }
+
+    public BattleUnit getBattleUnit() {
+        return unit;
     }
 
     @Override

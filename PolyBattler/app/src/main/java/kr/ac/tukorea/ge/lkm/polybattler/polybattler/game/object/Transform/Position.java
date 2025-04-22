@@ -32,4 +32,16 @@ public class Position {
         this.x += pos.x;
         this.y += pos.y;
     }
+
+    public void makeVector(Position pos1, Position pos2){
+           x = pos2.x - pos1.x;
+           y = pos2.y - pos1.y;
+    }
+
+    public void makeVector(Position pos1, Position pos2, float length){
+        makeVector(pos1, pos2);
+        float scale = length / (float) Math.sqrt(x * x + y * y);
+        x *= scale;
+        y *= scale;
+    }
 }

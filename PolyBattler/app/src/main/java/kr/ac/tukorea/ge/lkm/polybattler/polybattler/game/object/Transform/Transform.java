@@ -123,10 +123,10 @@ public class Transform {
     public void move(Transform pos){
         position.add(pos.position);
     }
-    public void moveTo(float x, float y){
+    public void goTo(float x, float y){
         position.set(x, y);
     }
-    public void moveTo(Transform pos){
+    public void goTo(Transform pos){
         position.set(pos.position);
     }
     public float distance(Transform pos) {

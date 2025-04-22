@@ -19,7 +19,7 @@ public class DragAndDropManager implements IGameManager {
     private final Position dragStartPoint;
     private final Position previous;
     private boolean isDragging;
-    private String TAG = "DragAndDropManager";
+    private final String TAG = "DragAndDropManager";
 
     public DragAndDropManager(GameMap gameMap) { // private 생성자
         this.gameMap = gameMap;
@@ -107,12 +107,12 @@ public class DragAndDropManager implements IGameManager {
     private void handleActionUp(float x, float y) {
         if (isDragging && draggedTransform != null) {
             isDragging = false;
-            draggedTransform.moveTo(x, y);
+            draggedTransform.goTo(x, y);
             gameMap.setOffPredictPoint(x, y);
             if(gameMap.isSettable(draggedTransform)){
                 gameMap.setPositionNear(draggedTransform);
             }else{
-                draggedTransform.moveTo(dragStartPoint.x, dragStartPoint.y);
+                draggedTransform.goTo(dragStartPoint.x, dragStartPoint.y);
                 if (gameMap.setPositionNear(draggedTransform)) {
                     // 무사히 원래 자리로 돌아갔다면 자리 바꿀 수 있는 녀석들인지 검사해서
                     // 자리 바꾸기
@@ -134,7 +134,7 @@ public class DragAndDropManager implements IGameManager {
                 } else {
                     // 원래 자리로 돌려놓으려 했는데 실패한 것이면 뭔가 프로그램이 잘못 돌아가고 있는 것이다
                     // 일단 화면 밖으로 날려버려서 정상적인 척 하자
-                    draggedTransform.moveTo(-100, -100);
+                    draggedTransform.goTo(-100, -100);
                     Log.d("Drag And Drop Manager", "드랍 했을 때, 원래 자리로 되돌려 놓기가 실패하여 화면 밖에 버림");
                 }
             }
