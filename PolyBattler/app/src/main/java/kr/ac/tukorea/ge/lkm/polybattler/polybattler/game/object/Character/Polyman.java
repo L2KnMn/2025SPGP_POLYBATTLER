@@ -2,7 +2,6 @@ package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.util.Log;
 
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.BehaviorTree.BattleUnit;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
@@ -121,14 +120,6 @@ public class Polyman extends Sprite implements IRecyclable {
         state = ObjectState.BATTLE;
         // IDLE 애니메이션 초기화
         transform.setAngle(0);
-    }
-
-    public void damage(int damage){
-        if(state == ObjectState.BATTLE) {
-            unit.damage(damage);
-            if (unit.isDead()) {
-            }
-        }
     }
 
     public void resetBattleStatus(){

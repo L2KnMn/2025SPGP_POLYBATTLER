@@ -26,19 +26,19 @@ public class BattleManager implements IGameManager {
 
     public BattleManager(Scene master) {
         this.master = master;
-        battlers = new HashMap<Team, ArrayList<BattleUnit>>();
-        enemies = new ArrayList<IGameObject>();
+        battlers = new HashMap<>();
+        enemies = new ArrayList<>();
         currentState = GameState.PREPARE;
     }
 
     public void addBattler(Polyman polyman) {
-        ArrayList<BattleUnit> units = battlers.computeIfAbsent(Team.PLAYER, k -> new ArrayList<BattleUnit>());
+        ArrayList<BattleUnit> units = battlers.computeIfAbsent(Team.PLAYER, k -> new ArrayList<>());
         units.add(polyman.getBattleUnit());
         polyman.getBattleUnit().setTeam(Team.PLAYER);
     }
 
     public void addEnemy() {
-        ArrayList<BattleUnit> units = battlers.computeIfAbsent(Team.ENEMY, k -> new ArrayList<BattleUnit>());
+        ArrayList<BattleUnit> units = battlers.computeIfAbsent(Team.ENEMY, k -> new ArrayList<>());
         Polyman enemy = (Polyman) master.getRecyclable(Polyman.class);
         if (enemy == null){
             enemy = new Polyman(Polyman.ShapeType.CIRCLE, Polyman.ColorType.BLACK);

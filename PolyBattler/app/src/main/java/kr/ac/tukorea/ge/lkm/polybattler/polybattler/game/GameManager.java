@@ -41,7 +41,7 @@ public class GameManager implements IGameManager {
         dragAndDropManager = new DragAndDropManager(gameMap);
         dragAndDropManager.setGameState(currentState);
 
-        cellButtons = new ArrayList<UiManager.Button>();
+        cellButtons = new ArrayList<>();
 
         battleManager = new BattleManager(master);
         AddUI();
@@ -187,9 +187,11 @@ public class GameManager implements IGameManager {
     public boolean cellCharacter(int index) {
         Transform transform = gameMap.getBenchTransform(index);
         if (transform != null) {
-            removeCharacter(transform.getInstance());
-            addGold(1);
-            return true;
+            boolean result = removeCharacter(transform.getInstance());
+            if(result) {
+                addGold(1);
+                return true;
+            }
         }
         return false;
     }

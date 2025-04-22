@@ -23,7 +23,7 @@ public class BattleUnit {
     int defense = 0;
     int speed = 1; // 1초에 몇 칸 움직일 수 있는가
     private BattleUnit target = null;
-    private Position velocity;
+    private final Position velocity;
 
     public BattleUnit(Transform transform){
         this.transform = transform;
@@ -89,7 +89,7 @@ public class BattleUnit {
     }
 
     public void attackTarget(BattleUnit target) {
-
+        target.damage(attack);
     }
 
     public void resetAttackCooldown() {

@@ -122,9 +122,7 @@ public class DragAndDropManager implements IGameManager {
                         // 교체해도 되는 물체인지 확인하고 (일단은 지금은 캐릭터들만 있으니 그냥 교체하자)
                         Polyman t2 = target.getInstance() instanceof Polyman ? ((Polyman) target.getInstance()) : null;
                         // 교체 실행하기
-                        if(gameMap.swapObject(draggedTransform, target)){
-                            //Log.d(TAG, "두 강체 위치 교환 성공");
-                        }else{
+                        if(!gameMap.swapObject(draggedTransform, target)){
                             Log.d(TAG, "두 강체 위치 교환 실패, 둘 중 하나에 문제가 있음");
                         }
                     }
