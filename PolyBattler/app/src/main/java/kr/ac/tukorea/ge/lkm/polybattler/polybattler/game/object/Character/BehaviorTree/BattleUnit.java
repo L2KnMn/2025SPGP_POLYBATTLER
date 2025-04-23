@@ -6,6 +6,7 @@ import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.BattleManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Polyman;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
+import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.GameView;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 
 public class BattleUnit {
@@ -106,15 +107,15 @@ public class BattleUnit {
 
     public float getSpeed() {
         return speed * Metrics.GRID_UNIT;
-    }
 
+    }
     public void moveTo(Transform transform) {
         if(this.transform.distance(transform) <= getSpeed()){
             this.transform.goTo(transform);
         }
         else{
             velocity.makeVector(this.transform.position, transform.position, getSpeed());
-            transform.move(velocity.x, velocity.y);
+            transform.move(velocity.x * GameView.frameTime, velocity.y * GameView.frameTime);
         }
     }
 
