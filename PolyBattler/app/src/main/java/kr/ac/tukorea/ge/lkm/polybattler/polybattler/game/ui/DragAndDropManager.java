@@ -43,6 +43,7 @@ public class DragAndDropManager implements IGameManager {
             case POST_GAME:
                 active = false;
                 if (draggedTransform != null) {
+                    Log.d("Drag and Drop", "Unexpected game state change");
                     handleActionUp(dragStartPoint.x, dragStartPoint.y);
                 }
                 break;

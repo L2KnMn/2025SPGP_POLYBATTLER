@@ -39,7 +39,10 @@ public class BehaviorTreeFactory {
         // Action: 타겟 찾기 (성공/실패)
         findTargetAction = new ActionNode((unit, manager) -> {
             //Log.d("find target action", String.valueOf(System.identityHashCode(unit)));
-            if (manager == null) return BTStatus.FAILURE;
+            if (manager == null) {
+                Log.e("findTargetAction", "BattleManager is null");
+                return BTStatus.FAILURE;
+            }
             // BattleManager에게 가장 가까운 적 찾기 요청 (BattleUnit 타입 반환 가정)
             BattleUnit target = manager.findClosestEnemy(unit);
             unit.setCurrentTarget(target); // 찾은 타겟을 유닛 내부에 저장
@@ -114,6 +117,13 @@ public class BehaviorTreeFactory {
      */
     private static BehaviorTree createNewTreeForShape(ShapeType shapeType) {
         BehaviorTree treeCache = null;
+//        treeCache = new BehaviorTree(
+//                new Selector(
+//                        "Route Node",
+//                        moveToTargetAction,
+//                        findTargetAction
+//                )
+//        );
         switch (shapeType){
             case CIRCLE:
                 treeCache = new BehaviorTree(
@@ -208,7 +218,6 @@ public class BehaviorTreeFactory {
     public static void releaseTree(ShapeType shapeType, BehaviorTree tree){
         if(tree == null)
             return;
-        tree.reset(); // 혹시 모르니 상태 초기화!
         ArrayList<BehaviorTree> pool = treePools.computeIfAbsent(shapeType, k -> new ArrayList<>());
         pool.add(tree);
     }

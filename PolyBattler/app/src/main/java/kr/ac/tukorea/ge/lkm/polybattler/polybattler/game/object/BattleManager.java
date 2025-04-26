@@ -5,11 +5,14 @@ import android.view.MotionEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameState;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.IGameManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.BehaviorTree.BattleUnit;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.BehaviorTree.BehaviorTreeFactory;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Polyman;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.UiManager;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IGameObject;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene.Scene;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
@@ -22,13 +25,16 @@ public class BattleManager implements IGameManager {
         ENEMY
     }
     private final Map<Team, ArrayList<BattleUnit>> battlers;
-    private final ArrayList<IGameObject> enemies;
+    private final Map<Team, Integer> counts;
 
     public BattleManager(Scene master) {
         this.master = master;
         battlers = new HashMap<>();
-        enemies = new ArrayList<>();
+        counts = new HashMap<>();
         currentState = GameState.PREPARE;
+
+        UiManager.Signage signage = UiManager.getInstance(master).addSignage("You Win/You Loose", Metrics.width/2, Metrics.height/2, Metrics.width, Metrics.height/2);
+        signage.setVisibility(GameState.RESULT, true);
     }
 
     public void addBattler(Polyman polyman) {
@@ -37,17 +43,10 @@ public class BattleManager implements IGameManager {
         polyman.getBattleUnit().setTeam(Team.PLAYER);
     }
 
-    public void addEnemy() {
+    public void addEnemy(Polyman polyman) {
         ArrayList<BattleUnit> units = battlers.computeIfAbsent(Team.ENEMY, k -> new ArrayList<>());
-        Polyman enemy = (Polyman) master.getRecyclable(Polyman.class);
-        if (enemy == null){
-            enemy = new Polyman(Polyman.ShapeType.CIRCLE, Polyman.ColorType.BLACK);
-        }
-        enemy.init(Polyman.ShapeType.CIRCLE, Polyman.ColorType.BLACK);
-        enemy.transform.set(Metrics.width/2, 400);
-        units.add(enemy.getBattleUnit());
-        Log.d("BattleManager", "addEnemy() called");
-        enemies.add(enemy);
+        units.add(polyman.getBattleUnit());
+        polyman.getBattleUnit().setTeam(Team.ENEMY);
     }
 
     @Override
@@ -67,12 +66,7 @@ public class BattleManager implements IGameManager {
                 for(BattleUnit unit : units){
                    unit.setBehaviorTree(BehaviorTreeFactory.getTreeForShape(unit.getShapeType()), this);
                 }
-            }
-            // 에너미 master에 포함시키기
-            for (IGameObject enemyIGameObject : enemies) {
-                Polyman enemy = (Polyman)enemyIGameObject;
-                enemy.startBattle();
-                master.add(enemy);
+                counts.computeIfAbsent(team, k->units.size());
             }
         }else {
             // 중지 시키고 원복
@@ -84,9 +78,7 @@ public class BattleManager implements IGameManager {
                     BehaviorTreeFactory.releaseTree(unit.getShapeType(), unit.getBehaviorTree());
                     unit.setBehaviorTree(null, null);
                 }
-            }
-            for (IGameObject enemy : enemies) {
-                master.remove(enemy);
+                units.clear();
             }
         }
         currentState = state;
@@ -117,5 +109,17 @@ public class BattleManager implements IGameManager {
         }
         //Log.d("BattleManager", "return target (" + closestEnemy.getTransform().getPosition().x + ", " + closestEnemy.getTransform().getPosition().y + ")");
         return closestEnemy;
+    }
+
+    public void killSign(BattleUnit unit, BattleUnit target){
+        Integer t = counts.get(target.getTeam());
+        t = t - 1;
+        counts.put(target.getTeam(), t);
+        Log.d("BattleManager", unit.getTeam() + " killed " + target.getTeam() + " be left " + t);
+        if(t <= 0){
+            GameManager.getInstance(master).setGameState(GameState.RESULT);
+            // 현재 터치 이벤트가 있어야 모든 Manager의 State가 변경되기 때문에 UI로 터치 하라고 하나 띄워서
+            // 상태 전체를 바꿔주는 꼼수를 부리는 게 좋겠음
+        }
     }
 }

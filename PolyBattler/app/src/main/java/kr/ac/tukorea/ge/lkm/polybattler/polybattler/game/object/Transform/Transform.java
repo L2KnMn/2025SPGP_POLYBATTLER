@@ -43,6 +43,9 @@ public class Transform {
     public void set(float x, float y){
         position.set(x, y);
     }
+    public void set(Position pos){
+        position.set(pos);
+    }
     public void setAngle(float radian){
         this.radian = radian;
     }
@@ -135,7 +138,7 @@ public class Transform {
         return (float) Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
     }
     public float distance(Position pos){
-        return distance(this.position.x, this.position.y);
+        return distance(pos.x, pos.y);
     }
     public float distance(float x, float y) {
         float dx = Math.abs(this.position.x - x);

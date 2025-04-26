@@ -6,6 +6,7 @@ import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.BattleManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Polyman;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
+import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.GameView;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 
 public class BattleUnit {
@@ -21,31 +22,49 @@ public class BattleUnit {
     int attack = 10;
     float attackPerSecond = 1;
     float attackRange = Metrics.GRID_UNIT;
-    private float lastAttackTime;
+    private long lastAttackTime;
     int defense = 0;
     int speed = 1; // 1초에 몇 칸 움직일 수 있는가
-    private BattleUnit target = null;
+    private BattleUnit target;
     private final Position velocity;
 
-    public BattleUnit(Transform transform){
+    public BattleUnit(Transform transform, Polyman.ShapeType shapeType, Polyman.ColorType colorType){
         this.transform = transform;
         behaviorTree = null;
         battleManager = null;
         velocity = new Position();
+        reset(shapeType, colorType);
     }
 
     public void reset(Polyman.ShapeType shapeType, Polyman.ColorType colorType){
         this.shapeType = shapeType;
         this.colorType = colorType;
-        hp = maxHp;
+        preset(shapeType, colorType);
         fillHp(maxHp);
+        target = null;
+    }
+
+    public void preset(Polyman.ShapeType shapeType, Polyman.ColorType colorType) {
         attack=10;
-        attackPerSecond=1;
         defense=0;
         speed=1;
         lastAttackTime = 0;
+        switch (shapeType){
+            case CIRCLE:
+                attackRange = Metrics.GRID_UNIT * 5;
+                attackPerSecond = 3;
+                break;
+            case RECTANGLE:
+                defense=1;
+                attackRange = Metrics.GRID_UNIT * 1;
+                attackPerSecond = 1;
+                break;
+            case TRIANGLE:
+                attackRange = Metrics.GRID_UNIT * 6;
+                attackPerSecond = 2;
+                break;
+        }
     }
-
     public boolean isDead() {
         return hp <= 0;
     }
@@ -58,7 +77,10 @@ public class BattleUnit {
     }
 
     public void damage(int damage){
+        Log.d("BATTLE UNIT", "damage(" + damage + ")");
         hp -= damage - defense;
+        if(isDead())
+            battleManager.killSign(target, this);
     }
 
     public void fillHp(int hp){
@@ -78,9 +100,7 @@ public class BattleUnit {
     }
 
     public boolean isTargetInRange() {
-        boolean result = target != null && target.getTransform().distance(transform.getPosition()) <= attackRange;
-        Log.d(System.identityHashCode(this) + "isTargetInRange", "target:" + result);
-        return result;
+        return (target != null) && (target.getTransform().distance(transform) <= attackRange);
     }
 
     public boolean isAttackReady() {
@@ -97,7 +117,7 @@ public class BattleUnit {
     }
 
     public void resetAttackCooldown() {
-        lastAttackTime = System.currentTimeMillis();
+        lastAttackTime = 0;
     }
 
     public void stopMovement() {
@@ -105,16 +125,18 @@ public class BattleUnit {
     }
 
     public float getSpeed() {
-        return speed * Metrics.GRID_UNIT;
+        return speed * Metrics.GRID_UNIT * GameView.frameTime;
     }
 
     public void moveTo(Transform transform) {
+//        velocity.makeVector(this.transform.position, transform.position, getSpeed());
+//        this.transform.move(velocity.x, velocity.y);
         if(this.transform.distance(transform) <= getSpeed()){
             this.transform.goTo(transform);
         }
         else{
             velocity.makeVector(this.transform.position, transform.position, getSpeed());
-            transform.move(velocity.x, velocity.y);
+            this.transform.move(velocity.x, velocity.y);
         }
     }
 

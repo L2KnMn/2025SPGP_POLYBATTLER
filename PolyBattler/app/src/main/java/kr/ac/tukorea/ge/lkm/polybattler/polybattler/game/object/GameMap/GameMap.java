@@ -5,6 +5,9 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.util.Log;
 
+import java.util.ArrayList;
+
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IGameObject;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
@@ -30,8 +33,6 @@ public class GameMap implements IGameObject {
     public GameMap(final int width, final int height, final int benchSize){
         field = new Field(width, height);
         bench = new MapPart(benchSize, 1);
-
-//        active = true;
 
         int width_max = Math.max(benchSize, width);
         int height_max = height + 1;
@@ -398,13 +399,6 @@ public class GameMap implements IGameObject {
         return field.get(width, height);
     }
 
-//    public IGameObject findObject(float x, float y){
-//        Transform transform = findTransform(x, y);
-//        if (transform == null)
-//            return null;
-//        return transform.getInstance();
-//    }
-
     public int getIndex(float x, float y) {
         if(bench.dstRect.contains(x, y)){
             return (int)((x - bench.leftTop.x) / length);
@@ -424,17 +418,6 @@ public class GameMap implements IGameObject {
                 return i;
         }
         return -1;
-    }
-
-    public boolean isFullField(){
-        return field.full();
-    }
-    public boolean isFullBench(){
-        return bench.count >= bench.width;
-    }
-
-    public boolean isFloatObjectOn(){
-        return floatObjectOn;
     }
 
     public void restore(){ // Battle 후 다시 prepare 상태로 되돌려 놓는 함수
@@ -463,6 +446,14 @@ public class GameMap implements IGameObject {
 
     public void setDrawBlocked(boolean drawBlocked) {
         this.drawBlocked = drawBlocked;
+    }
+
+    public void getEnemyPostions(ArrayList<Position> enemyPositions, int numEnemy) {
+        for(int i = 0; i < numEnemy; i++){
+            Position randomPosition = new Position();;
+
+            enemyPositions.add(randomPosition);
+        }
     }
 }
 

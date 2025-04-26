@@ -12,12 +12,18 @@ import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.GameView;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 
 public class Polyman extends Sprite implements IRecyclable {
+    public enum ShapeType {
+        RECTANGLE, CIRCLE, TRIANGLE,
+    }
+    public enum ColorType {
+        RED, GREEN, BLUE, BLACK
+    }
     public final Transform transform;
     private final Paint paint;
     private ShapeType shape;
     private ColorType color;
     private enum ObjectState {
-        IDLE, BATTLE, WAIT
+        IDLE, BATTLE, DEAD, WAIT
     }
     private final BattleUnit unit;
     private ObjectState state = ObjectState.IDLE;
@@ -30,7 +36,7 @@ public class Polyman extends Sprite implements IRecyclable {
         transform.setRigid(true);
 
         paint = new Paint();
-        unit = new BattleUnit(transform);
+        unit = new BattleUnit(transform, shape, color);
 
         init(shape, color);
     }
@@ -56,6 +62,8 @@ public class Polyman extends Sprite implements IRecyclable {
                 break;
             case BATTLE:
                 unit.tick();
+                if(unit.isDead())
+                    state = ObjectState.DEAD;
                 break;
             case WAIT:
                 break;
@@ -64,6 +72,8 @@ public class Polyman extends Sprite implements IRecyclable {
 
     @Override
     public void draw(Canvas canvas) {
+        if(state == ObjectState.DEAD)
+            return;
         canvas.save();
         canvas.rotate(transform.getAngle(), transform.getPosition().x, transform.getPosition().y);
         switch (shape){
@@ -127,12 +137,6 @@ public class Polyman extends Sprite implements IRecyclable {
         state = ObjectState.IDLE;
     }
 
-    public enum ShapeType {
-        RECTANGLE, CIRCLE, TRIANGLE
-    }
-    public enum ColorType {
-        RED, GREEN, BLUE, BLACK
-    }
     public boolean isDead() {
         return unit.isDead();
     }
