@@ -8,6 +8,7 @@ import java.util.ArrayList;
 
 import kr.ac.tukorea.ge.lkm.polybattler.BuildConfig;
 import kr.ac.tukorea.ge.lkm.polybattler.R;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.Effect.EffectManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.UiManager;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.res.BitmapPool;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene.Scene;
@@ -39,6 +40,7 @@ public class MainScene extends Scene {
         managerArray.add(UiManager.getInstance(this));
         managerArray.add(ShopManager.getInstance(this));
         managerArray.add(GameManager.getInstance(this));
+        managerArray.add(EffectManager.getInstance(this));
     }
 
     public void draw(Canvas canvas) {
