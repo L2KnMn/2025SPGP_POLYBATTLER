@@ -1,11 +1,15 @@
 package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.BehaviorTree;
 
+import android.text.style.ImageSpan;
 import android.util.Log;
 
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.Effect.EffectManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.BattleManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Polyman;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.UiManager;
+import kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene.Scene;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.GameView;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 
@@ -77,10 +81,8 @@ public class BattleUnit {
     }
 
     public void damage(int damage){
-        Log.d("BATTLE UNIT", "damage(" + damage + ")");
         hp -= damage - defense;
-        if(isDead())
-            battleManager.killSign(target, this);
+        EffectManager.getInstance(Scene.top()).createDamageTextEffect(transform.getPosition().x, transform.getPosition().y, damage);
     }
 
     public void fillHp(int hp){
@@ -114,6 +116,9 @@ public class BattleUnit {
 
     public void attackTarget(BattleUnit target) {
         target.damage(attack);
+        if(target.isDead()) {
+            battleManager.killSign(this, target);
+        }
     }
 
     public void resetAttackCooldown() {

@@ -295,6 +295,7 @@ public class GameManager implements IGameManager {
             master.remove(enemy);
         }
         enemies.clear();
+        nextRound();
     }
     private void startBattlePhase() {
         gameMap.setDrawBlocked(false);
@@ -324,11 +325,11 @@ public class GameManager implements IGameManager {
     private Polyman.ColorType getRandomColor(){
         return Polyman.ColorType.values()[random.nextInt(Polyman.ColorType.values().length)];
     }
+    ArrayList<Position> enemyPositions = new ArrayList<>();
     private void addBattleEnemy(){
-        int numEnemy = enemiesThisRound(1);
-        ArrayList<Position> enemyPositions = new ArrayList<>();
+        int numEnemy = enemiesThisRound(round);
         gameMap.getEnemyPostions(enemyPositions, numEnemy);
-        while(!enemyPositions.isEmpty()) {
+        for(Position pos : enemyPositions) {
             IRecyclable obj = master.getRecyclable(Polyman.class);
             Polyman enemy;
             if(obj == null)
@@ -338,8 +339,7 @@ public class GameManager implements IGameManager {
                 enemy.init(getRandomShape(), Polyman.ColorType.BLACK);
             }
             enemies.add(enemy);
-            enemy.transform.set(enemyPositions.get(0));
-            enemyPositions.remove(0);
+            enemy.transform.set(pos);
             master.add(enemy); // enemy Scene에 등록
             enemy.startBattle();
             battleManager.addEnemy(enemy);

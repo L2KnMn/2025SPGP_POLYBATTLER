@@ -1,9 +1,13 @@
 package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.GameMap;
 
+import java.util.ArrayList;
+import java.util.Random;
+
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
 
 class Field extends MapPart {
     private final boolean[][] blocked;
+    private final ArrayList<int[]> suffledBlocked;
     protected int countMax;
 
     Field(int width, int height) {
@@ -16,6 +20,23 @@ class Field extends MapPart {
             }
             for (int j = height - 3; j < height; j++) {
                 blocked[j][i] = false;
+            }
+        }
+        suffledBlocked = new ArrayList<>();
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                if (blocked[i][j]) {
+                    suffledBlocked.add(new int[]{j, i});
+                }
+            }
+        }
+        for(int i = suffledBlocked.size() - 1; i > 0; --i) {
+            Random random = new Random();
+            int j = random.nextInt(i + 1);
+            if (i != j) {
+                int[] temp = suffledBlocked.get(i);
+                suffledBlocked.set(i, suffledBlocked.get(j));
+                suffledBlocked.set(j, temp);
             }
         }
     }
@@ -35,5 +56,15 @@ class Field extends MapPart {
 
     protected void setCountMax(int max) {
         countMax = max;
+    }
+
+    protected int[] getBlockRandom() {
+        if (suffledBlocked.isEmpty()) {
+            return null;
+        }
+        int[] result = suffledBlocked.get(0);
+        suffledBlocked.remove(0);
+        suffledBlocked.add(result);
+        return result;
     }
 }

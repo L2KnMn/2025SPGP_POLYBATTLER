@@ -13,7 +13,6 @@ import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Behavi
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.BehaviorTree.BehaviorTreeFactory;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Polyman;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.UiManager;
-import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IGameObject;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene.Scene;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 
@@ -66,7 +65,7 @@ public class BattleManager implements IGameManager {
                 for(BattleUnit unit : units){
                    unit.setBehaviorTree(BehaviorTreeFactory.getTreeForShape(unit.getShapeType()), this);
                 }
-                counts.computeIfAbsent(team, k->units.size());
+                counts.put(team, units.size());
             }
         }else {
             // 중지 시키고 원복

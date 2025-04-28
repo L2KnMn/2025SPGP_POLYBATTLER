@@ -450,9 +450,16 @@ public class GameMap implements IGameObject {
 
     public void getEnemyPostions(ArrayList<Position> enemyPositions, int numEnemy) {
         for(int i = 0; i < numEnemy; i++){
-            Position randomPosition = new Position();;
-
-            enemyPositions.add(randomPosition);
+            Position randomPosition;
+            if(i < enemyPositions.size()) {
+                randomPosition = enemyPositions.get(i);
+            }else{
+                randomPosition = new Position();
+                enemyPositions.add(randomPosition);
+            }
+            int[] width_height = field.getBlockRandom();
+            randomPosition.x = getTileX(width_height[0], Gravity.CENTER);
+            randomPosition.y = getTileY(width_height[1], Gravity.CENTER);
         }
     }
 }

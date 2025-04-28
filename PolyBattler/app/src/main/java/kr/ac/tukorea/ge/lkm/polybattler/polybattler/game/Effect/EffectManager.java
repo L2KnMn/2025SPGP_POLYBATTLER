@@ -143,7 +143,7 @@ public class EffectManager implements IGameManager {
 
         @Override
         public void onRecycle(){
-            duration = 0;
+            Log.d("Effect", "onRecycle() called");
             elapsedTime = 0;
             finished = false;
         }
