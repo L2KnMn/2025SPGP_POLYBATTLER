@@ -64,6 +64,7 @@ public class BattleManager implements IGameManager {
                     continue;
                 for(BattleUnit unit : units){
                    unit.setBehaviorTree(BehaviorTreeFactory.getTreeForShape(unit.getShapeType()), this);
+                   UiManager.getInstance(master).addHpBar(unit);
                 }
                 counts.put(team, units.size());
             }
@@ -76,6 +77,7 @@ public class BattleManager implements IGameManager {
                 for(BattleUnit unit : units){
                     BehaviorTreeFactory.releaseTree(unit.getShapeType(), unit.getBehaviorTree());
                     unit.setBehaviorTree(null, null);
+                    UiManager.getInstance(master).removeHpBar(unit);
                 }
                 units.clear();
             }

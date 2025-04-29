@@ -13,19 +13,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import kr.ac.tukorea.ge.lkm.polybattler.R;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameState;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.IGameManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.MainScene;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.BehaviorTree.BattleUnit;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IGameObject;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.ILayerProvider;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene.Scene;
+import kr.ac.tukorea.ge.spgp2025.a2dg.framework.util.Gauge;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.GameView;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 
 public class UiManager implements IGameManager {
     public static final Map<Scene, UiManager> instances = new HashMap<>();
     private final Scene master;
+    private final HpBarManager hpBarManager;
     private GameState currentState = GameState.PREPARE; // 초기 상태 설정
     private final List<IGameObject> uiObjects; // 관리할 UI 요소 리스트
     private final List<Button> buttons; // 터치 이벤트를 받을 버튼 리스트
@@ -44,7 +48,6 @@ public class UiManager implements IGameManager {
 
         ToastMessenger(){
             transform = new Transform(this);
-
             master.add(this);
         }
 
@@ -301,11 +304,53 @@ public class UiManager implements IGameManager {
         }
     }
 
+    public class HpBarManager implements IGameObject {
+        private int upColor;
+        private int bgColor;
+        private Gauge gauge;
+
+        ArrayList<BattleUnit> units;
+
+        public HpBarManager(){
+            units = new ArrayList<>();
+            upColor = R.color.hpBarProgress;
+            bgColor = R.color.hpBarBackgroud;
+            gauge = new Gauge(0.1f, upColor, bgColor);
+            master.add(MainScene.Layer.ui, this);
+        }
+
+        public void AddUnit(BattleUnit unit){
+            if(!units.contains(unit)){
+                units.add(unit);
+            }
+        }
+
+        public void RemoveUnit(BattleUnit unit){
+            units.remove(unit);
+        }
+
+        @Override
+        public void update() { }
+
+        @Override
+        public void draw(Canvas canvas) {
+            for(BattleUnit unit : units){
+                if(unit.isDead())
+                    continue;
+                float hpRate = (float) unit.getHp() / unit.getMaxHp();
+                float offset_x = unit.getTransform().getPosition().x -unit.getTransform().getSize()/2;
+                float offset_y = unit.getTransform().getPosition().y -unit.getTransform().getSize();
+                gauge.draw(canvas, offset_x, offset_y, 100, hpRate);
+            }
+        }
+    }
+
     // UiManager 생성자
     private UiManager(Scene master) {
         this.master = master;
         this.uiObjects = new ArrayList<>();
         this.buttons = new ArrayList<>();
+        this.hpBarManager = new HpBarManager();
 
         // 기본 Paint 설정
         textPaint = new Paint();
@@ -380,6 +425,14 @@ public class UiManager implements IGameManager {
         Button button = new Button(text, x, y, width, height, action);
         // uiObjects 및 buttons 리스트에는 생성자에서 이미 추가됨
         return button;
+    }
+
+    public void addHpBar(BattleUnit unit){
+        hpBarManager.AddUnit(unit);
+    }
+
+    public void removeHpBar(BattleUnit unit){
+        hpBarManager.RemoveUnit(unit);
     }
 
     // 특정 UI 요소 제거 (필요시)

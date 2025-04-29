@@ -10,6 +10,7 @@ import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transf
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.ILayerProvider;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IRecyclable;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.objects.Sprite;
+import kr.ac.tukorea.ge.spgp2025.a2dg.framework.util.Gauge;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.GameView;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 
@@ -149,7 +150,7 @@ public class Polyman extends Sprite implements IRecyclable, ILayerProvider {
 
     @Override
     public void onRecycle() {
-        
+
     }
 
     @Override

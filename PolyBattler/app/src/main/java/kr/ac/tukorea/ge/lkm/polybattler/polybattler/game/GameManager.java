@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.BattleManager;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.GameMap.Background;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.GameMap.GameMap;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Polyman;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
@@ -26,6 +27,7 @@ public class GameManager implements IGameManager {
     private static final Map<Scene, GameManager> instances = new HashMap<>();
     private final Scene master;
     private final DragAndDropManager dragAndDropManager;
+    private final Background backgorund;
     private GameState currentState;
     private int round;
     private int gold;
@@ -40,8 +42,10 @@ public class GameManager implements IGameManager {
         currentState = GameState.PREPARE;
         round = 1;
         gold = 100; // 초기 골드
+        backgorund = new Background();
         gameMap = new GameMap(width, height, benchSize);
         this.master = master;
+        master.add(MainScene.Layer.bg, backgorund);
         master.add(MainScene.Layer.map, gameMap);
 
         dragAndDropManager = new DragAndDropManager(gameMap);

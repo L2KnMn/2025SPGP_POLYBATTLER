@@ -18,7 +18,6 @@ import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.shop.ShopManager;
 
 public class MainScene extends Scene {
     private static final String TAG = "MainScene";
-    private final Bitmap backgroundImage;
     private GameState currentState;
     private ArrayList<IGameManager> managerArray;
 
@@ -32,7 +31,6 @@ public class MainScene extends Scene {
         initLayers(Layer.COUNT);
         Metrics.setGameSize(700, 1600);
         GameView.drawsDebugStuffs = BuildConfig.DEBUG;
-        backgroundImage = BitmapPool.get(R.mipmap.game_background);
         currentState = GameState.PREPARE;
         setManagers();
     }
@@ -50,7 +48,6 @@ public class MainScene extends Scene {
     }
 
     public void draw(Canvas canvas) {
-        canvas.drawBitmap(backgroundImage, null, Metrics.screenRect, null);
         super.draw(canvas);
     }
 
