@@ -120,6 +120,7 @@ public class BattleManager implements IGameManager {
             Log.d("BattleManager", unit.getTeam() + " killed " + target.getTeam() + " be left " + t);
             if (t <= 0) {
                 GameManager.getInstance(master).setGameState(GameState.RESULT);
+                master.onTouchEvent(null);
                 // 현재 터치 이벤트가 있어야 모든 Manager의 State가 변경되기 때문에 UI로 터치 하라고 하나 띄워서
                 // 상태 전체를 바꿔주는 꼼수를 부리는 게 좋겠음
             }
