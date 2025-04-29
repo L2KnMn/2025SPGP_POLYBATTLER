@@ -21,6 +21,7 @@ import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Behavi
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IGameObject;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.ILayerProvider;
+import kr.ac.tukorea.ge.spgp2025.a2dg.framework.objects.Score;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene.Scene;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.util.Gauge;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.GameView;
@@ -197,6 +198,42 @@ public class UiManager implements IGameManager {
             }
         }
     }
+
+
+    public class ScoreBoard extends Signage {
+        private String preText;
+        private int score, displayScore;
+
+        public ScoreBoard(String preText, int score, float x, float y, float width, float height){
+            super(preText + score, x, y, width, height);
+            this.preText = preText;
+            this.score = displayScore = score;
+        }
+
+        public void setScore(int score){
+            this.score = score;
+        }
+
+        @Override
+        public void update() {
+            int diff = score - displayScore;
+            if (diff == 0) return;
+            if (-10 < diff && diff < 0) {
+                displayScore--;
+            } else if (0 < diff && diff < 10) {
+                displayScore++;
+            } else {
+                displayScore += diff / 10;
+            }
+        }
+
+        @Override
+        public void draw(Canvas canvas) {
+            super.text = preText + displayScore;
+            super.draw(canvas);
+        }
+    }
+
     // Button 구현
     public class Button implements IGameObject {
         private final Transform transform;
@@ -418,16 +455,17 @@ public class UiManager implements IGameManager {
 
     // Signage 생성 및 추가
     public Signage addSignage(String text, float x, float y, float width, float height) {
-        Signage sign = new Signage(text, x, y, width, height);
-        // uiObjects 리스트에는 생성자에서 이미 추가됨
-        return sign;
+        return new Signage(text, x, y, width, height); // 생성자에서 master에 추가
+    }
+
+    public ScoreBoard addScoreBoard(String preText, int score, float x, float y, float width, float height){
+        return new ScoreBoard(preText, score, x, y, width, height); // 생성자에서 master에 추가
     }
 
     // Button 생성 및 추가
     public Button addButton(String text, float x, float y, float width, float height, Runnable action) {
-        Button button = new Button(text, x, y, width, height, action);
         // uiObjects 및 buttons 리스트에는 생성자에서 이미 추가됨
-        return button;
+        return new Button(text, x, y, width, height, action);
     }
 
     public void addHpBar(BattleUnit unit){

@@ -8,7 +8,6 @@ import java.util.Random;
 import android.util.Log;
 import android.view.MotionEvent;
 
-import kr.ac.tukorea.ge.lkm.polybattler.R;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.BattleManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.GameMap.Background;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.GameMap.GameMap;
@@ -35,7 +34,7 @@ public class GameManager implements IGameManager {
     private final int width = 4, height = 7, benchSize = 5;
     private final GameMap gameMap;
     private final ArrayList<UiManager.Button> cellButtons;
-    private UiManager.Signage goldSignage;
+    private UiManager.ScoreBoard goldBoard;
     private final BattleManager battleManager;
     private final ArrayList<Polyman> enemies;
 
@@ -60,11 +59,11 @@ public class GameManager implements IGameManager {
     }
 
     private void AddUI() {
-        goldSignage = UiManager.getInstance(master).addSignage("GOLD:" + gold, Metrics.width / 2, 50, 100, 100);
-        goldSignage.setColors(0x00FFFFFF, 0xFFFFFFFF);
-        goldSignage.setTextSize(100);
-        goldSignage.setVisibility(GameState.PREPARE, true);
-        goldSignage.setVisibility(GameState.SHOPPING, true);
+        goldBoard = UiManager.getInstance(master).addScoreBoard("GOLD:", gold, Metrics.width / 2, 50, 100, 100);
+        goldBoard.setColors(0x00FFFFFF, 0xFFFFFFFF);
+        goldBoard.setTextSize(100);
+        goldBoard.setVisibility(GameState.PREPARE, true);
+        goldBoard.setVisibility(GameState.SHOPPING, true);
 
 
         // 1. "전투 시작" 버튼 생성
@@ -92,19 +91,19 @@ public class GameManager implements IGameManager {
         ).setVisibility(GameState.PREPARE, true);
 //        Log.d("GameManager", "전투 시작 버튼 생성 완료 at (" + battleButtonX + ", " + battleButtonY + ")");
 
-        UiManager.getInstance(master).addButton("항복", battleButtonX, battleButtonY,
-                buttonWidth, buttonHeight,
-                () -> {            // 버튼 클릭 시 실행될 동작
-                    Log.d("BATTLE SURRENDER BUTTON", "전투 종료 버튼 클릭됨!");
-                    if (currentState == GameState.BATTLE) {
-                        UiManager.getInstance(master).showToast("전투를 종료합니다."); // 사용자 피드백
-                        UiManager.getInstance(master).setGameState(GameState.RESULT); // 게임 상태 변경
-                    } else {
-                        //Log.d("BATTLE SURRENDER BUTTON", "현재 상태(" + currentState + ")에서는 전투를 종료할 수 없습니다.");
-                        UiManager.getInstance(master).showToast("지금은 전투를 종료할 수 없습니다."); // 사용자 피드백
-                    }
-                }
-        ).setVisibility(GameState.BATTLE, true);
+//        UiManager.getInstance(master).addButton("항복", battleButtonX, battleButtonY,
+//                buttonWidth, buttonHeight,
+//                () -> {            // 버튼 클릭 시 실행될 동작
+//                    Log.d("BATTLE SURRENDER BUTTON", "전투 종료 버튼 클릭됨!");
+//                    if (currentState == GameState.BATTLE) {
+//                        UiManager.getInstance(master).showToast("전투를 종료합니다."); // 사용자 피드백
+//                        UiManager.getInstance(master).setGameState(GameState.RESULT); // 게임 상태 변경
+//                    } else {
+//                        //Log.d("BATTLE SURRENDER BUTTON", "현재 상태(" + currentState + ")에서는 전투를 종료할 수 없습니다.");
+//                        UiManager.getInstance(master).showToast("지금은 전투를 종료할 수 없습니다."); // 사용자 피드백
+//                    }
+//                }
+//        ).setVisibility(GameState.BATTLE, true);
 
         UiManager.getInstance(master).addButton("확인", battleButtonX, battleButtonY,
                 buttonWidth, buttonHeight,
@@ -171,9 +170,7 @@ public class GameManager implements IGameManager {
     StringBuilder stringBuilder = new StringBuilder();
     public void addGold(int amount) {
         this.gold += amount;
-        stringBuilder.setLength(5);
-        stringBuilder.append("GOLD:").append(gold);
-        goldSignage.setText(stringBuilder.toString());
+        goldBoard.setScore(gold);
     }
 
     public boolean spendGold(int amount) {
