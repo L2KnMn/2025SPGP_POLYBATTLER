@@ -42,7 +42,7 @@ public class GameManager implements IGameManager {
         gold = 100; // 초기 골드
         gameMap = new GameMap(width, height, benchSize);
         this.master = master;
-        master.add(gameMap);
+        master.add(MainScene.Layer.map, gameMap);
 
         dragAndDropManager = new DragAndDropManager(gameMap);
         dragAndDropManager.setGameState(currentState);
@@ -203,7 +203,7 @@ public class GameManager implements IGameManager {
 
     public boolean removeCharacter(IGameObject gameObject) {
         if (gameObject instanceof Polyman) {
-            master.remove(gameObject);
+            master.remove((Polyman)gameObject);
             Polyman polyman = (Polyman) gameObject;
             Transform temp = gameMap.findTransform(polyman.transform.getPosition().x, polyman.transform.getPosition().y);
             if (temp == polyman.transform) {

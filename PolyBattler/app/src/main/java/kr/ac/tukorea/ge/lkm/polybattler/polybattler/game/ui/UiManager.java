@@ -15,8 +15,10 @@ import java.util.Map;
 
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameState;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.IGameManager;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.MainScene;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IGameObject;
+import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.ILayerProvider;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene.Scene;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.GameView;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
@@ -32,16 +34,18 @@ public class UiManager implements IGameManager {
     private final String TAG = "UiManager";
 
     // ToastMessenger 구현
-    private class ToastMessenger implements IGameObject {
+    private class ToastMessenger implements IGameObject, ILayerProvider {
         private String message = null;
         private float displayTime = 0; // 남은 표시 시간 (초)
         private final float DURATION = 2.0f; // 토스트 메시지 표시 시간
         private final Transform transform;
         private float textOffsetY;
+        private boolean isVisible = false;
 
         ToastMessenger(){
             transform = new Transform(this);
-            // 초기에는 Scene에 추가하지 않음. show() 할 때 추가
+
+            master.add(this);
         }
 
         // 메시지를 표시하는 함수
@@ -65,25 +69,19 @@ public class UiManager implements IGameManager {
             float textY = top + height/2;
             transform.set(textX, textY);
             transform.setSize(width, height);
-
-            // Scene에 추가하여 그리도록 함
-            if (!master.contains(this)) {
-                master.add(this);
-            }
+            isVisible = true;
             Log.d(TAG, message);
         }
 
         @Override
         public void update() {
-            if (message != null && displayTime > 0) {
+            if (isVisible  && displayTime > 0) {
                 displayTime -= GameView.frameTime; // 프레임 시간만큼 감소
                 // 조금씩 위로 올라가는 애니메이션
                 final float SPEED = 10.0f; // 애니메이션 속도
                 transform.move(0, -SPEED * GameView.frameTime);
                 if (displayTime <= 0) {
                     this.reset();
-                    master.remove(this); // Scene에서 제거
-                    Log.d(TAG, "Toast Hide");
                 }
             }
         }
@@ -91,11 +89,12 @@ public class UiManager implements IGameManager {
         public void reset(){
             message = null;
             displayTime = 0;
+            isVisible = false;
         }
 
         @Override
         public void draw(Canvas canvas) {
-            if (message != null && displayTime > 0) {
+            if (isVisible && displayTime > 0) {
                 // 반투명 배경 그리기
                 backgroundPaint.setColor(Color.argb(180, 0, 0, 0)); // 반투명 검정
                 canvas.drawRoundRect(transform.getRect(), 20, 20, backgroundPaint); // 둥근 모서리
@@ -105,6 +104,11 @@ public class UiManager implements IGameManager {
                 textPaint.setTextAlign(Paint.Align.CENTER);
                 canvas.drawText(message, transform.getPosition().x, transform.getPosition().y + textOffsetY, textPaint);
             }
+        }
+
+        @Override
+        public MainScene.Layer getLayer() {
+            return MainScene.Layer.ui;
         }
     }
     ToastMessenger toast;
@@ -132,7 +136,7 @@ public class UiManager implements IGameManager {
             signTextPaint.setColor(Color.WHITE);      // 기본 텍스트색 설정
             signTextPaint.setTextSize(40);            // 기본 텍스트 크기 설정
 
-            master.add(this); // Scene에 추가
+            master.add(MainScene.Layer.ui, this); // Scene에 추가
             uiObjects.add(this); // 관리 목록에 추가
         }
 
@@ -213,7 +217,7 @@ public class UiManager implements IGameManager {
             this.buttonTextPaint.setColor(Color.BLACK);
             this.buttonTextPaint.setTextAlign(Paint.Align.CENTER);
 
-            master.add(this); // Scene에 추가
+            master.add(MainScene.Layer.ui, this); // Scene에 추가
             uiObjects.add(this); // 관리 목록에 추가
             buttons.add(this); // 버튼 리스트에 추가
         }
@@ -380,7 +384,7 @@ public class UiManager implements IGameManager {
 
     // 특정 UI 요소 제거 (필요시)
     public void removeUIObject(IGameObject uiObject) {
-        master.remove(uiObject);
+        master.remove(MainScene.Layer.ui, uiObject);
         uiObjects.remove(uiObject);
         if (uiObject instanceof Button) {
             buttons.remove((Button) uiObject);
@@ -391,13 +395,13 @@ public class UiManager implements IGameManager {
     public void clearAllUI() {
         // Scene에서 제거
         for (IGameObject obj : uiObjects) {
-            master.remove(obj);
+            master.remove(MainScene.Layer.ui, obj);
         }
         // 관리 리스트 비우기
         uiObjects.clear();
         buttons.clear();
         // Toast는 Scene에서 제거되지만 객체는 유지
         master.remove(toast);
-        toast.message = null; // 메시지 내용도 초기화
+        toast.reset(); // 초기화
     }
 }

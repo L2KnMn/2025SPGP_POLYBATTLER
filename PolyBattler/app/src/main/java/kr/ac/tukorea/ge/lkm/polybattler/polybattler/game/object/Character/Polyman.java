@@ -3,15 +3,17 @@ package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.MainScene;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.BehaviorTree.BattleUnit;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
+import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.ILayerProvider;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IRecyclable;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.objects.Sprite;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.GameView;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 
-public class Polyman extends Sprite implements IRecyclable {
+public class Polyman extends Sprite implements IRecyclable, ILayerProvider {
     public enum ShapeType {
         RECTANGLE, CIRCLE, TRIANGLE,
     }
@@ -147,6 +149,11 @@ public class Polyman extends Sprite implements IRecyclable {
 
     @Override
     public void onRecycle() {
+        
+    }
 
+    @Override
+    public MainScene.Layer getLayer() {
+        return MainScene.Layer.charater;
     }
 }

@@ -14,8 +14,10 @@ import java.util.Random;
 
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameState;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.IGameManager;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.MainScene;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IGameObject;
+import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.ILayerProvider;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IRecyclable;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene.Scene;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.GameView;
@@ -51,7 +53,7 @@ public class EffectManager implements IGameManager {
 
     // 특정 위치에 데미지 텍스트 이펙트 생성 및 추가
     public void createDamageTextEffect(float x, float y, int damage) {
-        DamageTextEffect damageText = (DamageTextEffect) master.getRecyclable(DamageTextEffect.class);
+        DamageTextEffect damageText = master.getRecyclable(DamageTextEffect.class);
         if (damageText == null) {
             damageText = new DamageTextEffect(x, y, damage);
         }else{
@@ -107,7 +109,7 @@ public class EffectManager implements IGameManager {
 
 
     // 이펙트 추상 클래스
-    public abstract class Effect implements IGameObject, IRecyclable {
+    public abstract class Effect implements IGameObject, IRecyclable, ILayerProvider {
         protected float duration;
         protected float elapsedTime;
         protected boolean finished;
@@ -145,6 +147,11 @@ public class EffectManager implements IGameManager {
             Log.d("Effect", "onRecycle() called");
             elapsedTime = 0;
             finished = false;
+        }
+
+        @Override
+        public MainScene.Layer getLayer() {
+            return MainScene.Layer.effect_front;
         }
     }
 

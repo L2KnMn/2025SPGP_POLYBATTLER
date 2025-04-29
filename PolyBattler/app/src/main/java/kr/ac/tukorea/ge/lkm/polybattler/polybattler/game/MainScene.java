@@ -22,13 +22,19 @@ public class MainScene extends Scene {
     private GameState currentState;
     private ArrayList<IGameManager> managerArray;
 
+
+    public enum Layer {
+        bg, map, shadows, effect_back, charater, effect_front, ui, controller;
+        public static final int COUNT = values().length;
+    }
+
     public MainScene() {
+        initLayers(Layer.COUNT);
         Metrics.setGameSize(700, 1600);
         GameView.drawsDebugStuffs = BuildConfig.DEBUG;
         backgroundImage = BitmapPool.get(R.mipmap.game_background);
         currentState = GameState.PREPARE;
         setManagers();
-        add(ShopManager.getInstance(this).getShop());
     }
 
     public void setManagers(){
