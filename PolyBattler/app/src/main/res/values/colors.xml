@@ -4,4 +4,9 @@
     <color name="white">#FFFFFFFF</color>
     <color name="hpBarProgress">#4CAF50</color>
     <color name="hpBarBackgroud">#413B09</color>
+    <color name="goldSignageText">#FFFFFFFF</color>
+    <color name="goldSignageBg">#00000000</color>
+    <color name="gameMapShadows">#A0000000</color>
+    <color name="predictEffect">#B3E7E306</color>
+    <color name="gameMapOutline">#33750A</color>
 </resources>

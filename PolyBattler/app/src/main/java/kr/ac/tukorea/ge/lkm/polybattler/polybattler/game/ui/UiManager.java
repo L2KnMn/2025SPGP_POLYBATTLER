@@ -124,7 +124,6 @@ public class UiManager implements IGameManager {
         private final Paint signTextPaint; // Signage 텍스트용 Paint
         private final Paint signBackgroundPaint; // Signage 배경용 Paint
         private final RectF textBounds = new RectF(); // 텍스트 영역 계산용
-
         Signage(String string, float x, float y, float width, float height) {
             text = string;
             transform = new Transform(this, x, y); // Transform 초기화
@@ -154,7 +153,10 @@ public class UiManager implements IGameManager {
         public void setText(String newText) {
             this.text = newText;
         }
-
+        public void setText(String newText, int size){
+            this.text = newText;
+            signTextPaint.setTextSize(size);
+        }
         // 위치 설정
         public void setPosition(float x, float y) {
             transform.set(x, y);
@@ -171,11 +173,12 @@ public class UiManager implements IGameManager {
             signTextPaint.setColor(textColor);
         }
 
-        @Override
-        public void update() {
-            // Signage는 보통 상태 변경 외에 특별한 업데이트 로직이 필요 없을 수 있음
-            // 필요하다면 애니메이션 등을 추가
+        public void setTextSize(int size){
+            signTextPaint.setTextSize(size);
         }
+
+        @Override
+        public void update() {}
 
         @Override
         public void draw(Canvas canvas) {

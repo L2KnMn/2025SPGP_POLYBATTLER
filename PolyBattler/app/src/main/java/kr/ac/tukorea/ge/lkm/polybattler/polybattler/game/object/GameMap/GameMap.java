@@ -1,5 +1,6 @@
 package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.GameMap;
 
+import android.annotation.SuppressLint;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
@@ -7,6 +8,7 @@ import android.util.Log;
 
 import java.util.ArrayList;
 
+import kr.ac.tukorea.ge.lkm.polybattler.R;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IGameObject;
@@ -19,6 +21,8 @@ public class GameMap implements IGameObject {
     private final float length;
     private final RectF tileRect;
 
+    private final Paint paintShadows;
+    private final Paint paintOutline;
     private final Paint paintLight;
     private final Paint paintDark;
     private final Paint paintFilter;
@@ -71,9 +75,21 @@ public class GameMap implements IGameObject {
         predictPoint.setRigid(false);
 
         predictRectPaint = new Paint();
-        predictRectPaint.setColor(0xA0FFEF82);
+        predictRectPaint.setColor(0xB3E7E306);
         predictRectPaint.setStyle(Paint.Style.STROKE);
         predictRectPaint.setStrokeWidth(Metrics.GRID_UNIT * 0.1f);
+
+        paintShadows = new Paint();
+        paintShadows.setColor(0xA0000000);
+        paintShadows.setStrokeCap(Paint.Cap.ROUND);
+        paintShadows.setStyle(Paint.Style.STROKE);
+        paintShadows.setStrokeWidth(Metrics.GRID_UNIT * 0.3f);
+
+        paintOutline = new Paint();
+        paintOutline.setColor(0xFF33750A);
+        paintOutline.setStyle(Paint.Style.STROKE);
+        paintOutline.setStrokeCap(Paint.Cap.ROUND);
+        paintOutline.setStrokeWidth(Metrics.GRID_UNIT * 0.2f);
 
         floatObjectOn = false;
 
@@ -87,7 +103,8 @@ public class GameMap implements IGameObject {
     public void draw(Canvas canvas) {
         // 드로잉 로직
         // 맵 그림
-        canvas.drawRect(field.dstRect, predictRectPaint);
+        canvas.drawRect(field.dstRect, paintShadows);
+        canvas.drawRect(field.dstRect, paintOutline);
         tileRect.offsetTo(field.leftTop.x, field.leftTop.y);
         for (int i = 0; i < field.width; i++) {
             for (int j = 0; j < field.height; j++) {
@@ -104,7 +121,7 @@ public class GameMap implements IGameObject {
             tileRect.offset(length, -length * field.height);
         }
         // 벤치 그림
-        canvas.drawRect(bench.dstRect, predictRectPaint);
+        canvas.drawRect(bench.dstRect, paintOutline);
         tileRect.offsetTo(bench.leftTop.x, bench.leftTop.y);
         for (int i = 0; i < bench.width; i++) {
             if(i%2 == 0){

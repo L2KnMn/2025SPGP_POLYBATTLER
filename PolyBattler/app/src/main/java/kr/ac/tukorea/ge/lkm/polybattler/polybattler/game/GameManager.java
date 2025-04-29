@@ -8,6 +8,7 @@ import java.util.Random;
 import android.util.Log;
 import android.view.MotionEvent;
 
+import kr.ac.tukorea.ge.lkm.polybattler.R;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.BattleManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.GameMap.Background;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.GameMap.GameMap;
@@ -60,7 +61,8 @@ public class GameManager implements IGameManager {
 
     private void AddUI() {
         goldSignage = UiManager.getInstance(master).addSignage("GOLD:" + gold, Metrics.width / 2, 50, 100, 100);
-        goldSignage.setColors(0x00000000, 0xFFFFFFFF);
+        goldSignage.setColors(0x00FFFFFF, 0xFFFFFFFF);
+        goldSignage.setTextSize(100);
         goldSignage.setVisibility(GameState.PREPARE, true);
         goldSignage.setVisibility(GameState.SHOPPING, true);
 
