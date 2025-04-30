@@ -9,6 +9,7 @@ import java.util.Map;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameState;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.IGameManager;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.MasterManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.BehaviorTree.BattleUnit;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.BehaviorTree.BehaviorTreeFactory;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Polyman;
@@ -55,7 +56,7 @@ public class BattleManager implements IGameManager {
 
     @Override
     public IGameManager setGameState(GameState state) {
-        if (state == GameState.BATTLE) {
+        if (currentState != GameState.BATTLE && state == GameState.BATTLE) {
             // 전투 상태로 만들고, 행동 트리 삽입
             // Log.d("BattleManager", "setGameState() called" + state.name());
             for(Team team : Team.values()) {
@@ -68,7 +69,7 @@ public class BattleManager implements IGameManager {
                 }
                 counts.put(team, units.size());
             }
-        }else {
+        }else if(currentState == GameState.BATTLE) {
             // 중지 시키고 원복
             for(Team team : Team.values()) {
                 ArrayList<BattleUnit> units = battlers.get(team);
@@ -120,8 +121,7 @@ public class BattleManager implements IGameManager {
             counts.put(target.getTeam(), t);
             Log.d("BattleManager", unit.getTeam() + " killed " + target.getTeam() + " be left " + t);
             if (t <= 0) {
-                GameManager.getInstance(master).setGameState(GameState.RESULT);
-                master.onTouchEvent(null);
+                MasterManager.getInstance(master).setGameState(GameState.RESULT);
                 // 현재 터치 이벤트가 있어야 모든 Manager의 State가 변경되기 때문에 UI로 터치 하라고 하나 띄워서
                 // 상태 전체를 바꿔주는 꼼수를 부리는 게 좋겠음
             }

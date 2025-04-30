@@ -44,8 +44,8 @@ public class GameManager implements IGameManager {
         backgorund = new Background();
         gameMap = new GameMap(width, height, benchSize);
         this.master = master;
-        master.add(Layer.Layer.bg, backgorund);
-        master.add(Layer.Layer.map, gameMap);
+        master.add(Layer.bg, backgorund);
+        master.add(Layer.map, gameMap);
 
         dragAndDropManager = new DragAndDropManager(gameMap);
         dragAndDropManager.setGameState(currentState);
@@ -80,7 +80,7 @@ public class GameManager implements IGameManager {
                 () -> {            // 버튼 클릭 시 실행될 동작
                     if (currentState == GameState.PREPARE) {
                         UiManager.getInstance(master).showToast("전투를 시작합니다."); // 사용자 피드백
-                        UiManager.getInstance(master).setGameState(GameState.BATTLE); // 게임 상태 변경
+                        MasterManager.getInstance(master).setGameState(GameState.BATTLE); // 게임 상태 변경
                         // 버튼은 UI Manager의 이벤트 처리 함수에서 실행되기 때문에 여기서 게임 상태를 변경 해야지
                         // 모든 Manager들의 상태도 일괄적으로 변경될 수 있음
                     } else {
@@ -90,19 +90,19 @@ public class GameManager implements IGameManager {
         ).setVisibility(GameState.PREPARE, true);
 //        Log.d("GameManager", "전투 시작 버튼 생성 완료 at (" + battleButtonX + ", " + battleButtonY + ")");
 
-//        UiManager.getInstance(master).addButton("항복", battleButtonX, battleButtonY,
-//                buttonWidth, buttonHeight,
-//                () -> {            // 버튼 클릭 시 실행될 동작
-//                    Log.d("BATTLE SURRENDER BUTTON", "전투 종료 버튼 클릭됨!");
-//                    if (currentState == GameState.BATTLE) {
-//                        UiManager.getInstance(master).showToast("전투를 종료합니다."); // 사용자 피드백
-//                        UiManager.getInstance(master).setGameState(GameState.RESULT); // 게임 상태 변경
-//                    } else {
-//                        //Log.d("BATTLE SURRENDER BUTTON", "현재 상태(" + currentState + ")에서는 전투를 종료할 수 없습니다.");
-//                        UiManager.getInstance(master).showToast("지금은 전투를 종료할 수 없습니다."); // 사용자 피드백
-//                    }
-//                }
-//        ).setVisibility(GameState.BATTLE, true);
+        UiManager.getInstance(master).addButton("항복", battleButtonX, battleButtonY,
+                buttonWidth, buttonHeight,
+                () -> {            // 버튼 클릭 시 실행될 동작
+                    Log.d("BATTLE SURRENDER BUTTON", "전투 종료 버튼 클릭됨!");
+                    if (currentState == GameState.BATTLE) {
+                        UiManager.getInstance(master).showToast("전투를 종료합니다."); // 사용자 피드백
+                        UiManager.getInstance(master).setGameState(GameState.RESULT); // 게임 상태 변경
+                    } else {
+                        //Log.d("BATTLE SURRENDER BUTTON", "현재 상태(" + currentState + ")에서는 전투를 종료할 수 없습니다.");
+                        UiManager.getInstance(master).showToast("지금은 전투를 종료할 수 없습니다."); // 사용자 피드백
+                    }
+                }
+        ).setVisibility(GameState.BATTLE, true);
 
         UiManager.getInstance(master).addButton("확인", battleButtonX, battleButtonY,
                 buttonWidth, buttonHeight,
@@ -110,7 +110,7 @@ public class GameManager implements IGameManager {
                     Log.d("PREPARE BUTTON", "준비 시작 버튼 클릭됨!");
                     if (currentState == GameState.RESULT) {
                         UiManager.getInstance(master).showToast("전투를 준비합니다."); // 사용자 피드백
-                        UiManager.getInstance(master).setGameState(GameState.PREPARE); // 게임 상태 변경
+                        MasterManager.getInstance(master).setGameState(GameState.PREPARE); // 게임 상태 변경
                     } else {
 //                        Log.d("PREPARE BUTTON", "현재 상태(" + currentState + ")에서는 RESULT 상태를 종료할 수 없습니다.");
                         UiManager.getInstance(master).showToast("지금은 준비 단계를 시작할 수 없습니다."); // 사용자 피드백
@@ -215,7 +215,7 @@ public class GameManager implements IGameManager {
         return false;
     }
     private Polyman getCharacterFromPool(Polyman.ShapeType shape, Polyman.ColorType color) {
-        Polyman polyman = (Polyman) master.getRecyclable(Polyman.class);
+        Polyman polyman = master.getRecyclable(Polyman.class);
         if(polyman == null){
             polyman = new Polyman(shape, color);
         } else {
@@ -288,8 +288,7 @@ public class GameManager implements IGameManager {
         }
         gameMap.restore();
         for(Polyman enemy : enemies){
-            enemy.resetBattleStatus();
-            master.remove(enemy);
+            enemy.remove();
         }
         enemies.clear();
         nextRound();

@@ -10,10 +10,11 @@ import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transf
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.ILayerProvider;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IRecyclable;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.objects.Sprite;
+import kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene.Scene;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.GameView;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 
-public class Polyman extends Sprite implements IRecyclable, ILayerProvider {
+public class Polyman extends Sprite implements IRecyclable, ILayerProvider, IRemovable {
     public enum ShapeType {
         RECTANGLE, CIRCLE, TRIANGLE,
     }
@@ -25,7 +26,11 @@ public class Polyman extends Sprite implements IRecyclable, ILayerProvider {
     private ShapeType shape;
     private ColorType color;
     private enum ObjectState {
-        IDLE, BATTLE, DEAD, WAIT
+        IDLE, // 비전투 대기 상태
+        BATTLE, // 전투 상태
+        DEAD, // 전투 중 사망
+        REMOVE, // 삭제 대기 중 update 때가 되면 알아서 삭제할 것임
+        WAIT // 업데이트는 안 하고 그리기만
     }
     private final BattleUnit unit;
     private ObjectState state = ObjectState.IDLE;
@@ -67,14 +72,17 @@ public class Polyman extends Sprite implements IRecyclable, ILayerProvider {
                 if(unit.isDead())
                     state = ObjectState.DEAD;
                 break;
-            case WAIT:
+            case REMOVE:
+                Scene.top().remove(this);
+                break;
+            default:
                 break;
         }
     }
 
     @Override
     public void draw(Canvas canvas) {
-        if(state == ObjectState.DEAD)
+        if(state == ObjectState.DEAD || state == ObjectState.REMOVE)
             return;
         canvas.save();
         canvas.rotate(transform.getAngle(), transform.getPosition().x, transform.getPosition().y);
@@ -155,5 +163,10 @@ public class Polyman extends Sprite implements IRecyclable, ILayerProvider {
     @Override
     public Layer getLayer() {
         return Layer.charater;
+    }
+
+    @Override
+    public void remove() {
+        state = ObjectState.REMOVE;
     }
 }

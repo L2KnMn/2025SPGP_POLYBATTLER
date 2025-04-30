@@ -13,14 +13,10 @@ public class MainScene extends Scene {
     private final MasterManager master;
 
     public MainScene() {
-        initLayers(Layer.Layer.COUNT);
+        initLayers(Layer.COUNT);
         Metrics.setGameSize(700, 1600);
         GameView.drawsDebugStuffs = BuildConfig.DEBUG;
-        master = new MasterManager(this);
-    }
-
-    public void draw(Canvas canvas) {
-        super.draw(canvas);
+        master = MasterManager.getInstance(this);
     }
 
     @Override

@@ -29,6 +29,7 @@ public class EffectManager implements IGameManager {
     private final Scene master;
     private final List<Effect> effects;
     private final Paint textPaint;
+    private final Paint damageTextPaint;
     private final Random random = new Random();
     private GameState currentState = GameState.PREPARE;
 
@@ -39,6 +40,10 @@ public class EffectManager implements IGameManager {
         textPaint.setTextSize(30);
         textPaint.setColor(Color.WHITE);
         textPaint.setAntiAlias(true);
+
+        damageTextPaint = new Paint();
+        damageTextPaint.setTextSize(50);
+        damageTextPaint.setColor(Color.RED);
     }
 
     public static EffectManager getInstance(Scene master) {
@@ -178,8 +183,7 @@ public class EffectManager implements IGameManager {
 
         @Override
         public void draw(Canvas canvas) {
-            textPaint.setColor(Color.RED);
-            canvas.drawText(String.valueOf(damage), transform.getPosition().x, transform.getPosition().y, textPaint);
+            canvas.drawText(String.valueOf(damage), transform.getPosition().x, transform.getPosition().y, damageTextPaint);
         }
     }
 
