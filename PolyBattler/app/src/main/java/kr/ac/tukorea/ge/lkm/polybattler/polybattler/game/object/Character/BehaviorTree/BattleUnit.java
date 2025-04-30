@@ -20,7 +20,7 @@ public class BattleUnit {
     int hp = 100;
     int maxHp = 100;
     int attack = 10;
-    float attackPerSecond = 1;
+    float attackPerSecond = 1.0f/3.0f;
     float attackRange = Metrics.GRID_UNIT;
     private long lastAttackTime;
     int defense = 0;
@@ -99,6 +99,10 @@ public class BattleUnit {
 
     public boolean isTargetInRange() {
         return (target != null) && (target.getTransform().distance(transform) <= attackRange);
+    }
+
+    public float getAttackPercent() {
+        return Math.clamp((System.currentTimeMillis() - lastAttackTime) / (1000.0f / attackPerSecond), 0.0f, 1.0f);
     }
 
     public boolean isAttackReady() {

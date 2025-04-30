@@ -3,6 +3,8 @@ package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 
+import kr.ac.tukorea.ge.lkm.polybattler.R;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameState;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.Layer;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.BehaviorTree.BattleUnit;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
@@ -11,6 +13,7 @@ import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.ILayerProvider;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IRecyclable;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.objects.Sprite;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene.Scene;
+import kr.ac.tukorea.ge.spgp2025.a2dg.framework.util.Gauge;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.GameView;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 
@@ -98,6 +101,11 @@ public class Polyman extends Sprite implements IRecyclable, ILayerProvider, IRem
                 break;
             default:
                 break;
+        }
+        if(state == ObjectState.BATTLE){
+            float attackPercent = unit.getAttackPercent();
+            Gauge gauge = new Gauge(0.1f, R.color.attackPercent, R.color.attackPercentBg);
+            gauge.draw(canvas, transform.getPosition().x - 50, transform.getPosition().y + 100, 100, attackPercent);
         }
         canvas.restore();
         //canvas.drawCircle(transform.getPosition().x, transform.getPosition().y, transform.getSize(), paint);

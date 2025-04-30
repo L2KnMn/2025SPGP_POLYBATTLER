@@ -9,4 +9,6 @@
     <color name="gameMapShadows">#A0000000</color>
     <color name="predictEffect">#B3E7E306</color>
     <color name="gameMapOutline">#33750A</color>
+    <color name="attackPercentBg">#482014</color>
+    <color name="attackPercent">#FFEB3B</color>
 </resources>

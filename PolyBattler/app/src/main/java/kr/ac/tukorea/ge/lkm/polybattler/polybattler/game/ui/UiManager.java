@@ -349,6 +349,7 @@ public class UiManager implements IGameManager {
         private final Gauge gauge;
 
         ArrayList<BattleUnit> units;
+        Map<BattleUnit, Float> hpRates;
 
         public HpBarManager(){
             units = new ArrayList<>();
