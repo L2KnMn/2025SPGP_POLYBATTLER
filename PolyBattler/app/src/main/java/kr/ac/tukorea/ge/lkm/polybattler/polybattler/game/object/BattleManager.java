@@ -54,7 +54,7 @@ public class BattleManager implements IGameManager {
     }
 
     @Override
-    public void setGameState(GameState state) {
+    public IGameManager setGameState(GameState state) {
         if (state == GameState.BATTLE) {
             // 전투 상태로 만들고, 행동 트리 삽입
             // Log.d("BattleManager", "setGameState() called" + state.name());
@@ -83,6 +83,7 @@ public class BattleManager implements IGameManager {
             }
         }
         currentState = state;
+        return this;
     }
 
     @Override

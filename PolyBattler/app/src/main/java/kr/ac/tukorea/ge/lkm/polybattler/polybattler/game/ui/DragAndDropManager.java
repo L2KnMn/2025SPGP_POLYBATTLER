@@ -32,7 +32,7 @@ public class DragAndDropManager implements IGameManager {
     }
 
     @Override
-    public void setGameState(GameState state) {
+    public IGameManager setGameState(GameState state) {
         switch (state){
             case PREPARE:
                 active = true;
@@ -48,6 +48,7 @@ public class DragAndDropManager implements IGameManager {
                 }
                 break;
         }currentState = state;
+        return this;
     }
 
     @Override

@@ -14,7 +14,7 @@ import java.util.Random;
 
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameState;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.IGameManager;
-import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.MainScene;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.Layer;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IGameObject;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.ILayerProvider;
@@ -90,9 +90,10 @@ public class EffectManager implements IGameManager {
     }
 
     @Override
-    public void setGameState(GameState state) {
+    public IGameManager setGameState(GameState state) {
         clearAllEffects();
         this.currentState = state;
+        return this;
     }
 
     @Override
@@ -150,8 +151,8 @@ public class EffectManager implements IGameManager {
         }
 
         @Override
-        public MainScene.Layer getLayer() {
-            return MainScene.Layer.effect_front;
+        public Layer getLayer() {
+            return Layer.effect_front;
         }
     }
 

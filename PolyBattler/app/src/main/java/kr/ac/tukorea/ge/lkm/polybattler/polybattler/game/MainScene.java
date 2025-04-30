@@ -1,10 +1,7 @@
 package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game;
 
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.view.MotionEvent;
-
-import java.util.ArrayList;
 
 import kr.ac.tukorea.ge.lkm.polybattler.BuildConfig;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene.Scene;
@@ -13,22 +10,13 @@ import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 
 public class MainScene extends Scene {
     private static final String TAG = "MainScene";
-    private ArrayList<IGameManager> managerArray;
-
-
-    public enum Layer {
-        bg, map, shadows, effect_back, charater, effect_front, ui, controller;
-        public static final int COUNT = values().length;
-    }
+    private final MasterManager master;
 
     public MainScene() {
-        initLayers(Layer.COUNT);
+        initLayers(Layer.Layer.COUNT);
         Metrics.setGameSize(700, 1600);
         GameView.drawsDebugStuffs = BuildConfig.DEBUG;
-        setManagers();
-    }
-
-    public void setManagers(){
+        master = new MasterManager(this);
     }
 
     public void draw(Canvas canvas) {
@@ -37,19 +25,6 @@ public class MainScene extends Scene {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        boolean keep;
-        for (IGameManager manager : managerArray) {
-            keep = !manager.onTouch(event);
-            if(manager.getGameState() != currentState){
-                currentState = manager.getGameState();
-                for (IGameManager manager2 : managerArray) {
-                    if (manager2.getGameState() != currentState)
-                        manager2.setGameState(currentState);
-                }
-                break;
-            }
-            if (!keep) break;
-        }
-        return true;
+        return master.onTouch(event);
     }
 }

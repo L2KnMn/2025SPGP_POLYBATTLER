@@ -8,7 +8,6 @@ import java.util.Map;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameState;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.IGameManager;
-import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.MainScene;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.UiManager;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene.Scene;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
@@ -23,7 +22,7 @@ public class ShopManager implements IGameManager {
         shop = new Shop();
         currentState = GameState.PREPARE;
         this.master = master;
-        master.add(MainScene.Layer.ui, shop);
+        master.add(Layer.Layer.ui, shop);
     }
 
     public static ShopManager getInstance(Scene master) {
@@ -31,7 +30,7 @@ public class ShopManager implements IGameManager {
     }
 
     @Override
-    public void setGameState(GameState newState){
+    public IGameManager setGameState(GameState newState){
         switch (newState){
          case PREPARE:
              shop.setActive(true);
@@ -49,6 +48,7 @@ public class ShopManager implements IGameManager {
             break;
         }
         currentState = newState;
+        return this;
     }
 
     @Override

@@ -16,12 +16,11 @@ import java.util.Map;
 import kr.ac.tukorea.ge.lkm.polybattler.R;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameState;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.IGameManager;
-import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.MainScene;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.Layer;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.BehaviorTree.BattleUnit;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IGameObject;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.ILayerProvider;
-import kr.ac.tukorea.ge.spgp2025.a2dg.framework.objects.Score;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene.Scene;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.util.Gauge;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.GameView;
@@ -111,8 +110,8 @@ public class UiManager implements IGameManager {
         }
 
         @Override
-        public MainScene.Layer getLayer() {
-            return MainScene.Layer.ui;
+        public Layer getLayer() {
+            return Layer.ui;
         }
     }
     ToastMessenger toast;
@@ -139,7 +138,7 @@ public class UiManager implements IGameManager {
             signTextPaint.setColor(Color.WHITE);      // 기본 텍스트색 설정
             signTextPaint.setTextSize(40);            // 기본 텍스트 크기 설정
 
-            master.add(MainScene.Layer.ui, this); // Scene에 추가
+            master.add(Layer.ui, this); // Scene에 추가
             uiObjects.add(this); // 관리 목록에 추가
         }
 
@@ -260,7 +259,7 @@ public class UiManager implements IGameManager {
             this.buttonTextPaint.setColor(Color.BLACK);
             this.buttonTextPaint.setTextAlign(Paint.Align.CENTER);
 
-            master.add(MainScene.Layer.ui, this); // Scene에 추가
+            master.add(Layer.ui, this); // Scene에 추가
             uiObjects.add(this); // 관리 목록에 추가
             buttons.add(this); // 버튼 리스트에 추가
         }
@@ -345,9 +344,9 @@ public class UiManager implements IGameManager {
     }
 
     public class HpBarManager implements IGameObject {
-        private int upColor;
-        private int bgColor;
-        private Gauge gauge;
+        private final int upColor;
+        private final int bgColor;
+        private final Gauge gauge;
 
         ArrayList<BattleUnit> units;
 
@@ -356,7 +355,7 @@ public class UiManager implements IGameManager {
             upColor = R.color.hpBarProgress;
             bgColor = R.color.hpBarBackgroud;
             gauge = new Gauge(0.1f, upColor, bgColor);
-            master.add(MainScene.Layer.ui, this);
+            master.add(Layer.ui, this);
         }
 
         public void AddUnit(BattleUnit unit){
@@ -432,12 +431,13 @@ public class UiManager implements IGameManager {
 
     // IGameManager 인터페이스 구현: 게임 상태 설정
     @Override
-    public void setGameState(GameState state) {
+    public IGameManager setGameState(GameState state) {
         Log.d(TAG, "GameState changed to: " + state);
         this.currentState = state;
         // 관리하는 UI 요소들에게 상태 변경 알림 (필요시)
         // 예: Signage는 draw에서 상태를 확인하므로 별도 알림 불필요
         // 버튼 활성화/비활성화 로직이 필요하다면 여기서 처리
+        return this;
     }
 
     // IGameManager 인터페이스 구현: 현재 게임 상태 반환
@@ -478,7 +478,7 @@ public class UiManager implements IGameManager {
 
     // 특정 UI 요소 제거 (필요시)
     public void removeUIObject(IGameObject uiObject) {
-        master.remove(MainScene.Layer.ui, uiObject);
+        master.remove(Layer.ui, uiObject);
         uiObjects.remove(uiObject);
         if (uiObject instanceof Button) {
             buttons.remove((Button) uiObject);
@@ -489,7 +489,7 @@ public class UiManager implements IGameManager {
     public void clearAllUI() {
         // Scene에서 제거
         for (IGameObject obj : uiObjects) {
-            master.remove(MainScene.Layer.ui, obj);
+            master.remove(Layer.ui, obj);
         }
         // 관리 리스트 비우기
         uiObjects.clear();

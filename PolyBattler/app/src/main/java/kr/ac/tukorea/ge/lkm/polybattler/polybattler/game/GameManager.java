@@ -17,7 +17,6 @@ import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transf
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.DragAndDropManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.UiManager;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IGameObject;
-import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IRecyclable;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene.Scene;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 
@@ -45,8 +44,8 @@ public class GameManager implements IGameManager {
         backgorund = new Background();
         gameMap = new GameMap(width, height, benchSize);
         this.master = master;
-        master.add(MainScene.Layer.bg, backgorund);
-        master.add(MainScene.Layer.map, gameMap);
+        master.add(Layer.Layer.bg, backgorund);
+        master.add(Layer.Layer.map, gameMap);
 
         dragAndDropManager = new DragAndDropManager(gameMap);
         dragAndDropManager.setGameState(currentState);
@@ -203,7 +202,6 @@ public class GameManager implements IGameManager {
         }
         return false;
     }
-
     public boolean removeCharacter(IGameObject gameObject) {
         if (gameObject instanceof Polyman) {
             master.remove((Polyman)gameObject);
@@ -216,7 +214,6 @@ public class GameManager implements IGameManager {
         }
         return false;
     }
-
     private Polyman getCharacterFromPool(Polyman.ShapeType shape, Polyman.ColorType color) {
         Polyman polyman = (Polyman) master.getRecyclable(Polyman.class);
         if(polyman == null){
@@ -226,7 +223,6 @@ public class GameManager implements IGameManager {
         }
         return polyman;
     }
-
     public boolean generateCharacterBench(Polyman.ShapeType shape, Polyman.ColorType color) {
         int index = gameMap.getEmptyBenchIndex();
         if (index >= 0) {
@@ -238,21 +234,18 @@ public class GameManager implements IGameManager {
         }
         return false;
     }
-
     @Override
     public boolean onTouch(MotionEvent event) {
         if (currentState == GameState.PREPARE)
             return dragAndDropManager.onTouch(event);
         return false;
     }
-
     @Override
     public GameState getGameState() {
         return currentState;
     }
-
     @Override
-    public void setGameState(GameState newState) {
+    public IGameManager setGameState(GameState newState) {
         if (currentState == GameState.SHOPPING) {
             for (int i = 0; i < benchSize; ++i) {
                 cellButtons.get(i).setVisibility(GameState.SHOPPING, false);
@@ -281,6 +274,7 @@ public class GameManager implements IGameManager {
         dragAndDropManager.setGameState(newState);
         battleManager.setGameState(newState);
         this.currentState = newState;
+        return this;
     }
     private void endBattlePhase() {
         for (int i = 0; i < width; ++i) {
@@ -333,12 +327,12 @@ public class GameManager implements IGameManager {
         int numEnemy = enemiesThisRound(round);
         gameMap.getEnemyPostions(enemyPositions, numEnemy);
         for(Position pos : enemyPositions) {
-            IRecyclable obj = master.getRecyclable(Polyman.class);
+            Polyman obj = master.getRecyclable(Polyman.class);
             Polyman enemy;
             if(obj == null)
                 enemy = new Polyman(getRandomShape(), Polyman.ColorType.BLACK);
             else {
-                enemy = (Polyman) obj;
+                enemy = obj;
                 enemy.init(getRandomShape(), Polyman.ColorType.BLACK);
             }
             enemies.add(enemy);

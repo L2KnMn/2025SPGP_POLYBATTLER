@@ -4,6 +4,6 @@ import android.view.MotionEvent;
 
 public interface IGameManager {
     boolean onTouch(MotionEvent event);
-    void setGameState(GameState state);
+    IGameManager setGameState(GameState state);
     GameState getGameState();
 }

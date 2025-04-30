@@ -11,41 +11,37 @@ import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.UiManager;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene.Scene;
 
 public class MasterManager implements IGameManager {
-    private static final ArrayMap<Scene, ArrayList<IGameManager>> managers;
-    private Scene master;
+    private final ArrayList<IGameManager> managers;
+    private final Scene master;
     private GameState currentState;
 
-    GameManager gameManager;
-    ShopManager shopManager;
-    UiManager uiManager;
-    EffectManager effectManager;
-
-    private MasterManager(Scene master){
+    public MasterManager(Scene master){
         this.master = master;
+        managers = new ArrayList<>();
         currentState = GameState.PREPARE;
-
-        GameManager.getInstance(master).setGameState(currentState);
-        ShopManager.getInstance(master).setGameState(currentState);
-        UiManager.getInstance(master).setGameState(currentState);
-
-        managerArray.add(UiManager.getInstance(this));
-        managerArray.add(ShopManager.getInstance(this));
-        managerArray.add(GameManager.getInstance(this));
-        managerArray.add(EffectManager.getInstance(this));
-    }
-
-    public MasterManager get(Scene master){
-        return instances.computeIfAbsent(master, GameManager::new);
+        managers.add(UiManager.getInstance(master).setGameState(currentState));
+        managers.add(ShopManager.getInstance(master).setGameState(currentState));
+        managers.add(GameManager.getInstance(master).setGameState(currentState));
+        managers.add(EffectManager.getInstance(master).setGameState(currentState));
     }
 
     @Override
     public boolean onTouch(MotionEvent event) {
-        return false;
+        boolean spend = false;
+        for (IGameManager manager : managers) {
+            spend = manager.onTouch(event);
+            if (spend) break;
+        }
+        return spend;
     }
 
     @Override
-    public void setGameState(GameState state) {
+    public IGameManager setGameState(GameState state) {
         currentState = state;
+        for(IGameManager manager : managers){
+            manager.setGameState(state);
+        }
+        return this;
     }
 
     @Override
