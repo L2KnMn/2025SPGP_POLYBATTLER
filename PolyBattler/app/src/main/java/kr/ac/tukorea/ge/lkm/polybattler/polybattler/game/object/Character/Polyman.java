@@ -39,6 +39,19 @@ public class Polyman extends Sprite implements IRecyclable, ILayerProvider, IRem
     private ObjectState state = ObjectState.IDLE;
     private int level;
 
+    public Polyman(){
+        super(0);
+        transform = new Transform(this);
+        transform.setSize(Metrics.GRID_UNIT);
+        transform.setRigid(true);
+
+        paint = new Paint();
+
+        shape = ShapeType.RECTANGLE;
+        color = ColorType.BLACK;
+        unit = new BattleUnit(transform, shape, color);
+    }
+
     public Polyman(ShapeType shape, ColorType color) {
         super(0);
         transform = new Transform(this);

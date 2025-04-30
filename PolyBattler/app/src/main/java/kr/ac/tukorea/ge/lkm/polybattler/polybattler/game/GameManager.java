@@ -246,7 +246,7 @@ public class GameManager implements IGameManager {
     }
     @Override
     public IGameManager setGameState(GameState newState) {
-        if (currentState == GameState.SHOPPING) {
+        if (currentState == GameState.SHOPPING && newState != GameState.SHOPPING) {
             for (int i = 0; i < benchSize; ++i) {
                 cellButtons.get(i).setVisibility(GameState.SHOPPING, false);
             }

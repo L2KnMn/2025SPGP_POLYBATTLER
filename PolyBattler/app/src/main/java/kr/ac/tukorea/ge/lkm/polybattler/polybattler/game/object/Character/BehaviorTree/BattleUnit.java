@@ -20,7 +20,7 @@ public class BattleUnit {
     int hp = 100;
     int maxHp = 100;
     int attack = 10;
-    float attackPerSecond = 1.0f/3.0f;
+    float attackPerSecond;
     float attackRange = Metrics.GRID_UNIT;
     private long lastAttackTime;
     int defense = 0;
@@ -45,23 +45,25 @@ public class BattleUnit {
     }
 
     public void preset(Polyman.ShapeType shapeType, Polyman.ColorType colorType) {
-        attack=10;
         defense=0;
         speed=1;
         lastAttackTime = 0;
         switch (shapeType){
             case CIRCLE:
                 attackRange = Metrics.GRID_UNIT * 5;
-                attackPerSecond = 3;
+                attackPerSecond = 5;
+                attack=3;
                 break;
             case RECTANGLE:
                 defense=1;
                 attackRange = Metrics.GRID_UNIT * 1;
-                attackPerSecond = 1;
+                attackPerSecond = 3;
+                attack=4;
                 break;
             case TRIANGLE:
                 attackRange = Metrics.GRID_UNIT * 6;
-                attackPerSecond = 2;
+                attackPerSecond = 4;
+                attack=4;
                 break;
         }
     }
@@ -119,6 +121,7 @@ public class BattleUnit {
         if(target.isDead()) {
             battleManager.killSign(this, target);
         }
+        resetAttackCooldown();
     }
 
     public void resetAttackCooldown() {

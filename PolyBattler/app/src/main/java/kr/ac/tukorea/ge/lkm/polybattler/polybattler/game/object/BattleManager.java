@@ -13,6 +13,7 @@ import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.MasterManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.BehaviorTree.BattleUnit;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.BehaviorTree.BehaviorTreeFactory;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Polyman;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.UiManager;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene.Scene;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
@@ -126,5 +127,13 @@ public class BattleManager implements IGameManager {
                 // 상태 전체를 바꿔주는 꼼수를 부리는 게 좋겠음
             }
         }
+    }
+    public void findEnemiesInArea(ArrayList<BattleUnit> result, Position position, Team attacker, float v) {
+        ArrayList<BattleUnit> enemies = battlers.get(attacker == Team.ENEMY ? Team.PLAYER : Team.ENEMY);
+        if (enemies != null)
+            for (BattleUnit enemy : enemies){
+                if(!enemy.isDead() && (enemy.getTransform().distanceSq(position) < v*v))
+                    result.add(enemy);
+            }
     }
 }

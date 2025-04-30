@@ -15,6 +15,7 @@ import java.util.Random;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameState;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.IGameManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.Layer;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.IRemovable;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IGameObject;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.ILayerProvider;
@@ -62,7 +63,7 @@ public class EffectManager implements IGameManager {
         if (damageText == null) {
             damageText = new DamageTextEffect(x, y, damage);
         }else{
-            damageText.set(x, y, damage);
+            damageText.init(x, y, damage);
         }
         addEffect(damageText);
     }
@@ -108,18 +109,26 @@ public class EffectManager implements IGameManager {
 
     public void clearAllEffects() {
         for (Effect effect : effects) {
-            master.remove(effect);
+            effect.remove();
         }
         effects.clear();
     }
 
 
     // 이펙트 추상 클래스
-    public abstract class Effect implements IGameObject, IRecyclable, ILayerProvider {
+    public abstract class Effect implements IGameObject, IRecyclable, ILayerProvider, IRemovable {
         protected float duration;
         protected float elapsedTime;
         protected boolean finished;
         protected Transform transform;
+        protected boolean remove = false;
+
+        public Effect(){
+            this.duration = 1;
+            elapsedTime = 0;
+            finished = false;
+            transform = new Transform(this, -100, -100);
+        }
 
         public Effect(float x, float y, float duration) {
             this.duration = duration;
@@ -137,6 +146,9 @@ public class EffectManager implements IGameManager {
             elapsedTime += GameView.frameTime;
             if (elapsedTime >= duration) {
                 finished = true;
+                remove();
+            }
+            if(remove){
                 master.remove(this);
             }
         }
@@ -159,20 +171,31 @@ public class EffectManager implements IGameManager {
         public Layer getLayer() {
             return Layer.effect_front;
         }
+
+        @Override
+        public void remove(){
+            remove = true;
+        }
     }
 
     // 데미지 텍스트 이펙트 (이너 클래스)
     public class DamageTextEffect extends Effect {
         private int damage;
 
-        public DamageTextEffect(float x, float y, int damage) {
-            super(x, y, 1.0f); // 지속 시간 1초
-            this.damage = damage;
+        public DamageTextEffect(){
+            damage = 0;
         }
 
-        public void set(float x, float y, int damage){
+        public DamageTextEffect(float x, float y, int damage) {
+            init(x, y, damage);
+        }
+
+        public void init(float x, float y, int damage){
+            finished = false;
+            elapsedTime = 0;
             transform.set(x, y);
             this.damage = damage;
+            remove = false;
         }
 
         @Override
@@ -183,7 +206,8 @@ public class EffectManager implements IGameManager {
 
         @Override
         public void draw(Canvas canvas) {
-            canvas.drawText(String.valueOf(damage), transform.getPosition().x, transform.getPosition().y, damageTextPaint);
+            if(!finished)
+                canvas.drawText(String.valueOf(damage), transform.getPosition().x, transform.getPosition().y, damageTextPaint);
         }
     }
 

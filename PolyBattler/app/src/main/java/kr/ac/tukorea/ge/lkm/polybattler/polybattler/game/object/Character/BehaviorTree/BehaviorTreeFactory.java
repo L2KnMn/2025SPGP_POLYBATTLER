@@ -59,7 +59,6 @@ public class BehaviorTreeFactory {
 
             // 공격 실행 및 쿨다운 초기화
             unit.attackTarget(target); // BattleUnit의 공격 메서드 호출
-            unit.resetAttackCooldown();
             // System.out.println(unit + " attacks " + target);
             return BTStatus.SUCCESS; // 공격 성공 (이번 틱에)
         });
@@ -72,11 +71,12 @@ public class BehaviorTreeFactory {
             if (target == null || target.isDead()) return BTStatus.FAILURE; // 기준 타겟 필요
             if (!unit.isAttackReady()) return BTStatus.RUNNING;
 
-//             BattleManager에게 범위 내 적 목록 요청
-//             List<BattleUnit> targetsInArea = manager.findEnemiesInArea(target.getTransform().getPosition(), areaAttackRange);
-//             for (BattleUnit enemy : targetsInArea) {
-//                 unit.applyAreaDamage(enemy); // 범위 데미지 적용 메서드 호출
-//             }
+            //BattleManager에게 범위 내 적 목록 요청
+            ArrayList<BattleUnit> targetsInArea = new ArrayList<>();
+            manager.findEnemiesInArea(targetsInArea, target.getTransform().getPosition(), unit.getTeam(), 100.0f);
+            for (BattleUnit enemy : targetsInArea) {
+                unit.attackTarget(target);
+            }
             //System.out.println(unit + " performs AREA ATTACK around " + target);
             unit.resetAttackCooldown();
             return BTStatus.SUCCESS;
