@@ -44,10 +44,10 @@ public class MasterManager implements IGameManager {
 
     @Override
     public IGameManager setGameState(GameState state) {
-        currentState = state;
         for(IGameManager manager : managers){
             manager.setGameState(state);
         }
+        currentState = state;
         return this;
     }
 

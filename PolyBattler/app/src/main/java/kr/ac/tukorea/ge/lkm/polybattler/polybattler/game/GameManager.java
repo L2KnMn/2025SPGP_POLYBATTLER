@@ -74,8 +74,7 @@ public class GameManager implements IGameManager {
         float screenWidth = Metrics.width;
         float buttonWidth = 250;
         float buttonHeight = 100;
-        float padding = 50; // 화면 가장자리로부터의 여백
-        float battleButtonX = screenWidth - buttonWidth - padding;
+        float battleButtonX = Metrics.width / 2;
         float battleButtonY = gameMap.getButtonLine();
 
         // UiManager를 사용하여 버튼 추가
@@ -143,6 +142,7 @@ public class GameManager implements IGameManager {
                             }
                     )
             );
+//            cellButtons.get(i).setVisibility(GameState.PREPARE, true);
         }
     }
 

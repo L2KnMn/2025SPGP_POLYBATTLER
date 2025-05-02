@@ -9,6 +9,7 @@ import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameState;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.IGameManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.Layer;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.MasterManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.UiManager;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene.Scene;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
@@ -59,12 +60,13 @@ public class ShopManager implements IGameManager {
         float y = xy[1];
 
         if (!shop.isActive()) { return false; }
+        GameState privState = currentState;
         switch (currentState){
         case PREPARE:
             if(event.getAction() == MotionEvent.ACTION_DOWN
                     && shop.getIconRect().contains(x, y)) {
                 shop.openShop();
-                currentState = GameState.SHOPPING;
+                MasterManager.getInstance(master).setGameState(GameState.SHOPPING);
                 return true;
             }
             break;
@@ -98,7 +100,7 @@ public class ShopManager implements IGameManager {
                 } else {
                     // 상품 창 밖을 터치하면 상품창 닫고 준비 단계로 돌아가기
                     shop.foldShop();
-                    currentState = GameState.PREPARE;
+                    MasterManager.getInstance(master).setGameState(GameState.PREPARE);
                     return false;
                 }
             }
