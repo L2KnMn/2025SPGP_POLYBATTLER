@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.BattleManager;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.EnemyGenerator;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.GameMap.Background;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.GameMap.GameMap;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Polyman;
@@ -18,6 +19,7 @@ import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.DragAndDropManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.UiManager;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IGameObject;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene.Scene;
+import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.GameView;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 
 public class GameManager implements IGameManager {
@@ -35,6 +37,7 @@ public class GameManager implements IGameManager {
     private final ArrayList<UiManager.Button> cellButtons;
     private UiManager.ScoreBoard goldBoard;
     private final BattleManager battleManager;
+    private final EnemyGenerator enemyGenerator;
     private final ArrayList<Polyman> enemies;
 
     private GameManager(Scene master) {
@@ -54,6 +57,7 @@ public class GameManager implements IGameManager {
 
         battleManager = new BattleManager(master);
         enemies = new ArrayList<>();
+        enemyGenerator = new EnemyGenerator(GameView.view.getContext());
         AddUI();
     }
 
@@ -70,8 +74,7 @@ public class GameManager implements IGameManager {
         float screenWidth = Metrics.width;
         float buttonWidth = 250;
         float buttonHeight = 100;
-        float padding = 50; // 화면 가장자리로부터의 여백
-        float battleButtonX = screenWidth - buttonWidth - padding;
+        float battleButtonX = Metrics.width / 2;
         float battleButtonY = gameMap.getButtonLine();
 
         // UiManager를 사용하여 버튼 추가
@@ -139,6 +142,7 @@ public class GameManager implements IGameManager {
                             }
                     )
             );
+//            cellButtons.get(i).setVisibility(GameState.PREPARE, true);
         }
     }
 
@@ -311,33 +315,18 @@ public class GameManager implements IGameManager {
             }
         }
     }
-
-    private int enemiesThisRound(int round){
-        return round + 1;
-    }
     private Polyman.ShapeType getRandomShape(){
         return Polyman.ShapeType.values()[random.nextInt(Polyman.ShapeType.values().length)];
     }
     private Polyman.ColorType getRandomColor(){
         return Polyman.ColorType.values()[random.nextInt(Polyman.ColorType.values().length)];
     }
-    ArrayList<Position> enemyPositions = new ArrayList<>();
+
     private void addBattleEnemy(){
-        int numEnemy = enemiesThisRound(round);
-        gameMap.getEnemyPostions(enemyPositions, numEnemy);
-        for(Position pos : enemyPositions) {
-            Polyman obj = master.getRecyclable(Polyman.class);
-            Polyman enemy;
-            if(obj == null)
-                enemy = new Polyman(getRandomShape(), Polyman.ColorType.BLACK);
-            else {
-                enemy = obj;
-                enemy.init(getRandomShape(), Polyman.ColorType.BLACK);
-            }
-            enemies.add(enemy);
-            enemy.transform.set(pos);
-            master.add(enemy); // enemy Scene에 등록
-            enemy.startBattle();
+        enemyGenerator.generateEnemiesForRound(round, gameMap, master, enemies);
+
+        int numEnemy = enemies.size();
+        for(Polyman enemy : enemies) {
             battleManager.addEnemy(enemy);
         }
     }

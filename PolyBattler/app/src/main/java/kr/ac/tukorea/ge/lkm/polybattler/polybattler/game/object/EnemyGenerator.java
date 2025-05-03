@@ -83,6 +83,10 @@ public class EnemyGenerator {
         }
     }
 
+    public RoundData getRoundData(int round) {
+        return roundDataMap.get(round);
+    }
+
     /**
      * 지정된 라운드에 맞는 적 Polyman 객체 리스트를 생성하여 반환합니다.
      * 생성된 Polyman들은 전투 상태로 초기화되고 위치가 할당됩니다.
@@ -91,21 +95,16 @@ public class EnemyGenerator {
      * @param scene Polyman 객체 재활용을 위한 Scene 객체
      * @return 생성된 적 Polyman 객체 리스트
      */
-    public List<Polyman> generateEnemiesForRound(int round, GameMap gameMap, Scene scene) {
-        List<Polyman> generatedEnemies = new ArrayList<>();
-
+    public void generateEnemiesForRound(int round, GameMap gameMap, Scene scene, ArrayList<Polyman> generatedEnemies) {
         RoundData data = roundDataMap.get(round);
         if (data == null) {
             Log.w(TAG, "No enemy data found for round: " + round + ". Generating default enemies.");
             data = generateDefaultRoundData(round); // 기본 데이터 생성
-            if (data == null) { // 기본 데이터 생성도 실패하면 빈 리스트 반환
-                return generatedEnemies;
-            }
         }
 
         int totalEnemies = data.getTotalEnemyCount();
         if (totalEnemies <= 0) {
-            return generatedEnemies; // 생성할 적이 없으면 빈 리스트 반환
+            return; // 생성할 적이 없으면 빈 리스트 반환
         }
 
         ArrayList<Position> enemyPositions = new ArrayList<>();
@@ -113,7 +112,7 @@ public class EnemyGenerator {
 
         if (enemyPositions.isEmpty()) {
             Log.w(TAG, "No spawn positions available for round " + round);
-            return generatedEnemies; // 배치할 위치가 없으면 빈 리스트 반환
+            return; // 배치할 위치가 없으면 빈 리스트 반환
         }
 
         int positionIndex = 0;
@@ -135,14 +134,13 @@ public class EnemyGenerator {
                 Position spawnPos = enemyPositions.get(positionIndex++);
                 enemy.transform.set(spawnPos); // 위치 설정
                 enemy.startBattle(); // 전투 상태로 전환 (GameManager가 Scene에 추가 후 호출해도 됨)
+                scene.add(enemy); // Scene에 추가
 
                 generatedEnemies.add(enemy); // 결과 리스트에 추가
                 Log.d(TAG, "Prepared enemy: " + info.shape + " at (" + spawnPos.x + ", " + spawnPos.y + ")");
             }
             if (positionIndex >= enemyPositions.size()) break; // 바깥 루프도 중단
         }
-
-        return generatedEnemies;
     }
 
     /**
