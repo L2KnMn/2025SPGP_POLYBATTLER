@@ -204,8 +204,8 @@ public class GameManager implements IGameManager {
     }
     public boolean removeCharacter(IGameObject gameObject) {
         if (gameObject instanceof Polyman) {
-            master.remove((Polyman)gameObject);
             Polyman polyman = (Polyman) gameObject;
+            polyman.remove(); // Event 처리에서  직접 없애는 게 아니라 update에서 자삭 맡김
             Transform temp = gameMap.findTransform(polyman.transform.getPosition().x, polyman.transform.getPosition().y);
             if (temp == polyman.transform) {
                 gameMap.removeObject(polyman.transform.getPosition().x, polyman.transform.getPosition().y);
