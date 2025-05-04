@@ -30,12 +30,14 @@ public class BattleManager implements IGameManager {
     private final String winMassage;
     private final String loseMassage;
     UiManager.Signage signage;
+    private Team winner;
 
     public BattleManager(Scene master) {
         this.master = master;
         battlers = new HashMap<>();
         counts = new HashMap<>();
         currentState = GameState.PREPARE;
+        winner = Team.PLAYER; // Player가 기본이고, 만약 enemy일 경우 패배한 것으로 보고 게임을 초기화
 
         winMassage = "You Win";
         loseMassage = "You Loose";
@@ -133,6 +135,7 @@ public class BattleManager implements IGameManager {
                     signage.setText(winMassage);
                 }else {
                     signage.setText(loseMassage);
+                    winner = Team.ENEMY;
                 }
             }
         }
@@ -144,5 +147,9 @@ public class BattleManager implements IGameManager {
                 if(!enemy.isDead() && (enemy.getTransform().distanceSq(position) < v*v))
                     result.add(enemy);
             }
+    }
+
+    public Team getWinner() {
+        return winner;
     }
 }
