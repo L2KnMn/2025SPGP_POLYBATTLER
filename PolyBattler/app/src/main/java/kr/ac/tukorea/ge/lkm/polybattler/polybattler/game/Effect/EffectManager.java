@@ -61,9 +61,9 @@ public class EffectManager implements IGameManager {
     public void createDamageTextEffect(float x, float y, int damage) {
         DamageTextEffect damageText = master.getRecyclable(DamageTextEffect.class);
         if (damageText == null) {
-            damageText = new DamageTextEffect(x, y, damage);
+            damageText = new DamageTextEffect(x, y, damage, damageTextPaint);
         }else{
-            damageText.init(x, y, damage);
+            damageText.init(x, y, damage, damageTextPaint);
         }
         addEffect(damageText);
     }
@@ -116,7 +116,7 @@ public class EffectManager implements IGameManager {
 
 
     // 이펙트 추상 클래스
-    public abstract class Effect implements IGameObject, IRecyclable, ILayerProvider, IRemovable {
+    public static abstract class Effect implements IGameObject, IRecyclable, ILayerProvider, IRemovable {
         protected float duration;
         protected float elapsedTime;
         protected boolean finished;
@@ -149,7 +149,7 @@ public class EffectManager implements IGameManager {
                 remove();
             }
             if(remove){
-                master.remove(this);
+                Scene.top().remove(this);
             }
         }
 
@@ -179,23 +179,28 @@ public class EffectManager implements IGameManager {
     }
 
     // 데미지 텍스트 이펙트 (이너 클래스)
-    public class DamageTextEffect extends Effect {
+    public static class DamageTextEffect extends Effect {
         private int damage;
+        private Paint damageTextPaint;
 
         public DamageTextEffect(){
+            super();
             damage = 0;
+            damageTextPaint = null;
         }
 
-        public DamageTextEffect(float x, float y, int damage) {
-            init(x, y, damage);
+        public DamageTextEffect(float x, float y, int damage, Paint paint) {
+            super();
+            init(x, y, damage, paint);
         }
 
-        public void init(float x, float y, int damage){
+        public void init(float x, float y, int damage, Paint paint){
             finished = false;
             elapsedTime = 0;
             transform.set(x, y);
             this.damage = damage;
-            remove = false;
+            this.remove = false;
+            this.damageTextPaint = paint;
         }
 
         @Override
@@ -206,15 +211,21 @@ public class EffectManager implements IGameManager {
 
         @Override
         public void draw(Canvas canvas) {
-            if(!finished)
+            if(!finished && damageTextPaint != null)
                 canvas.drawText(String.valueOf(damage), transform.getPosition().x, transform.getPosition().y, damageTextPaint);
         }
     }
 
     // 원 모양 이펙트 (공격 범위, 타격 효과 등에 사용)
-    public class CircleEffect extends Effect {
+    public static class CircleEffect extends Effect {
         private float radius;
         private final int color;
+
+        public CircleEffect(){
+            super();
+            color = Color.WHITE;
+            radius = Metrics.GRID_UNIT;
+        }
 
         public CircleEffect(float x, float y, float radius, int color, float duration) {
             super(x, y, duration);

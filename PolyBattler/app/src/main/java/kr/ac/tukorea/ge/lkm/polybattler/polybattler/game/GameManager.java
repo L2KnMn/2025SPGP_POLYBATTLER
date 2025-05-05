@@ -41,6 +41,7 @@ public class GameManager implements IGameManager {
     private UiManager.ScoreBoard goldBoard;
     private final BattleManager battleManager;
     private final EnemyGenerator enemyGenerator;
+    private final ArrayList<Polyman> players;
     private final ArrayList<Polyman> enemies;
 
     private GameManager(Scene master) {
@@ -59,6 +60,7 @@ public class GameManager implements IGameManager {
         cellButtons = new ArrayList<>();
 
         battleManager = new BattleManager(master);
+        players = new ArrayList<>();
         enemies = new ArrayList<>();
         enemyGenerator = new EnemyGenerator(GameView.view.getContext());
         AddUI();
@@ -230,12 +232,13 @@ public class GameManager implements IGameManager {
         }
         return polyman;
     }
-    public boolean generateCharacterBench(Polyman.ShapeType shape, Polyman.ColorType color) {
+    private boolean generateCharacterBench(Polyman.ShapeType shape, Polyman.ColorType color) {
         int index = gameMap.getEmptyBenchIndex();
         if (index >= 0) {
             Polyman polyman = getCharacterFromPool(shape, color);
             gameMap.setObjectOnBench(polyman.transform, index);
             cellButtons.get(index).setVisibility(GameState.SHOPPING, true);
+            players.add(polyman);
             master.add(polyman);
             return true;
         }
@@ -304,6 +307,7 @@ public class GameManager implements IGameManager {
             Context context = GameView.view.getContext();
             if (context instanceof Activity) {
                 ((Activity) context).finish();
+                enemyGenerator.saveRoundData(GameView.view.getContext(), getRound(), players);
                 Log.i("Game Manager", "Activity finished by GameView request.");
             } else {
                 Log.e("Game Manager", "Context is not an Activity, cannot finish.");
