@@ -18,6 +18,7 @@ import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.GameView;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 
 public class Polyman extends Sprite implements IRecyclable, ILayerProvider, IRemovable {
+
     public enum ShapeType {
         RECTANGLE, CIRCLE, TRIANGLE,
     }
@@ -189,5 +190,9 @@ public class Polyman extends Sprite implements IRecyclable, ILayerProvider, IRem
     @Override
     public void remove() {
         state = ObjectState.REMOVE;
+    }
+
+    public ShapeType getShape() {
+        return shape;
     }
 }

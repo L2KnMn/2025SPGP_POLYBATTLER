@@ -27,14 +27,22 @@ public class BattleManager implements IGameManager {
     }
     private final Map<Team, ArrayList<BattleUnit>> battlers;
     private final Map<Team, Integer> counts;
+    private final String winMassage;
+    private final String loseMassage;
+    UiManager.Signage signage;
+    private Team winner;
 
     public BattleManager(Scene master) {
         this.master = master;
         battlers = new HashMap<>();
         counts = new HashMap<>();
         currentState = GameState.PREPARE;
+        winner = Team.PLAYER; // Player가 기본이고, 만약 enemy일 경우 패배한 것으로 보고 게임을 초기화
 
-        UiManager.Signage signage = UiManager.getInstance(master).addSignage("You Win/You Loose", Metrics.width/2, Metrics.height/2, Metrics.width, Metrics.height/2);
+        winMassage = "You Win";
+        loseMassage = "You Loose";
+
+        signage = UiManager.getInstance(master).addSignage("", Metrics.width/2, Metrics.height/2 - Metrics.GRID_UNIT, Metrics.width, Metrics.height/2);
         signage.setVisibility(GameState.RESULT, true);
     }
 
@@ -123,8 +131,12 @@ public class BattleManager implements IGameManager {
             Log.d("BattleManager", unit.getTeam() + " killed " + target.getTeam() + " be left " + t);
             if (t <= 0) {
                 MasterManager.getInstance(master).setGameState(GameState.RESULT);
-                // 현재 터치 이벤트가 있어야 모든 Manager의 State가 변경되기 때문에 UI로 터치 하라고 하나 띄워서
-                // 상태 전체를 바꿔주는 꼼수를 부리는 게 좋겠음
+                if(unit.getTeam() == Team.PLAYER){
+                    signage.setText(winMassage);
+                }else {
+                    signage.setText(loseMassage);
+                    winner = Team.ENEMY;
+                }
             }
         }
     }
@@ -135,5 +147,9 @@ public class BattleManager implements IGameManager {
                 if(!enemy.isDead() && (enemy.getTransform().distanceSq(position) < v*v))
                     result.add(enemy);
             }
+    }
+
+    public Team getWinner() {
+        return winner;
     }
 }

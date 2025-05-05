@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+import android.app.Activity;
+import android.content.Context;
 import android.util.Log;
 import android.view.MotionEvent;
 
@@ -17,6 +19,7 @@ import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Positi
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.DragAndDropManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.UiManager;
+import kr.ac.tukorea.ge.spgp2025.a2dg.framework.activity.GameActivity;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IGameObject;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene.Scene;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.GameView;
@@ -99,7 +102,7 @@ public class GameManager implements IGameManager {
                     Log.d("BATTLE SURRENDER BUTTON", "전투 종료 버튼 클릭됨!");
                     if (currentState == GameState.BATTLE) {
                         UiManager.getInstance(master).showToast("전투를 종료합니다."); // 사용자 피드백
-                        UiManager.getInstance(master).setGameState(GameState.RESULT); // 게임 상태 변경
+                        MasterManager.getInstance(master).setGameState(GameState.RESULT); // 게임 상태 변경
                     } else {
                         //Log.d("BATTLE SURRENDER BUTTON", "현재 상태(" + currentState + ")에서는 전투를 종료할 수 없습니다.");
                         UiManager.getInstance(master).showToast("지금은 전투를 종료할 수 없습니다."); // 사용자 피드백
@@ -208,8 +211,8 @@ public class GameManager implements IGameManager {
     }
     public boolean removeCharacter(IGameObject gameObject) {
         if (gameObject instanceof Polyman) {
-            master.remove((Polyman)gameObject);
             Polyman polyman = (Polyman) gameObject;
+            polyman.remove(); // Event 처리에서  직접 없애는 게 아니라 update에서 자삭 맡김
             Transform temp = gameMap.findTransform(polyman.transform.getPosition().x, polyman.transform.getPosition().y);
             if (temp == polyman.transform) {
                 gameMap.removeObject(polyman.transform.getPosition().x, polyman.transform.getPosition().y);
@@ -295,7 +298,17 @@ public class GameManager implements IGameManager {
             enemy.remove();
         }
         enemies.clear();
-        nextRound();
+        if(battleManager.getWinner() == BattleManager.Team.PLAYER) {
+            nextRound();
+        }else{
+            Context context = GameView.view.getContext();
+            if (context instanceof Activity) {
+                ((Activity) context).finish();
+                Log.i("Game Manager", "Activity finished by GameView request.");
+            } else {
+                Log.e("Game Manager", "Context is not an Activity, cannot finish.");
+            }
+        }
     }
     private void startBattlePhase() {
         gameMap.setDrawBlocked(false);
