@@ -151,10 +151,9 @@ public class EnemyGenerator {
         roundDatas.add(data);
     }
 
-    private void saveDataToJson(Context context) {
+    public void saveDataToJson(Context context) {
         JSONObject root = new JSONObject();
         JSONArray roundsArray = new JSONArray();
-
         try {
             // roundDatasMap의 모든 라운드 번호 순회
             for (int i = 0; i < roundDatasMap.size(); i++) {

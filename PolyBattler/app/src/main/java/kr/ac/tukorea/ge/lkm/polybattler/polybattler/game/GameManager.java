@@ -113,10 +113,16 @@ public class GameManager implements IGameManager {
         UiManager.getInstance(master).addButton("확인", battleButtonX, battleButtonY,
                 buttonWidth, buttonHeight,
                 () -> {            // 버튼 클릭 시 실행될 동작
-                    Log.d("PREPARE BUTTON", "준비 시작 버튼 클릭됨!");
+                    Log.d("CONFIRM BUTTON", "전투 결과 확인 버튼 클릭됨!");
                     if (currentState == GameState.RESULT) {
-                        UiManager.getInstance(master).showToast("전투를 준비합니다."); // 사용자 피드백
-                        MasterManager.getInstance(master).setGameState(GameState.PREPARE); // 게임 상태 변경
+                        if(battleManager.getResult() == BattleManager.Result.WIN) {
+                            nextRound();
+                            UiManager.getInstance(master).showToast("전투를 다시 준비합니다."); // 사용자 피드백
+                            MasterManager.getInstance(master).setGameState(GameState.PREPARE); // 게임 상태 변경
+                        }else if(battleManager.getResult() == BattleManager.Result.LOSE){
+                            UiManager.getInstance(master).showToast("게임을 마무리합니다."); // 사용자 피드백
+                            MasterManager.getInstance(master).setGameState(GameState.POST_GAME); // 게임 상태 변경
+                        }
                     } else {
 //                        Log.d("PREPARE BUTTON", "현재 상태(" + currentState + ")에서는 RESULT 상태를 종료할 수 없습니다.");
                         UiManager.getInstance(master).showToast("지금은 준비 단계를 시작할 수 없습니다."); // 사용자 피드백
@@ -236,7 +242,6 @@ public class GameManager implements IGameManager {
             Polyman polyman = getCharacterFromPool(shape, color);
             gameMap.setObjectOnBench(polyman.transform, index);
             cellButtons.get(index).setVisibility(GameState.SHOPPING, true);
-            players.add(polyman);
             master.add(polyman);
             return true;
         }
@@ -270,13 +275,14 @@ public class GameManager implements IGameManager {
                         cellButtons.get(i).setVisibility(GameState.SHOPPING, true);
                 }
                 break;
-            case BATTLE:
+            case BATTLE: // 플레이어가 전투 준비를 마치면 진입하는 단계, 전투를 진행함
                 startBattlePhase();
                 break;
-            case RESULT:
+            case RESULT: // 플레이어가 전투를 마치면 진입하는 단계, 전투 결과를 확인시켜주고 플레이어가 확인할 때까지 대기
                 endBattlePhase();
                 break;
-            case POST_GAME:
+            case POST_GAME: // 플레이어가 게임 오버되면 진입하는 단계, 전투 결과 저장 후 게임 종료 -> MainActivity로 돌아가기
+                cleanGamePhase();
                 break;
         }
         dragAndDropManager.setGameState(newState);
@@ -284,6 +290,19 @@ public class GameManager implements IGameManager {
         this.currentState = newState;
         return this;
     }
+
+    private void cleanGamePhase() {
+        Context context = GameView.view.getContext();
+        if (context instanceof Activity) {
+            enemyGenerator.saveRoundData(context, getRound(), players);
+            enemyGenerator.saveDataToJson(context);
+            ((Activity) context).finish();
+            Log.i("Game Manager", "Activity finished by GameView request.");
+        } else {
+            Log.e("Game Manager", "Context is not an Activity, cannot finish.");
+        }
+    }
+
     private void endBattlePhase() {
         for (int i = 0; i < width; ++i) {
             for (int j = 0; j < height; ++j) {
@@ -299,18 +318,6 @@ public class GameManager implements IGameManager {
             enemy.remove();
         }
         enemies.clear();
-        if(battleManager.getWinner() == BattleManager.Team.PLAYER) {
-            nextRound();
-        }else{
-            Context context = GameView.view.getContext();
-            if (context instanceof Activity) {
-                ((Activity) context).finish();
-                enemyGenerator.saveRoundData(GameView.view.getContext(), getRound(), players);
-                Log.i("Game Manager", "Activity finished by GameView request.");
-            } else {
-                Log.e("Game Manager", "Context is not an Activity, cannot finish.");
-            }
-        }
     }
     private void startBattlePhase() {
         gameMap.setDrawBlocked(false);
@@ -319,12 +326,14 @@ public class GameManager implements IGameManager {
     }
 
     private void addBattlePlayers(){
+        players.clear();
         for (int i = 0; i < width; ++i) {
             for (int j = 0; j < height; ++j) {
                 Transform transform = gameMap.findTransform(i, j);
                 if (transform != null && transform.getInstance() instanceof Polyman) {
                     Polyman polyman = (Polyman) transform.getInstance();
                     polyman.startBattle();
+                    players.add(polyman);
                     battleManager.addBattler(polyman);
                 }
             }

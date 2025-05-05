@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameState;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.IGameManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.MasterManager;
@@ -21,23 +20,31 @@ import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 public class BattleManager implements IGameManager {
     private final Scene master;
     GameState currentState;
+    private Result result;
+
     public enum Team {
         PLAYER,
         ENEMY
+    }
+    public enum Result {
+        WIN,
+        LOSE,
+        CONTINUE,
+        NONE,
     }
     private final Map<Team, ArrayList<BattleUnit>> battlers;
     private final Map<Team, Integer> counts;
     private final String winMassage;
     private final String loseMassage;
     UiManager.Signage signage;
-    private Team winner;
+
 
     public BattleManager(Scene master) {
         this.master = master;
         battlers = new HashMap<>();
         counts = new HashMap<>();
         currentState = GameState.PREPARE;
-        winner = Team.PLAYER; // Player가 기본이고, 만약 enemy일 경우 패배한 것으로 보고 게임을 초기화
+        result = Result.NONE;
 
         winMassage = "You Win";
         loseMassage = "You Loose";
@@ -67,6 +74,7 @@ public class BattleManager implements IGameManager {
     public IGameManager setGameState(GameState state) {
         if (currentState != GameState.BATTLE && state == GameState.BATTLE) {
             // 전투 상태로 만들고, 행동 트리 삽입
+            result = Result.CONTINUE;
             // Log.d("BattleManager", "setGameState() called" + state.name());
             for(Team team : Team.values()) {
                 ArrayList<BattleUnit> units = battlers.get(team);
@@ -133,9 +141,10 @@ public class BattleManager implements IGameManager {
                 MasterManager.getInstance(master).setGameState(GameState.RESULT);
                 if(unit.getTeam() == Team.PLAYER){
                     signage.setText(winMassage);
+                    result = Result.WIN;
                 }else {
                     signage.setText(loseMassage);
-                    winner = Team.ENEMY;
+                    result = Result.LOSE;
                 }
             }
         }
@@ -149,7 +158,7 @@ public class BattleManager implements IGameManager {
             }
     }
 
-    public Team getWinner() {
-        return winner;
+    public Result getResult() {
+        return result;
     }
 }
