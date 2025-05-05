@@ -76,6 +76,10 @@ class MapPart{
     protected boolean isCorrect(int width, int height){
         return isCorrectWidth(width) && isCorrectHeight(height);
     }
+
+    public int getCount(){
+        return count;
+    }
 }
 
 

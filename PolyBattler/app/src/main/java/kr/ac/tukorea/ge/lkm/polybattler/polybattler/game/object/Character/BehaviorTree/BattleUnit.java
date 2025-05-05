@@ -80,7 +80,7 @@ public class BattleUnit {
 
     public void damage(int damage){
         hp -= damage - defense;
-        EffectManager.getInstance(Scene.top()).createDamageTextEffect(transform.getPosition().x, transform.getPosition().y, damage);
+        EffectManager.getInstance(Scene.top()).createDamageTextEffect(transform.getPosition().x + (float)Math.random() * 25.0f, transform.getPosition().y, damage);
     }
 
     public void fillHp(int hp){

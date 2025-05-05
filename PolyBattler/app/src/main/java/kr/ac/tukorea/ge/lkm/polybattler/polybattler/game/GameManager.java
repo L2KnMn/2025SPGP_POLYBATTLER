@@ -81,7 +81,7 @@ public class GameManager implements IGameManager {
         UiManager.getInstance(master).addButton("전투 시작", battleButtonX, battleButtonY,
                 buttonWidth, buttonHeight,
                 () -> {            // 버튼 클릭 시 실행될 동작
-                    if (currentState == GameState.PREPARE) {
+                    if (currentState == GameState.PREPARE && gameMap.getFieldCount() > 0) {
                         UiManager.getInstance(master).showToast("전투를 시작합니다."); // 사용자 피드백
                         MasterManager.getInstance(master).setGameState(GameState.BATTLE); // 게임 상태 변경
                         // 버튼은 UI Manager의 이벤트 처리 함수에서 실행되기 때문에 여기서 게임 상태를 변경 해야지

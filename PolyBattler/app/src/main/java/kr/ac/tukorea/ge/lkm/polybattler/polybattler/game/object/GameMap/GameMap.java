@@ -453,6 +453,10 @@ public class GameMap implements IGameObject {
         return field.countMax;
     }
 
+    public int getFieldCount() {
+        return field.getCount();
+    }
+
     public float getButtonLine() {
         return ((field.leftTop.y + field.dstRect.height()) + (bench.leftTop.y))/2;
     }
