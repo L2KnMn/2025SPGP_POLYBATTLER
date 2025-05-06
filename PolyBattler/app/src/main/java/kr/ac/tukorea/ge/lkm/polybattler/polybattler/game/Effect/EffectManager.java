@@ -16,10 +16,13 @@ import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameState;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.IGameManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.Layer;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.IRemovable;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Coin;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IGameObject;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.ILayerProvider;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IRecyclable;
+import android.animation.ValueAnimator;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene.Scene;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.GameView;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
@@ -109,7 +112,7 @@ public class EffectManager implements IGameManager {
 
     public void clearAllEffects() {
         for (Effect effect : effects) {
-            effect.remove();
+            ((IRemovable)effects).remove();
         }
         effects.clear();
     }
@@ -248,5 +251,117 @@ public class EffectManager implements IGameManager {
             canvas.drawCircle(transform.getPosition().x, transform.getPosition().y, radius, paint);
         }
     }
-    // 추가적인 이펙트 클래스들 (필요에 따라 구현)
+
+    public static class CoinEffect extends Effect {
+        Coin coin;
+        private ValueAnimator popAnimator; // 코인 튀어나오는 애니메이터
+        private ValueAnimator fadeOutAnimator; // 코인 사라지는 애니메이터 (투명도 조절용)
+        private float initialX, initialY; // 코인 초기 위치
+        private float targetY; // 코인 최종 Y 위치 (살짝 아래로)
+        private static final float JUMP_HEIGHT = Metrics.GRID_UNIT * 1.5f; // 점프 높이
+        private static final float HORIZONTAL_SPREAD = Metrics.GRID_UNIT * 0.5f; // 좌우로 퍼지는 정도
+
+
+        public CoinEffect() {
+            super();
+            coin = null;
+        }
+
+        public void init(float x, float y){
+            if(coin == null)
+                coin = Scene.top().getRecyclable(Coin.class);
+            finished = false;
+            duration = 1.5f;
+            elapsedTime = 0.0f;
+            transform.set(x, y);
+            coin.setPosition(x, y, Metrics.GRID_UNIT/3);
+            this.remove = false;
+
+            initialX = x;
+            initialY = y;
+            // 최종 Y 위치를 초기 Y에서 살짝 아래로 설정 (튀어나왔다가 떨어지는 느낌)
+            targetY = initialY + Metrics.GRID_UNIT * 0.5f;
+
+            // 코인 초기 위치 및 크기 설정
+            coin.setPosition(initialX, initialY, Metrics.GRID_UNIT / 2.5f); // 크기 살짝 조절
+            coin.setAlpha(255); // 초기 알파값 (불투명)
+
+            // 기존 애니메이터가 있다면 취소
+            if (popAnimator != null && popAnimator.isRunning()) {
+                popAnimator.cancel();
+            }
+            if (fadeOutAnimator != null && fadeOutAnimator.isRunning()) {
+                fadeOutAnimator.cancel();
+            }
+
+            // 뿅 튀어나오는 애니메이션 설정 (포물선 운동)
+            // X 좌표는 초기 위치에서 랜덤하게 살짝 좌우로 퍼지도록 합니다.
+            // Y 좌표는 위로 점프했다가 targetY로 떨어지도록 합니다.
+            float randomSpread = ((float)Math.random() - 0.5f) * 2 * HORIZONTAL_SPREAD; // -HORIZONTAL_SPREAD ~ +HORIZONTAL_SPREAD
+            final float finalX = initialX + randomSpread;
+
+            popAnimator = ValueAnimator.ofFloat(0f, 1f);
+            popAnimator.setDuration((long) (duration * 1000 * 0.7)); // 전체 지속시간의 70% 동안 움직임
+            popAnimator.setInterpolator(new AccelerateDecelerateInterpolator()); // 부드러운 가감속
+
+            popAnimator.addUpdateListener(animation -> {
+                float progress = (float) animation.getAnimatedValue();
+
+                // X 좌표: 초기 위치에서 최종 위치로 직선 이동
+                float currentX = initialX + (finalX - initialX) * progress;
+
+                // Y 좌표: 포물선 운동 (위로 점프했다가 떨어짐)
+                // progress가 0일 때 0, 0.5일 때 1, 1일 때 0이 되는 2차 함수: -4 * (x - 0.5)^2 + 1
+                float verticalProgress = -4 * (progress - 0.5f) * (progress - 0.5f) + 1;
+                float currentY = initialY - verticalProgress * JUMP_HEIGHT + (targetY - initialY) * progress;
+
+                coin.setPosition(currentX, currentY);
+            });
+
+            // 사라지는 애니메이션 (투명도)
+            fadeOutAnimator = ValueAnimator.ofInt(255, 0);
+            fadeOutAnimator.setDuration((long) (duration * 1000 * 0.5)); // 움직임이 끝날 때쯤부터 사라지기 시작
+            fadeOutAnimator.setStartDelay((long) (duration * 1000 * 0.5)); // 전체 지속시간의 50% 이후부터 시작
+            fadeOutAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
+
+            fadeOutAnimator.addUpdateListener(animation -> {
+                int alphaValue = (int) animation.getAnimatedValue();
+                coin.setAlpha(alphaValue);
+            });
+
+            popAnimator.start();
+            fadeOutAnimator.start();
+        }
+
+        @Override
+        public void update() {
+            coin.update();
+            super.update();
+        }
+
+        @Override
+        public void draw(Canvas canvas) {
+            coin.draw(canvas);
+        }
+
+        @Override
+        public void onRecycle() {
+            super.onRecycle();
+            if (popAnimator != null) {
+                popAnimator.removeAllUpdateListeners(); // 리스너 제거
+                popAnimator.cancel(); // 혹시 실행 중이면 취소
+            }
+            if (fadeOutAnimator != null) {
+                fadeOutAnimator.removeAllUpdateListeners();
+                fadeOutAnimator.cancel();
+            }
+            Scene.top().remove(coin);
+            coin = null;
+        }
+
+        @Override
+        public Layer getLayer(){
+            return Layer.effect_back;
+        }
+    }
 }

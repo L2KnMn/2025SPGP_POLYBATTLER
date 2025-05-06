@@ -2,12 +2,14 @@ package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object;
 
 
 import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.Rect;
 
 import kr.ac.tukorea.ge.lkm.polybattler.R;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.Layer;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.IRemovable;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.ILayerProvider;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IRecyclable;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.objects.AnimSprite;
@@ -15,11 +17,15 @@ import kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene.Scene;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.GameView;
 
 public class Coin extends AnimSprite implements IRecyclable, IRemovable, ILayerProvider {
+    private final Paint paint;
     private boolean removed;
 
     public Coin(){
         super(R.mipmap.coin_images, 16, 8);
         removed =false;
+        paint = new Paint();
+        paint.setAlpha(255);
+
     }
 
     @Override
@@ -36,12 +42,12 @@ public class Coin extends AnimSprite implements IRecyclable, IRemovable, ILayerP
         // draw 에서 생성시각과의 차이로 frameIndex 를 계산한다.
         long now = System.currentTimeMillis();
         float time = (now - createdOn) / 1000.0f;
-        int frameIndex = Math.round(time * fps) % (frameCount * 2);
+        int frameIndex = Math.round(time * fps) % (frameCount * 2 - 2);
         if(frameIndex >= frameCount){
-            frameIndex = (frameCount * 2 - 1) - frameIndex;
+            frameIndex = (frameCount * 2 - 2) - frameIndex;
         }
         srcRect.set(frameIndex * frameWidth, 0, (frameIndex + 1) * frameWidth, frameHeight);
-        canvas.drawBitmap(bitmap, srcRect, dstRect, null);
+        canvas.drawBitmap(bitmap, srcRect, dstRect, paint);
     }
 
     @Override
@@ -55,7 +61,13 @@ public class Coin extends AnimSprite implements IRecyclable, IRemovable, ILayerP
     }
 
     @Override
-    public void onRecycle() {
+    public void onRecycle() {}
 
+    public void setPosition(float x, float y){
+        setPosition(x, y, super.radius);
+    }
+
+    public void setAlpha(int alpha){
+        paint.setAlpha(alpha);
     }
 }
