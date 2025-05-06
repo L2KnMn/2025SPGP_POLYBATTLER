@@ -4,6 +4,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameState;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.IRemovable;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.GameMap.GameMap;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Polyman;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
@@ -12,7 +13,6 @@ import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 
 public class DragAndDropEventController {
     private GameState currentState;
-    private final GameMap gameMap;
     private boolean active;
     private Transform draggedTransform;
     private final Position dragStartPoint;
@@ -20,8 +20,7 @@ public class DragAndDropEventController {
     private boolean isDragging;
     private final String TAG = "DragAndDropManager";
 
-    public DragAndDropEventController(GameMap gameMap) { // private 생성자
-        this.gameMap = gameMap;
+    public DragAndDropEventController() { // private 생성자
         this.draggedTransform = null;
         this.isDragging = false;
         this.dragStartPoint = new Position();
@@ -30,7 +29,7 @@ public class DragAndDropEventController {
         currentState = GameState.PREPARE;
     }
 
-    public boolean onTouch(MotionEvent event) {
+    public boolean onTouch(MotionEvent event, GameMap gameMap) {
         if (!active) return false;
 
         float[] xy = Metrics.fromScreen(event.getX(), event.getY());
@@ -39,19 +38,19 @@ public class DragAndDropEventController {
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                return handleActionDown(x, y);
+                return handleActionDown(x, y, gameMap);
             case MotionEvent.ACTION_MOVE:
-                handleActionMove(x, y);
+                handleActionMove(x, y, gameMap);
                 return isDragging;
             case MotionEvent.ACTION_UP:
-                handleActionUp(x, y);
+                handleActionUp(x, y, gameMap);
                 return isDragging;
         }
         previous.set(x,y);
         return false ;
     }
 
-    private boolean handleActionDown(float x, float y) {
+    private boolean handleActionDown(float x, float y, GameMap gameMap) {
         if (isDragging) {
             return false;
         }
@@ -68,7 +67,7 @@ public class DragAndDropEventController {
         }
     }
 
-    private void handleActionMove(float x, float y) {
+    private void handleActionMove(float x, float y, GameMap gameMap) {
         if (isDragging && draggedTransform != null) {
             float deltaX = x - previous.x;
             float deltaY = y - previous.y;
@@ -79,7 +78,7 @@ public class DragAndDropEventController {
         }
     }
 
-    private void handleActionUp(float x, float y) {
+    private void handleActionUp(float x, float y, GameMap gameMap) {
         if (isDragging && draggedTransform != null) {
             isDragging = false;
             draggedTransform.goTo(x, y);
@@ -108,7 +107,12 @@ public class DragAndDropEventController {
                     // 원래 자리로 돌려놓으려 했는데 실패한 것이면 뭔가 프로그램이 잘못 돌아가고 있는 것이다
                     // 일단 화면 밖으로 날려버려서 정상적인 척 하자
                     draggedTransform.goTo(-100, -100);
-                    Log.d("Drag And Drop Manager", "드랍 했을 때, 원래 자리로 되돌려 놓기가 실패하여 화면 밖에 버림");
+                    if(draggedTransform.getInstance() instanceof IRemovable){
+                        ((IRemovable) draggedTransform.getInstance()).remove();
+                        Log.d("Drag And Drop Manager", "드랍 했을 때, 원래 자리로 되돌려 놓기가 실패하여 삭제 조치함");
+                    }else{
+                        Log.d("Drag And Drop Manager", "드랍 했을 때, 원래 자리로 되돌려 놓기가 실패하여 화면 밖에 버림");
+                    }
                 }
             }
             draggedTransform = null;

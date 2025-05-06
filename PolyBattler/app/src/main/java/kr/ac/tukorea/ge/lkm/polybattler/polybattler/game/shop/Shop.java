@@ -8,10 +8,14 @@ import android.util.Log;
 import java.util.Random;
 
 import kr.ac.tukorea.ge.lkm.polybattler.R;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameState;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.MasterManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Polyman;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.UiManager;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IGameObject;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.res.BitmapPool;
+import kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene.Scene;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 
 public class Shop implements IGameObject {
@@ -36,10 +40,6 @@ public class Shop implements IGameObject {
             this.color = color;
             this.soldOut = false;
         }
-    }
-
-    enum ShopEvent {
-        CLOSE, PURCHASE, REROLL, IGNORE
     }
 
     private final int numberOfBox = 3;
@@ -85,6 +85,21 @@ public class Shop implements IGameObject {
             goods[i] = new Goods(1, Polyman.ShapeType.CIRCLE, Polyman.ColorType.RED);
         }
         setRandomGoods();
+    }
+
+    public void createUI(Scene scene){
+        UiManager ui = UiManager.getInstance(scene);
+        ui.addButton("SHOP", IconRect.centerX(), IconRect.centerY(), IconRect.width(), IconRect.height(),
+                () -> {
+                    openShop();
+                    MasterManager.getInstance(scene).setGameState(GameState.SHOPPING);
+                }
+            ).setVisibility(GameState.PREPARE, true);
+        UiManager.Button rerollButton = ui.addButton("REROLL", RerollButtonRect.centerX(), RerollButtonRect.centerY(), RerollButtonRect.width(), RerollButtonRect.height(),
+                () -> {
+                    ShopManager.getInstance(scene).reRoll();
+                }
+        ).setVisibility(GameState.SHOPPING, true);
     }
 
     @Override

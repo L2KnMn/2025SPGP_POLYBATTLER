@@ -268,16 +268,15 @@ public class UiManager implements IGameManager {
         // Button(int bitmapResId, float x, float y, float width, float height, Runnable action) { ... }
 
         // 버튼 어떤 상태에서 활성화
-        public void setVisibility(GameState state, boolean isVisible) {
+        public Button setVisibility(GameState state, boolean isVisible) {
             if (state.ordinal() < visible.length) {
                 visible[state.ordinal()] = isVisible;
             }
+            return this;
         }
 
         @Override
-        public void update() {
-            // 버튼 상태에 따른 시각적 변화 등 (예: 눌렸을 때 색 변경)
-        }
+        public void update() {}
 
         @Override
         public void draw(Canvas canvas) {

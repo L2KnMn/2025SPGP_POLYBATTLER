@@ -20,6 +20,7 @@ import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.GameMap.Backgrou
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.GameMap.GameMap;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Polyman;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.shop.ShopManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.DragAndDropEventController;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.UiManager;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IGameObject;
@@ -56,7 +57,7 @@ public class GameManager implements IGameManager {
         master.add(Layer.bg, backgorund);
         master.add(Layer.map, gameMap);
 
-        dragAndDropEventController = new DragAndDropEventController(gameMap);
+        dragAndDropEventController = new DragAndDropEventController();
 
         cellButtons = new ArrayList<>();
 
@@ -177,6 +178,8 @@ public class GameManager implements IGameManager {
     }
 
     public void nextRound() {
+        ShopManager.getInstance(master).reRoll();
+        addGold(10);
         round++;
     }
 
@@ -255,7 +258,7 @@ public class GameManager implements IGameManager {
     @Override
     public boolean onTouch(MotionEvent event) {
         if (currentState == GameState.PREPARE)
-            return dragAndDropEventController.onTouch(event);
+            return dragAndDropEventController.onTouch(event, gameMap);
         return false;
     }
     @Override
