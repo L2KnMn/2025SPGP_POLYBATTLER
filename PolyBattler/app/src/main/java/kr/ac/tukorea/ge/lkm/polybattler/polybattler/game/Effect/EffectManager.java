@@ -112,7 +112,7 @@ public class EffectManager implements IGameManager {
 
     public void clearAllEffects() {
         for (Effect effect : effects) {
-            ((IRemovable)effects).remove();
+            effect.remove();
         }
         effects.clear();
     }

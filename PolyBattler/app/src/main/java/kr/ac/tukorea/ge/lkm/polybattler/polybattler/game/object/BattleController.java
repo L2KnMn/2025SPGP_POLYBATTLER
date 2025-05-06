@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import kr.ac.tukorea.ge.lkm.polybattler.R;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.Effect.EffectManager;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameState;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.MasterManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.BehaviorTree.BattleUnit;
@@ -131,6 +133,10 @@ public class BattleController {
         if(t != null) {
             t = t - 1;
             counts.put(target.getTeam(), t);
+            EffectManager.CoinEffect coinEffect = new EffectManager.CoinEffect();
+            coinEffect.init(target.getTransform().getPosition().x, target.getTransform().getPosition().y);
+            EffectManager.getInstance(master).addEffect(coinEffect);
+            GameManager.getInstance(master).addGold(1);
             Log.d("BattleManager", unit.getTeam() + " killed " + target.getTeam() + " be left " + t);
             if (t <= 0) {
                 if(unit.getTeam() == Team.PLAYER){
