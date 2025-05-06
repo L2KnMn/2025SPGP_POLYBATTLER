@@ -1,6 +1,6 @@
 package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.BehaviorTree;
 
-import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.BattleManager;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.BattleController;
 
 /**
  * 특정 액션(람다식으로 정의 가능)을 수행하는 노드.
@@ -17,9 +17,9 @@ public class ActionNode implements BTNode {
     }
 
     @Override
-    public BTStatus tick(BattleUnit unit, BattleManager battleManager) {
+    public BTStatus tick(BattleUnit unit, BattleController battleController) {
         // System.out.println("Ticking ActionNode");
-        return actionLogic.tick(unit, battleManager);
+        return actionLogic.tick(unit, battleController);
     }
 
     @Override

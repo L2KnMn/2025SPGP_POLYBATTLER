@@ -3,8 +3,9 @@ package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Behav
 // 필요한 클래스들을 임포트합니다.
 import android.util.Log;
 
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Polyman;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Polyman.ShapeType; // ShapeType Enum 경로 확인
-import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.BattleManager;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.BattleController;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -28,9 +29,9 @@ public class BehaviorTreeFactory {
     static BTNode attackAreaAction;
     static BTNode moveToTargetAction;
 
-    static BiPredicate<BattleUnit, BattleManager> hasTarget;
-    static BiPredicate<BattleUnit, BattleManager> isTargetInRange;
-    static BiPredicate<BattleUnit, BattleManager> isAttackReady;
+    static BiPredicate<BattleUnit, BattleController> hasTarget;
+    static BiPredicate<BattleUnit, BattleController> isTargetInRange;
+    static BiPredicate<BattleUnit, BattleController> isAttackReady;
 
     // 실제 트리 생성 로직
     private static void buildAndCacheNodes() {
@@ -215,10 +216,13 @@ public class BehaviorTreeFactory {
         return tree; // null이라면 없는 shapeType을 전달한 것
     }
 
-    public static void releaseTree(ShapeType shapeType, BehaviorTree tree){
+    public static void releaseTree(BattleUnit unit){
+        Polyman.ShapeType shapeType = unit.getShapeType();
+        BehaviorTree tree = unit.getBehaviorTree();
         if(tree == null)
             return;
         ArrayList<BehaviorTree> pool = treePools.computeIfAbsent(shapeType, k -> new ArrayList<>());
         pool.add(tree);
+        unit.setBehaviorTree(null, null);
     }
 }

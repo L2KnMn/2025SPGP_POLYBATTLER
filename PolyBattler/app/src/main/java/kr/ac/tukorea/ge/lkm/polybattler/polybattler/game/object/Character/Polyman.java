@@ -2,13 +2,14 @@ package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.RectF;
 
 import kr.ac.tukorea.ge.lkm.polybattler.R;
-import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameState;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.Layer;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.BehaviorTree.BattleUnit;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
+import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IBoxCollidable;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.ILayerProvider;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IRecyclable;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.objects.Sprite;
@@ -17,7 +18,7 @@ import kr.ac.tukorea.ge.spgp2025.a2dg.framework.util.Gauge;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.GameView;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 
-public class Polyman extends Sprite implements IRecyclable, ILayerProvider, IRemovable {
+public class Polyman extends Sprite implements IRecyclable, ILayerProvider, IRemovable, IBoxCollidable {
 
     public enum ShapeType {
         RECTANGLE, CIRCLE, TRIANGLE,
@@ -139,24 +140,25 @@ public class Polyman extends Sprite implements IRecyclable, ILayerProvider, IRem
                 return 0xFFFFFFFF;
         }
     }
-    public boolean inPoint(Position point){
-        switch (shape){
-            case RECTANGLE:
-                if(transform.getRect().contains(point.x, point.y)){
-                    return true;
-                }
-            case CIRCLE:
-                if(transform.distance(point.x, point.y) < transform.getSize()){
-                    return true;
-                }
-            case TRIANGLE:
-                if(transform.isPointInTriangle(point)){
-                    return true;
-                }
-            default:
-                return false;
-        }
-    }
+
+//    public boolean inPoint(Position point){
+//        switch (shape){
+//            case RECTANGLE:
+//                if(transform.getRect().contains(point.x, point.y)){
+//                    return true;
+//                }
+//            case CIRCLE:
+//                if(transform.distance(point.x, point.y) < transform.getSize()){
+//                    return true;
+//                }
+//            case TRIANGLE:
+//                if(transform.isPointInTriangle(point)){
+//                    return true;
+//                }
+//            default:
+//                return false;
+//        }
+//    }
 
     public void startBattle() {
         state = ObjectState.BATTLE;
@@ -194,5 +196,10 @@ public class Polyman extends Sprite implements IRecyclable, ILayerProvider, IRem
 
     public ShapeType getShape() {
         return shape;
+    }
+
+    @Override
+    public RectF getCollisionRect() {
+        return transform.getRect();
     }
 }

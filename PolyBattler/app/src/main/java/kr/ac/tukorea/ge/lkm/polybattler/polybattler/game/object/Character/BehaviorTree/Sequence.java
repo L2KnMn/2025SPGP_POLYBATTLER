@@ -1,6 +1,6 @@
 package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.BehaviorTree;
 
-import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.BattleManager;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.BattleController;
 
 /**
  * 자식 노드를 순서대로 실행합니다.
@@ -16,10 +16,10 @@ public class Sequence extends CompositeNode {
     }
 
     @Override
-    public BTStatus tick(BattleUnit unit, BattleManager battleManager) {
+    public BTStatus tick(BattleUnit unit, BattleController battleController) {
         for (int i = runningChildIndex; i < children.size(); ++i) {
             BTNode child = children.get(i);
-            BTStatus status = child.tick(unit, battleManager);
+            BTStatus status = child.tick(unit, battleController);
 
             //System.out.println("Sequence " + name + ": child "  + i + " returned " + status);
 

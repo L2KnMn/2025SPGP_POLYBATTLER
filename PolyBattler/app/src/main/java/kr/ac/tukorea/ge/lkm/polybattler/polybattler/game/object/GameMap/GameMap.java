@@ -1,17 +1,22 @@
 package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.GameMap;
 
 import android.annotation.SuppressLint;
+import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.util.Log;
 
+import androidx.core.content.res.ResourcesCompat;
+
 import java.util.ArrayList;
+import java.util.ResourceBundle;
 
 import kr.ac.tukorea.ge.lkm.polybattler.R;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IGameObject;
+import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.GameView;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 
 public class GameMap implements IGameObject {
@@ -25,6 +30,8 @@ public class GameMap implements IGameObject {
     private final Paint paintOutline;
     private final Paint paintLight;
     private final Paint paintDark;
+    private final Paint paintBenchLight;
+    private final Paint paintBenchDark;
     private final Paint paintFilter;
 
 //    private final boolean active;
@@ -58,6 +65,8 @@ public class GameMap implements IGameObject {
                 bench.leftTop.x + tileRect.width() * benchSize,
                 bench.leftTop.y + tileRect.height());
 
+        Resources res = GameView.view.getResources();
+
         paintLight = new Paint();
         paintLight.setColor(0xFFD2944A);
         paintLight.setStyle(Paint.Style.FILL);
@@ -65,6 +74,14 @@ public class GameMap implements IGameObject {
         paintDark = new Paint();
         paintDark.setColor(0xffAE6B2D);
         paintDark.setStyle(Paint.Style.FILL);
+
+        paintBenchLight = new Paint();
+        paintBenchLight.setColor(ResourcesCompat.getColor(res, R.color.benchTileColor, null));
+        paintBenchLight.setStyle(Paint.Style.FILL);
+
+        paintBenchDark = new Paint();
+        paintBenchDark.setColor(ResourcesCompat.getColor(res, R.color.benchTileColorDark, null));
+        paintBenchDark.setStyle(Paint.Style.FILL);
 
         paintFilter = new Paint();
         paintFilter.setColor(0x80000000);
@@ -80,13 +97,13 @@ public class GameMap implements IGameObject {
         predictRectPaint.setStrokeWidth(Metrics.GRID_UNIT * 0.1f);
 
         paintShadows = new Paint();
-        paintShadows.setColor(0xA0000000);
+        paintShadows.setColor(ResourcesCompat.getColor(res, R.color.gameMapShadows, null));
         paintShadows.setStrokeCap(Paint.Cap.ROUND);
         paintShadows.setStyle(Paint.Style.STROKE);
         paintShadows.setStrokeWidth(Metrics.GRID_UNIT * 0.3f);
 
         paintOutline = new Paint();
-        paintOutline.setColor(0xFF33750A);
+        paintOutline.setColor(ResourcesCompat.getColor(res, R.color.gameMapOutline, null));
         paintOutline.setStyle(Paint.Style.STROKE);
         paintOutline.setStrokeCap(Paint.Cap.ROUND);
         paintOutline.setStrokeWidth(Metrics.GRID_UNIT * 0.2f);
@@ -125,9 +142,9 @@ public class GameMap implements IGameObject {
         tileRect.offsetTo(bench.leftTop.x, bench.leftTop.y);
         for (int i = 0; i < bench.width; i++) {
             if(i%2 == 0){
-                canvas.drawRect(tileRect, paintLight);
+                canvas.drawRect(tileRect, paintBenchLight);
             }else{
-                canvas.drawRect(tileRect, paintDark);
+                canvas.drawRect(tileRect, paintBenchDark);
             }
             tileRect.offset(tileRect.width(),0);
         }

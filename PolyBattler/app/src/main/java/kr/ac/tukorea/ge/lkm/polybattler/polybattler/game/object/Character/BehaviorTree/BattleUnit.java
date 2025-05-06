@@ -1,7 +1,7 @@
 package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.BehaviorTree;
 
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.Effect.EffectManager;
-import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.BattleManager;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.BattleController;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Polyman;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
@@ -12,9 +12,9 @@ import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 public class BattleUnit {
     final Transform transform;
     private BehaviorTree behaviorTree;
-    private BattleManager battleManager;
+    private BattleController battleController;
 
-    BattleManager.Team team;
+    BattleController.Team team;
     Polyman.ShapeType shapeType;
     Polyman.ColorType colorType;
     int hp = 100;
@@ -31,7 +31,7 @@ public class BattleUnit {
     public BattleUnit(Transform transform, Polyman.ShapeType shapeType, Polyman.ColorType colorType){
         this.transform = transform;
         behaviorTree = null;
-        battleManager = null;
+        battleController = null;
         velocity = new Position();
         reset(shapeType, colorType);
     }
@@ -119,7 +119,7 @@ public class BattleUnit {
     public void attackTarget(BattleUnit target) {
         target.damage(attack);
         if(target.isDead()) {
-            battleManager.killSign(this, target);
+            battleController.killSign(this, target);
         }
         resetAttackCooldown();
     }
@@ -153,27 +153,27 @@ public class BattleUnit {
         return isTargetInRange();
     }
 
-    public void setTeam(BattleManager.Team team) {
+    public void setTeam(BattleController.Team team) {
         this.team = team;
     }
-    public BattleManager.Team getTeam() {
+    public BattleController.Team getTeam() {
         return team;
     }
 
     public Polyman.ShapeType getShapeType() {
         return shapeType;
     }
-    public void setBehaviorTree(BehaviorTree behaviorTree, BattleManager battleManager) {
+    public void setBehaviorTree(BehaviorTree behaviorTree, BattleController battleController) {
         this.behaviorTree = behaviorTree;
-        this.battleManager = battleManager;
+        this.battleController = battleController;
     }
     public BehaviorTree getBehaviorTree() {
         return behaviorTree;
     }
 
     public void tick(){
-        if(behaviorTree != null && battleManager != null) {
-            behaviorTree.tick(this, battleManager);
+        if(behaviorTree != null && battleController != null) {
+            behaviorTree.tick(this, battleController);
         }
     }
 }

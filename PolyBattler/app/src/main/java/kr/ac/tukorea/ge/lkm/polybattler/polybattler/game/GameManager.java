@@ -7,16 +7,20 @@ import java.util.Random;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Resources;
 import android.util.Log;
 import android.view.MotionEvent;
 
-import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.BattleManager;
+import androidx.core.content.res.ResourcesCompat;
+
+import kr.ac.tukorea.ge.lkm.polybattler.R;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.BattleController;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.EnemyGenerator;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.GameMap.Background;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.GameMap.GameMap;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Polyman;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
-import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.DragAndDropManager;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.DragAndDropEventController;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.UiManager;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IGameObject;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene.Scene;
@@ -28,7 +32,7 @@ public class GameManager implements IGameManager {
     static Random random = new Random();
     private static final Map<Scene, GameManager> instances = new HashMap<>();
     private final Scene master;
-    private final DragAndDropManager dragAndDropManager;
+    private final DragAndDropEventController dragAndDropEventController;
     private final Background backgorund;
     private GameState currentState;
     private int round;
@@ -37,7 +41,7 @@ public class GameManager implements IGameManager {
     private final GameMap gameMap;
     private final ArrayList<UiManager.Button> cellButtons;
     private UiManager.ScoreBoard goldBoard;
-    private final BattleManager battleManager;
+    private final BattleController battleController;
     private final EnemyGenerator enemyGenerator;
     private final ArrayList<Polyman> players;
     private final ArrayList<Polyman> enemies;
@@ -52,12 +56,11 @@ public class GameManager implements IGameManager {
         master.add(Layer.bg, backgorund);
         master.add(Layer.map, gameMap);
 
-        dragAndDropManager = new DragAndDropManager(gameMap);
-        dragAndDropManager.setGameState(currentState);
+        dragAndDropEventController = new DragAndDropEventController(gameMap);
 
         cellButtons = new ArrayList<>();
 
-        battleManager = new BattleManager(master);
+        battleController = new BattleController(master);
         players = new ArrayList<>();
         enemies = new ArrayList<>();
         enemyGenerator = new EnemyGenerator(GameView.view.getContext());
@@ -66,7 +69,8 @@ public class GameManager implements IGameManager {
 
     private void AddUI() {
         goldBoard = UiManager.getInstance(master).addScoreBoard("GOLD:", gold, Metrics.width / 2, 50, 100, 100);
-        goldBoard.setColors(0x00FFFFFF, 0xFFFFFFFF);
+        Resources res =  GameView.view.getResources();
+        goldBoard.setColors(ResourcesCompat.getColor(res, R.color.goldSignageBg, null), ResourcesCompat.getColor(res,R.color.goldSignageText, null));
         goldBoard.setTextSize(100);
         goldBoard.setVisibility(GameState.PREPARE, true);
         goldBoard.setVisibility(GameState.SHOPPING, true);
@@ -102,6 +106,7 @@ public class GameManager implements IGameManager {
                     Log.d("BATTLE SURRENDER BUTTON", "전투 종료 버튼 클릭됨!");
                     if (currentState == GameState.BATTLE) {
                         UiManager.getInstance(master).showToast("전투를 종료합니다."); // 사용자 피드백
+                        battleController.resignPlayer();
                         MasterManager.getInstance(master).setGameState(GameState.RESULT); // 게임 상태 변경
                     } else {
                         //Log.d("BATTLE SURRENDER BUTTON", "현재 상태(" + currentState + ")에서는 전투를 종료할 수 없습니다.");
@@ -115,11 +120,11 @@ public class GameManager implements IGameManager {
                 () -> {            // 버튼 클릭 시 실행될 동작
                     Log.d("CONFIRM BUTTON", "전투 결과 확인 버튼 클릭됨!");
                     if (currentState == GameState.RESULT) {
-                        if(battleManager.getResult() == BattleManager.Result.WIN) {
+                        if(battleController.getResult() == BattleController.Result.WIN) {
                             nextRound();
                             UiManager.getInstance(master).showToast("전투를 다시 준비합니다."); // 사용자 피드백
                             MasterManager.getInstance(master).setGameState(GameState.PREPARE); // 게임 상태 변경
-                        }else if(battleManager.getResult() == BattleManager.Result.LOSE){
+                        }else if(battleController.getResult() == BattleController.Result.LOSE){
                             UiManager.getInstance(master).showToast("게임을 마무리합니다."); // 사용자 피드백
                             MasterManager.getInstance(master).setGameState(GameState.POST_GAME); // 게임 상태 변경
                         }
@@ -250,7 +255,7 @@ public class GameManager implements IGameManager {
     @Override
     public boolean onTouch(MotionEvent event) {
         if (currentState == GameState.PREPARE)
-            return dragAndDropManager.onTouch(event);
+            return dragAndDropEventController.onTouch(event);
         return false;
     }
     @Override
@@ -285,8 +290,6 @@ public class GameManager implements IGameManager {
                 cleanGamePhase();
                 break;
         }
-        dragAndDropManager.setGameState(newState);
-        battleManager.setGameState(newState);
         this.currentState = newState;
         return this;
     }
@@ -318,11 +321,13 @@ public class GameManager implements IGameManager {
             enemy.remove();
         }
         enemies.clear();
+        battleController.endBattle();
     }
     private void startBattlePhase() {
         gameMap.setDrawBlocked(false);
         addBattlePlayers();
         addBattleEnemy();
+        battleController.startBattle();
     }
 
     private void addBattlePlayers(){
@@ -334,7 +339,7 @@ public class GameManager implements IGameManager {
                     Polyman polyman = (Polyman) transform.getInstance();
                     polyman.startBattle();
                     players.add(polyman);
-                    battleManager.addBattler(polyman);
+                    battleController.addBattler(polyman);
                 }
             }
         }
@@ -351,7 +356,7 @@ public class GameManager implements IGameManager {
 
         int numEnemy = enemies.size();
         for(Polyman enemy : enemies) {
-            battleManager.addEnemy(enemy);
+            battleController.addEnemy(enemy);
         }
     }
 }

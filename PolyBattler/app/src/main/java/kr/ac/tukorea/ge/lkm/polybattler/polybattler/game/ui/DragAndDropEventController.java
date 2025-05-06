@@ -4,14 +4,13 @@ import android.util.Log;
 import android.view.MotionEvent;
 
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameState;
-import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.IGameManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.GameMap.GameMap;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Polyman;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 
-public class DragAndDropManager implements IGameManager {
+public class DragAndDropEventController {
     private GameState currentState;
     private final GameMap gameMap;
     private boolean active;
@@ -21,7 +20,7 @@ public class DragAndDropManager implements IGameManager {
     private boolean isDragging;
     private final String TAG = "DragAndDropManager";
 
-    public DragAndDropManager(GameMap gameMap) { // private 생성자
+    public DragAndDropEventController(GameMap gameMap) { // private 생성자
         this.gameMap = gameMap;
         this.draggedTransform = null;
         this.isDragging = false;
@@ -31,32 +30,6 @@ public class DragAndDropManager implements IGameManager {
         currentState = GameState.PREPARE;
     }
 
-    @Override
-    public IGameManager setGameState(GameState state) {
-        switch (state){
-            case PREPARE:
-                active = true;
-                break;
-            case SHOPPING:
-            case BATTLE:
-            case RESULT:
-            case POST_GAME:
-                active = false;
-                if (draggedTransform != null) {
-                    Log.d("Drag and Drop", "Unexpected game state change");
-                    handleActionUp(dragStartPoint.x, dragStartPoint.y);
-                }
-                break;
-        }currentState = state;
-        return this;
-    }
-
-    @Override
-    public GameState getGameState() {
-        return currentState;
-    }
-
-    @Override
     public boolean onTouch(MotionEvent event) {
         if (!active) return false;
 

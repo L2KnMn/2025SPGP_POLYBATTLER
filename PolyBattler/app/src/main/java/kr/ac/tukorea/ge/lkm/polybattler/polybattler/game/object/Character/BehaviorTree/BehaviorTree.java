@@ -1,5 +1,5 @@
 package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.BehaviorTree;
-import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.BattleManager;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.BattleController;
 
 /**
  * Behavior Tree 전체를 관리하고 실행하는 클래스.
@@ -17,9 +17,9 @@ public class BehaviorTree {
      * Behavior Tree를 실행합니다 (매 프레임 호출).
      * @param unit 이 트리를 사용하는 유닛.
      */
-    public void tick(BattleUnit unit, BattleManager battleManager) {
+    public void tick(BattleUnit unit, BattleController battleController) {
         if (rootNode != null) {
-            rootNode.tick(unit, battleManager);
+            rootNode.tick(unit, battleController);
         }
     }
 

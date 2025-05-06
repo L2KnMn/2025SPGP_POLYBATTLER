@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.BattleManager;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.BattleController;
 
 /**
  * 여러 자식 노드를 가지는 복합 노드의 추상 기본 클래스.
@@ -33,5 +33,5 @@ public abstract class CompositeNode implements BTNode {
 
     // tick 메서드는 Sequence, Selector 등 구체적인 클래스에서 구현해야 함
     @Override
-    public abstract BTStatus tick(BattleUnit unit, BattleManager battleManager);
+    public abstract BTStatus tick(BattleUnit unit, BattleController battleController);
 }

@@ -68,19 +68,19 @@ public class EffectManager implements IGameManager {
         addEffect(damageText);
     }
 
-    // 공격 범위 표시 이펙트 (예시)
+    // 공격 범위 표시 이펙트
     public void createAttackRangeEffect(float x, float y, float range, float duration) {
         CircleEffect attackRange = new CircleEffect(x, y, range, Color.YELLOW, duration);
         addEffect(attackRange);
     }
 
-    // 타격 효과 이펙트 (예시)
+    // 타격 효과 이펙트
     public void createHitEffect(float x, float y, float size, float duration) {
         CircleEffect hitEffect = new CircleEffect(x, y, size, Color.RED, duration);
         addEffect(hitEffect);
     }
 
-    // 터치 효과 이펙트 (예시)
+    // 터치 효과 이펙트
     public void createTouchEffect(float x, float y) {
         CircleEffect touchEffect = new CircleEffect(x, y, 20, Color.BLUE, 0.3f); // 짧은 지속 시간
         addEffect(touchEffect);

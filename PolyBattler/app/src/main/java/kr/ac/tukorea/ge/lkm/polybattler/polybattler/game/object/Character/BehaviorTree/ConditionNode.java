@@ -1,8 +1,6 @@
 package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.BehaviorTree;
 
-import android.util.Log;
-
-import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.BattleManager;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.BattleController;
 import java.util.function.BiPredicate; // Predicate 사용 예시
 
 /**
@@ -11,19 +9,19 @@ import java.util.function.BiPredicate; // Predicate 사용 예시
  */
 public class ConditionNode implements BTNode {
     // BiPredicate<BattleUnit, BattleManager> 사용 예시
-    private final BiPredicate<BattleUnit, BattleManager> conditionLogic;
+    private final BiPredicate<BattleUnit, BattleController> conditionLogic;
 
     /**
      * @param conditionLogic 조건을 검사하는 로직. (unit, manager) -> boolean 형태의 람다식.
      */
-    public ConditionNode(BiPredicate<BattleUnit, BattleManager> conditionLogic) {
+    public ConditionNode(BiPredicate<BattleUnit, BattleController> conditionLogic) {
         this.conditionLogic = conditionLogic;
     }
 
     @Override
-    public BTStatus tick(BattleUnit unit, BattleManager battleManager) {
+    public BTStatus tick(BattleUnit unit, BattleController battleController) {
         //System.out.println("Ticking ConditionNode");
-        boolean result = conditionLogic.test(unit, battleManager);
+        boolean result = conditionLogic.test(unit, battleController);
         //System.out.println("Condition result: " + result);
         return result ? BTStatus.SUCCESS : BTStatus.FAILURE;
     }

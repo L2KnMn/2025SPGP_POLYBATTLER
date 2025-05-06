@@ -11,4 +11,8 @@
     <color name="gameMapOutline">#33750A</color>
     <color name="attackPercentBg">#482014</color>
     <color name="attackPercent">#FFEB3B</color>
+    <color name="resultBoardbg">#5D00007E</color>
+    <color name="resultBoardText">#FFFFFF</color>
+    <color name="benchTileColor">#8BC34A</color>
+    <color name="benchTileColorDark">#4CAF50</color>
 </resources>

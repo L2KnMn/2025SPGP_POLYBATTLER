@@ -1,13 +1,16 @@
 package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object;
 
+import android.content.res.Resources;
 import android.util.Log;
-import android.view.MotionEvent;
+
+import androidx.core.content.res.ResourcesCompat;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import kr.ac.tukorea.ge.lkm.polybattler.R;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameState;
-import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.IGameManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.MasterManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.BehaviorTree.BattleUnit;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.BehaviorTree.BehaviorTreeFactory;
@@ -15,11 +18,11 @@ import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Polyma
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.UiManager;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene.Scene;
+import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.GameView;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 
-public class BattleManager implements IGameManager {
+public class BattleController {
     private final Scene master;
-    GameState currentState;
     private Result result;
 
     public enum Team {
@@ -39,18 +42,24 @@ public class BattleManager implements IGameManager {
     UiManager.Signage signage;
 
 
-    public BattleManager(Scene master) {
+    public BattleController(Scene master) {
         this.master = master;
         battlers = new HashMap<>();
         counts = new HashMap<>();
-        currentState = GameState.PREPARE;
         result = Result.NONE;
 
         winMassage = "You Win";
         loseMassage = "You Loose";
 
         signage = UiManager.getInstance(master).addSignage("", Metrics.width/2, Metrics.height/2 - Metrics.GRID_UNIT, Metrics.width, Metrics.height/2);
+        Resources res = GameView.view.getResources();
+        signage.setColors(ResourcesCompat.getColor(res, R.color.resultBoardbg, null), ResourcesCompat.getColor(res, R.color.resultBoardText, null));
         signage.setVisibility(GameState.RESULT, true);
+    }
+
+    public void resignPlayer() {
+        result = Result.LOSE;
+        signage.setText(loseMassage);
     }
 
     public void addBattler(Polyman polyman) {
@@ -65,48 +74,34 @@ public class BattleManager implements IGameManager {
         polyman.getBattleUnit().setTeam(Team.ENEMY);
     }
 
-    @Override
-    public boolean onTouch(MotionEvent event) {
-        return false;
-    }
-
-    @Override
-    public IGameManager setGameState(GameState state) {
-        if (currentState != GameState.BATTLE && state == GameState.BATTLE) {
-            // 전투 상태로 만들고, 행동 트리 삽입
-            result = Result.CONTINUE;
-            // Log.d("BattleManager", "setGameState() called" + state.name());
-            for(Team team : Team.values()) {
-                ArrayList<BattleUnit> units = battlers.get(team);
-                if(units == null)
-                    continue;
-                for(BattleUnit unit : units){
-                   unit.setBehaviorTree(BehaviorTreeFactory.getTreeForShape(unit.getShapeType()), this);
-                   UiManager.getInstance(master).addHpBar(unit);
-                }
-                counts.put(team, units.size());
+    public void startBattle(){
+        // 전투 상태로 만들고, 행동 트리 삽입
+        result = Result.CONTINUE;
+        // Log.d("BattleManager", "setGameState() called" + state.name());
+        for(Team team : Team.values()) {
+            ArrayList<BattleUnit> units = battlers.get(team);
+            if(units == null)
+                continue;
+            for(BattleUnit unit : units){
+                unit.setBehaviorTree(BehaviorTreeFactory.getTreeForShape(unit.getShapeType()), this);
+                UiManager.getInstance(master).addHpBar(unit);
             }
-        }else if(currentState == GameState.BATTLE) {
-            // 중지 시키고 원복
-            for(Team team : Team.values()) {
-                ArrayList<BattleUnit> units = battlers.get(team);
-                if(units == null)
-                    continue;
-                for(BattleUnit unit : units){
-                    BehaviorTreeFactory.releaseTree(unit.getShapeType(), unit.getBehaviorTree());
-                    unit.setBehaviorTree(null, null);
-                    UiManager.getInstance(master).removeHpBar(unit);
-                }
-                units.clear();
-            }
+            counts.put(team, units.size());
         }
-        currentState = state;
-        return this;
     }
 
-    @Override
-    public GameState getGameState() {
-        return currentState;
+    public void endBattle(){
+        // 중지 시키고 원복
+        for(Team team : Team.values()) {
+            ArrayList<BattleUnit> units = battlers.get(team);
+            if(units == null)
+                continue;
+            for(BattleUnit unit : units){
+                BehaviorTreeFactory.releaseTree(unit);
+                UiManager.getInstance(master).removeHpBar(unit);
+            }
+            units.clear();
+        }
     }
 
     public BattleUnit findClosestEnemy(BattleUnit unit) {
@@ -138,7 +133,6 @@ public class BattleManager implements IGameManager {
             counts.put(target.getTeam(), t);
             Log.d("BattleManager", unit.getTeam() + " killed " + target.getTeam() + " be left " + t);
             if (t <= 0) {
-                MasterManager.getInstance(master).setGameState(GameState.RESULT);
                 if(unit.getTeam() == Team.PLAYER){
                     signage.setText(winMassage);
                     result = Result.WIN;
@@ -146,6 +140,7 @@ public class BattleManager implements IGameManager {
                     signage.setText(loseMassage);
                     result = Result.LOSE;
                 }
+                MasterManager.getInstance(master).setGameState(GameState.RESULT);
             }
         }
     }

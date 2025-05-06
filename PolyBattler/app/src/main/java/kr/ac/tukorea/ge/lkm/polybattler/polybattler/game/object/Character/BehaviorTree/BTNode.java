@@ -1,5 +1,5 @@
 package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.BehaviorTree;
-import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.BattleManager;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.BattleController;
 
 /**
  * Behavior Tree의 모든 노드가 구현해야 하는 기본 인터페이스.
@@ -9,10 +9,10 @@ public interface BTNode {
     /**
      * 노드의 로직을 실행합니다.
      * @param unit 이 행동을 실행하는 유닛 객체.
-     * @param battleManager 전투 상황 및 월드 정보를 제공하는 컨텍스트 객체.
+     * @param battleController 전투 상황 및 월드 정보를 제공하는 컨텍스트 객체.
      * @return 노드 실행 후의 상태 (SUCCESS, FAILURE, RUNNING).
      */
-    BTStatus tick(BattleUnit unit, BattleManager battleManager);
+    BTStatus tick(BattleUnit unit, BattleController battleController);
 
     /**
      * 노드가 RUNNING 상태였다가 중단되거나 다시 시작될 때 내부 상태를 초기화하기 위한 메서드 (선택적).
