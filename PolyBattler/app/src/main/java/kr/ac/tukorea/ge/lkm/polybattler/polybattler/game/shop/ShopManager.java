@@ -64,12 +64,6 @@ public class ShopManager implements IGameManager {
         GameState privState = currentState;
         switch (currentState){
         case PREPARE:
-            if(event.getAction() == MotionEvent.ACTION_DOWN
-                    && shop.getIconRect().contains(x, y)) {
-                shop.openShop();
-                MasterManager.getInstance(master).setGameState(GameState.SHOPPING);
-                return true;
-            }
             break;
         case SHOPPING:
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
