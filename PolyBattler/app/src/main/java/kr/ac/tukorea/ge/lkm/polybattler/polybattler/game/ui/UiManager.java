@@ -1,5 +1,6 @@
 package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui;
 
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -21,6 +22,7 @@ import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Behavi
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IGameObject;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.ILayerProvider;
+import kr.ac.tukorea.ge.spgp2025.a2dg.framework.res.BitmapPool;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene.Scene;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.util.Gauge;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.GameView;
@@ -143,10 +145,11 @@ public class UiManager implements IGameManager {
         }
 
         // 특정 게임 상태에서 보이도록 설정
-        public void setVisibility(GameState state, boolean isVisible) {
+        public Signage setVisibility(GameState state, boolean isVisible) {
             if (state.ordinal() < visible.length) {
                 visible[state.ordinal()] = isVisible;
             }
+            return this;
         }
 
         // 텍스트 설정
@@ -243,6 +246,7 @@ public class UiManager implements IGameManager {
         boolean[] visible; // 게임 상태별 가시 상태
         private boolean isPressed = false; // 버튼이 눌린 상태인지
         private final RectF touchArea = new RectF(); // 터치 영역
+        private Bitmap bitmap = null; // 배경 이미지 기본은 사용 안 함
 
         // 버튼 생성자 (텍스트 기반)
         Button(String text, float x, float y, float width, float height, Runnable action){
@@ -262,6 +266,11 @@ public class UiManager implements IGameManager {
             master.add(Layer.ui, this); // Scene에 추가
             uiObjects.add(this); // 관리 목록에 추가
             buttons.add(this); // 버튼 리스트에 추가
+        }
+
+        public Button addImage(int bitmapId){
+            this.bitmap = BitmapPool.get(bitmapId);
+            return this;
         }
 
         // 이미지 기반 버튼 생성자 (추가 구현 필요)
@@ -288,7 +297,11 @@ public class UiManager implements IGameManager {
                 } else {
                     buttonPaint.setColor(Color.GRAY); // 기본 색
                 }
-                canvas.drawRect(drawRect, buttonPaint);
+                if(bitmap != null){
+                    canvas.drawBitmap(bitmap, null, drawRect, null);
+                }else{
+                    canvas.drawRect(drawRect, buttonPaint);
+                }
                 // 텍스트 그리기
                 Paint.FontMetrics fm = buttonTextPaint.getFontMetrics();
                 float textY = drawRect.centerY() - (fm.ascent + fm.descent) / 2;
@@ -466,6 +479,9 @@ public class UiManager implements IGameManager {
     public Button addButton(String text, float x, float y, float width, float height, Runnable action) {
         // uiObjects 및 buttons 리스트에는 생성자에서 이미 추가됨
         return new Button(text, x, y, width, height, action);
+    }
+    public Button addButton(int bitmapId, String text, float x, float y, float width, float height, Runnable action) {
+        return new Button(text, x, y, width, height, action).addImage(bitmapId);
     }
 
     public void addHpBar(BattleUnit unit){

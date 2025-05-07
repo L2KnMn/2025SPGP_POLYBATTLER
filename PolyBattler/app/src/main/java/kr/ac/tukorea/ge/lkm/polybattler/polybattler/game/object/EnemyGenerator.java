@@ -138,13 +138,15 @@ public class EnemyGenerator {
         }
     }
 
-    public void saveRoundData(Context context, int round, ArrayList<Polyman> enemies){
+    public void saveRoundData(Context context, int round, ArrayList<Polyman> polymans){
         RoundData data = new RoundData(round);
-        for (Polyman enemy : enemies) {
-            data.addData(enemy.getShape());
+        // player의 캐릭터들을 데이터에 추가
+        for (Polyman character : polymans) {
+            data.addData(character.getShape());
         }
+        // roundDatasMap에 추가해서 재사용
         ArrayList<RoundData> roundDatas = roundDatasMap.get(round);
-        if(roundDatas == null){
+        if(roundDatas == null){ // 해당 라운드의 리스트가 없으면 하나 만듦
             roundDatas = new ArrayList<>();
             roundDatasMap.put(round, roundDatas);
         }
@@ -318,9 +320,10 @@ public class EnemyGenerator {
             for (EnemyInfo enemy : enemies) {
                 if(enemy.shape == shape){
                     enemy.count++;
-                    return;
+                    return; // 원하는 shapeType의 enemyInfo를 찾았으니 종료
                 }
             }
+            // shapeType에 해당하는 enemyInfo가 없으면 새로 추가
             enemies.add(new EnemyInfo(shape, 1));
         }
     }

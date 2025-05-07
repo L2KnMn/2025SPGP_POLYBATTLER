@@ -136,6 +136,24 @@ public class GameManager implements IGameManager {
                 }
         ).setVisibility(GameState.RESULT, true);
 
+        UiManager.getInstance(master).addSignage("저장하고 종료하시겠습니까?", battleButtonX, Metrics.height/2,
+                Metrics.width, Metrics.height).setVisibility(GameState.POST_GAME, true)
+                .setColors(R.color.resultBoardbg, R.color.resultBoardText);
+
+        UiManager.getInstance(master).addButton("아니요", battleButtonX - buttonWidth/3*2, battleButtonY,
+                buttonWidth, buttonHeight,
+                () -> {            // 버튼 클릭 시 실행될 동작)
+                    cleanGamePhase(false);
+                }
+        ).setVisibility(GameState.POST_GAME, true);
+
+        UiManager.getInstance(master).addButton("예", battleButtonX + buttonWidth/3*2, battleButtonY,
+                buttonWidth, buttonHeight,
+                () -> {            // 버튼 클릭 시 실행될 동작)
+                    cleanGamePhase(true);
+                }
+        ).setVisibility(GameState.POST_GAME, true);
+
         for (int i = 0; i < benchSize; ++i) {
             final int benchIndex = i;
             final float centerX = gameMap.getBenchX(benchIndex);
@@ -290,18 +308,20 @@ public class GameManager implements IGameManager {
                 endBattlePhase();
                 break;
             case POST_GAME: // 플레이어가 게임 오버되면 진입하는 단계, 전투 결과 저장 후 게임 종료 -> MainActivity로 돌아가기
-                cleanGamePhase();
+//                cleanGamePhase();
                 break;
         }
         this.currentState = newState;
         return this;
     }
 
-    private void cleanGamePhase() {
+    private void cleanGamePhase(boolean saveData) {
         Context context = GameView.view.getContext();
         if (context instanceof Activity) {
-            enemyGenerator.saveRoundData(context, getRound(), players);
-            enemyGenerator.saveDataToJson(context);
+            if(saveData) {
+                enemyGenerator.saveRoundData(context, getRound(), players);
+                enemyGenerator.saveDataToJson(context);
+            }
             ((Activity) context).finish();
             Log.i("Game Manager", "Activity finished by GameView request.");
         } else {

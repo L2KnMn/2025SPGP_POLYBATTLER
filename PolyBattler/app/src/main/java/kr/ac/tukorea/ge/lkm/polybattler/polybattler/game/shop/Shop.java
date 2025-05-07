@@ -89,7 +89,7 @@ public class Shop implements IGameObject {
 
     public void createUI(Scene scene){
         UiManager ui = UiManager.getInstance(scene);
-        ui.addButton("SHOP", IconRect.centerX(), IconRect.centerY(), IconRect.width(), IconRect.height(),
+        ui.addButton(R.mipmap.icon_shop,"SHOP", IconRect.centerX(), IconRect.centerY(), IconRect.width(), IconRect.height(),
                 () -> {
                     openShop();
                     MasterManager.getInstance(scene).setGameState(GameState.SHOPPING);
@@ -110,7 +110,7 @@ public class Shop implements IGameObject {
         // 드로잉 로직
         if (active) {
             if (fold) {
-                drawIconButton(canvas);
+                //drawIconButton(canvas);
             } else {
                 canvas.drawRect(backboardRect, backboardPaint);
                 boxOutline.offsetTo(backboardRect.left + interlude.x, backboardRect.top + interlude.y);
