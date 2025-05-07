@@ -13,6 +13,7 @@ public class BattleUnit {
     final Transform transform;
     private BehaviorTree behaviorTree;
     private BattleController battleController;
+    private EffectManager.Effect attackEffect;
 
     BattleController.Team team;
     Polyman.ShapeType shapeType;
@@ -53,6 +54,7 @@ public class BattleUnit {
                 attackRange = Metrics.GRID_UNIT * 5;
                 attackPerSecond = 5;
                 attack=3;
+//                attackEffect = new EffectManager.CircleEffect()
                 break;
             case RECTANGLE:
                 defense=1;
@@ -175,5 +177,19 @@ public class BattleUnit {
         if(behaviorTree != null && battleController != null) {
             behaviorTree.tick(this, battleController);
         }
+    }
+
+    public void initAttackEffect(){
+        if(attackEffect == null){
+            // 생성해서 이펙트 실행시키고
+            // attackEffect에 할당
+        }
+    }
+
+    public void stopAttackEffect() {
+        // attackEffect를 지우라고 해두고 null로 만들어서 알빠노 시전
+        // 최악의 경우에도 2클럭 더 그려지고 삭제될 것이니 신경 끄기
+        attackEffect.remove();
+        attackEffect = null;
     }
 }

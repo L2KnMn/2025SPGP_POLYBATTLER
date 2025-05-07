@@ -3,9 +3,11 @@ package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Behav
 // 필요한 클래스들을 임포트합니다.
 import android.util.Log;
 
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.Effect.EffectManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Polyman;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Polyman.ShapeType; // ShapeType Enum 경로 확인
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.BattleController;
+import kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene.Scene;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -54,12 +56,19 @@ public class BehaviorTreeFactory {
         attackSingleTargetAction = new ActionNode((unit, manager) -> {
             BattleUnit target = unit.getCurrentTarget();
             // 타겟 없거나 죽었으면 실패
-            if (target == null || target.isDead()) return BTStatus.FAILURE;
+            if (target == null || target.isDead()) {
+                unit.stopAttackEffect();
+                return BTStatus.FAILURE;
+            }
             // 공격 쿨다운 준비 안됐으면 진행중
-            if (!unit.isAttackReady()) return BTStatus.RUNNING;
+            if (!unit.isAttackReady()){
+                unit.initAttackEffect();
+                return BTStatus.RUNNING;
+            }
 
             // 공격 실행 및 쿨다운 초기화
             unit.attackTarget(target); // BattleUnit의 공격 메서드 호출
+            unit.stopAttackEffect();
             // System.out.println(unit + " attacks " + target);
             return BTStatus.SUCCESS; // 공격 성공 (이번 틱에)
         });
@@ -106,8 +115,10 @@ public class BehaviorTreeFactory {
                 hasTarget.test(unit, manager) && manager != null && unit.isTargetInRange();
 
         // Condition: 공격 준비가 되었는가? (쿨다운 완료)
-        isAttackReady = (unit, manager) ->
-                unit.isAttackReady();
+        isAttackReady = ((unit, manager) -> {
+                return unit.isAttackReady();
+            }
+        );
     }
 
     private BehaviorTreeFactory(){}

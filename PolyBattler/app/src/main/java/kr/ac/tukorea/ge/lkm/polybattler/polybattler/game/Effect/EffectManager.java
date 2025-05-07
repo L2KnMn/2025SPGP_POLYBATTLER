@@ -73,19 +73,19 @@ public class EffectManager implements IGameManager {
 
     // 공격 범위 표시 이펙트
     public void createAttackRangeEffect(float x, float y, float range, float duration) {
-        CircleEffect attackRange = new CircleEffect(x, y, range, Color.YELLOW, duration);
+        CircleEffect attackRange = new CircleEffect().init(x, y, range, Color.YELLOW, duration);
         addEffect(attackRange);
     }
 
-    // 타격 효과 이펙트
-    public void createHitEffect(float x, float y, float size, float duration) {
-        CircleEffect hitEffect = new CircleEffect(x, y, size, Color.RED, duration);
-        addEffect(hitEffect);
-    }
+//    // 타격 효과 이펙트
+//    public void createHitEffect(float x, float y, float size, float duration) {
+//        CircleEffect hitEffect = new CircleEffect(x, y, size, Color.RED, duration);
+//        addEffect(hitEffect);
+//    }
 
     // 터치 효과 이펙트
     public void createTouchEffect(float x, float y) {
-        CircleEffect touchEffect = new CircleEffect(x, y, 20, Color.BLUE, 0.3f); // 짧은 지속 시간
+        CircleEffect touchEffect = new CircleEffect().init(x, y, 20, Color.BLUE, 0.3f); // 짧은 지속 시간
         addEffect(touchEffect);
     }
 
@@ -93,7 +93,7 @@ public class EffectManager implements IGameManager {
     public boolean onTouch(MotionEvent event) {
         if (currentState == GameState.BATTLE) {
             createTouchEffect(event.getX(), event.getY()); // 터치 이펙트 생성
-            return true; // 이벤트 소비
+            return false; // 이벤트 소비
         }
         return false;
     }
@@ -116,7 +116,6 @@ public class EffectManager implements IGameManager {
         }
         effects.clear();
     }
-
 
     // 이펙트 추상 클래스
     public static abstract class Effect implements IGameObject, IRecyclable, ILayerProvider, IRemovable {
@@ -181,7 +180,7 @@ public class EffectManager implements IGameManager {
         }
     }
 
-    // 데미지 텍스트 이펙트 (이너 클래스)
+    // 데미지 텍스트 이펙트
     public static class DamageTextEffect extends Effect {
         private int damage;
         private Paint damageTextPaint;
@@ -221,34 +220,45 @@ public class EffectManager implements IGameManager {
 
     // 원 모양 이펙트 (공격 범위, 타격 효과 등에 사용)
     public static class CircleEffect extends Effect {
+        private float finalRadius;
         private float radius;
-        private final int color;
+        private int color;
+        private final Paint paint;
 
         public CircleEffect(){
             super();
             color = Color.WHITE;
             radius = Metrics.GRID_UNIT;
+            paint = new Paint();
         }
 
-        public CircleEffect(float x, float y, float radius, int color, float duration) {
-            super(x, y, duration);
-            this.radius = radius;
+        public CircleEffect init(float x, float y, float radius, int color, float duration) {
+            transform.set(x, y);
+            super.duration = duration;
+            super.elapsedTime = 0;
+            this.finalRadius = radius;
+            this.radius = 0;
             this.color = color;
+            paint.setColor(color);
+            paint.setStyle(Paint.Style.FILL);
+            return this;
         }
 
         @Override
         public void update() {
             super.update();
-            this.radius += GameView.frameTime * 20;
         }
 
         @Override
         public void draw(Canvas canvas) {
-            Paint paint = new Paint();
-            paint.setColor(color);
-            paint.setStyle(Paint.Style.FILL);
-            paint.setAlpha(255 - (int) (255 * (elapsedTime / duration))); // 투명도 조절
+            this.radius = finalRadius * elapsedTime / duration;
+            paint.setAlpha(100 - (int) (100 * (elapsedTime / duration)));
             canvas.drawCircle(transform.getPosition().x, transform.getPosition().y, radius, paint);
+        }
+
+        @Override
+        public Layer getLayer() {
+            return Layer.effect_back;
         }
     }
 
@@ -267,7 +277,7 @@ public class EffectManager implements IGameManager {
             coin = null;
         }
 
-        public void init(float x, float y){
+        public CoinEffect init(float x, float y){
             if(coin == null)
                 coin = Scene.top().getRecyclable(Coin.class);
             finished = false;
@@ -331,6 +341,8 @@ public class EffectManager implements IGameManager {
 
             popAnimator.start();
             fadeOutAnimator.start();
+
+            return this;
         }
 
         @Override
@@ -364,4 +376,6 @@ public class EffectManager implements IGameManager {
             return Layer.effect_back;
         }
     }
+
+    public static class single
 }
