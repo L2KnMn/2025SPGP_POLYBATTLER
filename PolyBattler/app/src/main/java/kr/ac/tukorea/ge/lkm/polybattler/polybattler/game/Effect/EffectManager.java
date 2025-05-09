@@ -1,8 +1,11 @@
 package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.Effect;
 
+import android.animation.Animator;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.DashPathEffect;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.util.Log;
 import android.view.MotionEvent;
 
@@ -15,8 +18,10 @@ import java.util.Random;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameState;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.IGameManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.Layer;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.BehaviorTree.BattleUnit;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.IRemovable;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Coin;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IGameObject;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.ILayerProvider;
@@ -164,7 +169,7 @@ public class EffectManager implements IGameManager {
 
         @Override
         public void onRecycle(){
-            Log.d("Effect", "onRecycle() called");
+//            Log.d("Effect", "onRecycle() called");
             elapsedTime = 0;
             finished = false;
         }
@@ -184,6 +189,7 @@ public class EffectManager implements IGameManager {
     public static class DamageTextEffect extends Effect {
         private int damage;
         private Paint damageTextPaint;
+        private ValueAnimator fadeOutAnimator;
 
         public DamageTextEffect(){
             super();
@@ -203,6 +209,23 @@ public class EffectManager implements IGameManager {
             this.damage = damage;
             this.remove = false;
             this.damageTextPaint = paint;
+
+            if (fadeOutAnimator != null && fadeOutAnimator.isRunning()) {
+                fadeOutAnimator.cancel();
+            }
+
+            // 사라지는 애니메이션 (투명도)
+            fadeOutAnimator = ValueAnimator.ofInt(255, 0);
+            fadeOutAnimator.setDuration((long) (duration * 1000 * 0.5)); // 움직임이 끝날 때쯤부터 사라지기 시작
+            fadeOutAnimator.setStartDelay((long) (duration * 1000 * 0.5)); // 전체 지속시간의 50% 이후부터 시작
+            fadeOutAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
+
+            fadeOutAnimator.addUpdateListener(animation -> {
+                int alphaValue = (int) animation.getAnimatedValue();
+                damageTextPaint.setAlpha(alphaValue);
+            });
+
+            fadeOutAnimator.start();
         }
 
         @Override
@@ -215,6 +238,15 @@ public class EffectManager implements IGameManager {
         public void draw(Canvas canvas) {
             if(!finished && damageTextPaint != null)
                 canvas.drawText(String.valueOf(damage), transform.getPosition().x, transform.getPosition().y, damageTextPaint);
+        }
+
+        @Override
+        public void onRecycle(){
+            super.onRecycle();
+            if (fadeOutAnimator != null) {
+                fadeOutAnimator.removeAllUpdateListeners();
+                fadeOutAnimator.cancel();
+            }
         }
     }
 
@@ -377,5 +409,73 @@ public class EffectManager implements IGameManager {
         }
     }
 
-    public static class single
+    public static class AttackEffect extends Effect {
+        BattleUnit attacker;
+        BattleUnit target;
+        Paint paint;
+        ArrayList<DashPathEffect> dashPathEffects;
+        Path path;
+
+        public AttackEffect(){
+            super();
+            paint = new Paint();
+            paint.setColor(Color.RED);
+            paint.setStyle(Paint.Style.STROKE);
+            paint.setStrokeWidth(20);
+
+            // 점선 패턴 설정: [그려질 길이, 간격, 그려질 길이, 간격, ...]
+            // 예: 10px 그리고, 20px 건너뛰고, 10px 그리고, 20px 건너뛰는 패턴
+            dashPathEffects = new ArrayList<>();
+            dashPathEffects.add(new DashPathEffect(new float[]{25f, 25f}, 0f));
+            dashPathEffects.add(new DashPathEffect(new float[]{25f, 25f}, 12.5f));
+            dashPathEffects.add(new DashPathEffect(new float[]{25f, 25f}, 25f));
+            paint.setPathEffect(dashPathEffects.get(0));
+
+            path = new Path();
+        }
+
+        public AttackEffect init(BattleUnit attacker, BattleUnit target){
+            this.attacker = attacker;
+            this.target = target;
+            path.reset();
+            Position pos1 = attacker.getTransform().getPosition();
+            Position pos2 = target.getTransform().getPosition();
+
+            path.moveTo(pos1.x, pos1.y);
+            path.lineTo(pos2.x, pos2.y);
+
+            duration = 100.0f;
+
+            return this;
+        }
+
+        public AttackEffect stop(){
+            finished = true;
+            remove();
+            return this;
+        }
+
+        @Override
+        public void update() {
+            super.update();
+        }
+
+        float elapsedTimeNext = 0;
+        public void draw(Canvas canvas){
+            if(elapsedTime > elapsedTimeNext) {
+                DashPathEffect temp = dashPathEffects.get(0);
+                dashPathEffects.remove(0);
+                paint.setPathEffect(dashPathEffects.get(0));
+                dashPathEffects.add(temp);
+                elapsedTimeNext = elapsedTime + 0.25f;
+            }
+            canvas.drawPath(path, paint);
+        }
+
+        @Override
+        public void remove() {
+            stop();
+            super.remove();
+        }
+    }
 }

@@ -49,12 +49,12 @@ public class BattleUnit {
         defense=0;
         speed=1;
         lastAttackTime = 0;
+        attackEffect = null;
         switch (shapeType){
             case CIRCLE:
                 attackRange = Metrics.GRID_UNIT * 5;
                 attackPerSecond = 5;
                 attack=3;
-//                attackEffect = new EffectManager.CircleEffect()
                 break;
             case RECTANGLE:
                 defense=1;
@@ -180,16 +180,20 @@ public class BattleUnit {
     }
 
     public void initAttackEffect(){
-        if(attackEffect == null){
+        if(attackEffect == null && target != null){
             // 생성해서 이펙트 실행시키고
             // attackEffect에 할당
+            attackEffect = new EffectManager.AttackEffect().init(this, target);
+            EffectManager.getInstance(Scene.top()).addEffect(attackEffect);
         }
     }
 
     public void stopAttackEffect() {
         // attackEffect를 지우라고 해두고 null로 만들어서 알빠노 시전
         // 최악의 경우에도 2클럭 더 그려지고 삭제될 것이니 신경 끄기
-        attackEffect.remove();
-        attackEffect = null;
+        if(attackEffect != null) {
+            attackEffect.remove();
+            attackEffect = null;
+        }
     }
 }
