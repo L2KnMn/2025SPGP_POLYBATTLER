@@ -1,5 +1,7 @@
 package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.BehaviorTree;
 
+import android.util.Log;
+
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.Effect.EffectManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.BattleController;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Polyman;
@@ -53,19 +55,19 @@ public class BattleUnit {
         switch (shapeType){
             case CIRCLE:
                 attackRange = Metrics.GRID_UNIT * 5;
-                attackPerSecond = 5;
-                attack=3;
+                attackPerSecond = 3f/5f;
+                attack=9;
                 break;
             case RECTANGLE:
                 defense=1;
                 attackRange = Metrics.GRID_UNIT * 1;
-                attackPerSecond = 3;
-                attack=4;
+                attackPerSecond = 3f/3f;
+                attack=11;
                 break;
             case TRIANGLE:
                 attackRange = Metrics.GRID_UNIT * 6;
-                attackPerSecond = 4;
-                attack=4;
+                attackPerSecond = 3f/4f;
+                attack=11;
                 break;
         }
     }
@@ -180,11 +182,11 @@ public class BattleUnit {
     }
 
     public void initAttackEffect(){
+        Log.d("Battle Unit", "initAttack() called");
         if(attackEffect == null && target != null){
             // 생성해서 이펙트 실행시키고
             // attackEffect에 할당
             attackEffect = new EffectManager.AttackEffect().init(this, target);
-            EffectManager.getInstance(Scene.top()).addEffect(attackEffect);
         }
     }
 

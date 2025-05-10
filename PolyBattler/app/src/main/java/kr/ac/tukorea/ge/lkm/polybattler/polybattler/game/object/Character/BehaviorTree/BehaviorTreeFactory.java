@@ -30,6 +30,7 @@ public class BehaviorTreeFactory {
     static BTNode attackSingleTargetAction;
     static BTNode attackAreaAction;
     static BTNode moveToTargetAction;
+    static BTNode resetTarget;
 
     static BiPredicate<BattleUnit, BattleController> hasTarget;
     static BiPredicate<BattleUnit, BattleController> isTargetInRange;
@@ -49,7 +50,12 @@ public class BehaviorTreeFactory {
             // BattleManager에게 가장 가까운 적 찾기 요청 (BattleUnit 타입 반환 가정)
             BattleUnit target = manager.findClosestEnemy(unit);
             unit.setCurrentTarget(target); // 찾은 타겟을 유닛 내부에 저장
-            return (target != null) ? BTStatus.SUCCESS : BTStatus.FAILURE;
+            if(target != null) {
+                unit.initAttackEffect();
+                return BTStatus.SUCCESS;
+            }else{
+                return BTStatus.FAILURE;
+            }
         });
 
         // Action: 단일 타겟 공격 (성공/실패/진행중)
@@ -57,18 +63,16 @@ public class BehaviorTreeFactory {
             BattleUnit target = unit.getCurrentTarget();
             // 타겟 없거나 죽었으면 실패
             if (target == null || target.isDead()) {
-                unit.stopAttackEffect();
+                unit.resetAttackCooldown();
                 return BTStatus.FAILURE;
             }
             // 공격 쿨다운 준비 안됐으면 진행중
             if (!unit.isAttackReady()){
-                unit.initAttackEffect();
                 return BTStatus.RUNNING;
             }
 
             // 공격 실행 및 쿨다운 초기화
             unit.attackTarget(target); // BattleUnit의 공격 메서드 호출
-            unit.stopAttackEffect();
             // System.out.println(unit + " attacks " + target);
             return BTStatus.SUCCESS; // 공격 성공 (이번 틱에)
         });
@@ -78,17 +82,21 @@ public class BehaviorTreeFactory {
             // 타겟 개념이 다를 수 있음 (예: 가장 가까운 적 그룹 중심?)
             // 여기서는 일단 현재 타겟 주변 범위로 가정
             BattleUnit target = unit.getCurrentTarget();
-            if (target == null || target.isDead()) return BTStatus.FAILURE; // 기준 타겟 필요
-            if (!unit.isAttackReady()) return BTStatus.RUNNING;
+            if (target == null || target.isDead()){
+                return BTStatus.FAILURE; // 기준 타겟 필요
+            }
+            if (!unit.isAttackReady()){
+                unit.initAttackEffect();
+                return BTStatus.RUNNING;
+            }
 
             //BattleManager에게 범위 내 적 목록 요청
             ArrayList<BattleUnit> targetsInArea = new ArrayList<>();
             manager.findEnemiesInArea(targetsInArea, target.getTransform().getPosition(), unit.getTeam(), 100.0f);
             for (BattleUnit enemy : targetsInArea) {
-                unit.attackTarget(target);
+                unit.attackTarget(enemy);
             }
             //System.out.println(unit + " performs AREA ATTACK around " + target);
-            unit.resetAttackCooldown();
             return BTStatus.SUCCESS;
         });
 
@@ -98,12 +106,17 @@ public class BehaviorTreeFactory {
             if (target == null || target.isDead()) return BTStatus.FAILURE;
             // 이미 범위 내에 있으면 성공
             if (unit.isTargetInRange()) {
-                unit.stopMovement(); // 이동 멈춤 (필요시 BattleUnit에 구현)
                 return BTStatus.SUCCESS;
             }
             // 이동 명령 및 상태 반환
             unit.moveTo(target.getTransform()); // BattleUnit의 이동 메서드 호출
             return unit.isMovementComplete() ? BTStatus.SUCCESS : BTStatus.RUNNING;
+        });
+
+        resetTarget = new ActionNode((unit, battleController) -> {
+            if(unit.getCurrentTarget() != null)
+                unit.setCurrentTarget(null);
+            return BTStatus.SUCCESS;
         });
 
         // Condition: 타겟이 있고 살아있는가?
@@ -144,10 +157,11 @@ public class BehaviorTreeFactory {
                                 // 1순위: 공격 가능하면 범위 공격
                                 new Sequence(
                                         "Attack Area",
-                                        new ConditionNode(hasTarget), // 범위 공격을 위한 타겟 선정 방식 필요시 수정
+                                        new ConditionNode(hasTarget), // 타겟을 가지고 있는지 확인
                                         new ConditionNode(isTargetInRange), // 범위 공격 사거리
                                         new ConditionNode(isAttackReady),
-                                        attackAreaAction // 범위 공격 액션 사용
+                                        attackAreaAction, // 범위 공격 액션 사용
+                                        resetTarget // 공격 했으니 Target 초기화 (다음에 재탐색)
                                 ),
                                 // 2순위: 타겟 있으면 이동 (최적 위치 선정 로직 추가 가능)
                                 new Sequence(
@@ -193,7 +207,8 @@ public class BehaviorTreeFactory {
                                         new ConditionNode(hasTarget),
                                         new ConditionNode(isTargetInRange), // 원거리
                                         new ConditionNode(isAttackReady),
-                                        attackSingleTargetAction
+                                        attackSingleTargetAction,
+                                        resetTarget // 공격 했으니 Target 초기화 (다음에 재탐색)
                                 ),
                                 // 2순위: 타겟 있으면 이동 (추후 Kiting 등 추가 가능)
                                 new Sequence(

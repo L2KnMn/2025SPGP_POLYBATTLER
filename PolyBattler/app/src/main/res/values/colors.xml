@@ -15,4 +15,5 @@
     <color name="resultBoardText">#FFFFFF</color>
     <color name="benchTileColor">#8BC34A</color>
     <color name="benchTileColorDark">#4CAF50</color>
+    <color name="TargetEffect">#86F82015</color>
 </resources>

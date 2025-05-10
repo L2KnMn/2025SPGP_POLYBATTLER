@@ -1,32 +1,5 @@
 {
     "rounds": [
-      {
-        "round": 1,
-        "enemies": [
-          {"shape": "RECTANGLE", "count": 2},
-          {"shape": "CIRCLE", "count": 1}
-        ]
-      },
-      {
-        "round": 2,
-        "enemies": [
-          {"shape": "TRIANGLE", "count": 3}
-        ]
-      },
-      {
-        "round": 3,
-        "enemies": [
-          {"shape": "RECTANGLE", "count": 1},
-          {"shape": "CIRCLE", "count": 2},
-          {"shape": "TRIANGLE", "count": 1}
-        ]
-      },
-      {
-        "round": 4,
-        "enemies": [
-          {"shape": "RECTANGLE", "count": 2},
-          {"shape": "TRIANGLE", "count": 3}
-        ]
-      }
+
     ]
   }

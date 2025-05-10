@@ -133,10 +133,12 @@ public class BattleController {
         if(t != null) {
             t = t - 1;
             counts.put(target.getTeam(), t);
-            EffectManager.CoinEffect coinEffect = new EffectManager.CoinEffect()
-                    .init(target.getTransform().getPosition().x, target.getTransform().getPosition().y);
-            EffectManager.getInstance(master).addEffect(coinEffect);
-            GameManager.getInstance(master).addGold(1);
+            if(target.getTeam() == Team.ENEMY) {
+                EffectManager.CoinEffect coinEffect = new EffectManager.CoinEffect()
+                        .init(target.getTransform().getPosition().x, target.getTransform().getPosition().y);
+                EffectManager.getInstance(master).addEffect(coinEffect);
+                GameManager.getInstance(master).addGold(1);
+            }
             Log.d("BattleManager", unit.getTeam() + " killed " + target.getTeam() + " be left " + t);
             if (t <= 0) {
                 if(unit.getTeam() == Team.PLAYER){

@@ -56,9 +56,12 @@ public class ImageFixScene extends Scene {
         float x = xy[0];
         float y = xy[1];
 
-        EffectManager.getInstance(this).addEffect(
-                new EffectManager.AttackEffect().init(
-                    tester.get(0).getBattleUnit(), tester.get(1).getBattleUnit()));
+//        EffectManager.getInstance(this).addEffect(
+//                new EffectManager.AttackEffect().init(
+//                    tester.get(0).getBattleUnit(), tester.get(1).getBattleUnit()));
+
+        tester.get(0).getBattleUnit().setCurrentTarget(tester.get(1).getBattleUnit());
+        tester.get(0).getBattleUnit().initAttackEffect();
 
         return true;
     }
