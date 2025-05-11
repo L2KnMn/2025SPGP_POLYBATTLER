@@ -22,6 +22,7 @@ import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.IGameManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.Layer;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.BehaviorTree.BattleUnit;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.IRemovable;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Polyman;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Coin;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
@@ -420,6 +421,7 @@ public class EffectManager implements IGameManager {
         Paint paint;
         ArrayList<DashPathEffect> dashPathEffects;
         Path path;
+        boolean areaAttack = false;
 
         public AttackEffect(){
             super();
@@ -438,6 +440,8 @@ public class EffectManager implements IGameManager {
             paint.setPathEffect(dashPathEffects.get(0));
 
             path = new Path();
+
+
         }
 
         public AttackEffect init(BattleUnit attacker, BattleUnit target){
@@ -453,6 +457,8 @@ public class EffectManager implements IGameManager {
             path.lineTo(pos2.x, pos2.y);
 
             EffectManager.getInstance(Scene.top()).addEffect(this);
+
+            areaAttack = attacker.getShapeType() == Polyman.ShapeType.CIRCLE;
 
             return this;
         }
@@ -482,6 +488,9 @@ public class EffectManager implements IGameManager {
                 }else{
                     attacker.stopAttackEffect();
                 }
+            }
+            if(areaAttack){
+                canvas.drawCircle(target.getTransform().getPosition().x, target.getTransform().getPosition().y, attacker.getAreaRange(), paint);
             }
             canvas.drawPath(path, paint);
         }

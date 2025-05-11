@@ -92,7 +92,7 @@ public class BehaviorTreeFactory {
 
             //BattleManager에게 범위 내 적 목록 요청
             ArrayList<BattleUnit> targetsInArea = new ArrayList<>();
-            manager.findEnemiesInArea(targetsInArea, target.getTransform().getPosition(), unit.getTeam(), 100.0f);
+            manager.findEnemiesInArea(targetsInArea, target.getTransform().getPosition(), unit.getTeam(), unit.getAreaRange());
             for (BattleUnit enemy : targetsInArea) {
                 unit.attackTarget(enemy);
             }

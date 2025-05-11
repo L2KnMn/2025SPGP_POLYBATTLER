@@ -23,6 +23,7 @@ public class BattleUnit {
     int hp = 100;
     int maxHp = 100;
     int attack = 10;
+    float areaRange;
     float attackPerSecond;
     float attackRange = Metrics.GRID_UNIT;
     private long lastAttackTime;
@@ -57,17 +58,20 @@ public class BattleUnit {
                 attackRange = Metrics.GRID_UNIT * 5;
                 attackPerSecond = 3f/5f;
                 attack=9;
+                areaRange = Metrics.GRID_UNIT;
                 break;
             case RECTANGLE:
                 defense=1;
                 attackRange = Metrics.GRID_UNIT * 1;
                 attackPerSecond = 3f/3f;
                 attack=11;
+                areaRange = 0;
                 break;
             case TRIANGLE:
                 attackRange = Metrics.GRID_UNIT * 6;
                 attackPerSecond = 3f/4f;
                 attack=11;
+                areaRange = 0;
                 break;
         }
     }
@@ -197,5 +201,9 @@ public class BattleUnit {
             attackEffect.remove();
             attackEffect = null;
         }
+    }
+
+    public float getAreaRange() {
+        return areaRange;
     }
 }
