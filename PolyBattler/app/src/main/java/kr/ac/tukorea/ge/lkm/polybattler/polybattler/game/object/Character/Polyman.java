@@ -1,8 +1,11 @@
 package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character;
 
+import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
+
+import androidx.core.content.res.ResourcesCompat;
 
 import kr.ac.tukorea.ge.lkm.polybattler.R;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.Layer;
@@ -127,18 +130,18 @@ public class Polyman extends Sprite implements IRecyclable, ILayerProvider, IRem
     }
 
     private int getColor(){
+        Resources res = GameView.view.getResources();
         switch (color) {
             case RED:
-                return 0xFFFF0000;
-            case GREEN:
-                return 0xFF00FF00;
+                return ResourcesCompat.getColor(res, R.color.PolymanColorRed, null);
             case BLUE:
-                return 0xFF0000FF;
+                return ResourcesCompat.getColor(res, R.color.PolymanColorBlue, null);
+            case GREEN:
+                return ResourcesCompat.getColor(res, R.color.PolymanColorGreen, null);
             case BLACK:
-                return 0xFF000000;
-            default:
-                return 0xFFFFFFFF;
+                return ResourcesCompat.getColor(res, R.color.PolymanColorBlack, null);
         }
+        return ResourcesCompat.getColor(res, R.color.PolymanColorBlack, null);
     }
 
 //    public boolean inPoint(Position point){

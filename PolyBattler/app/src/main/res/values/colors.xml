@@ -16,4 +16,8 @@
     <color name="benchTileColor">#8BC34A</color>
     <color name="benchTileColorDark">#4CAF50</color>
     <color name="TargetEffect">#86F82015</color>
+    <color name="PolymanColorRed">#FF1000</color>
+    <color name="PolymanColorBlue">#0000FF</color>
+    <color name="PolymanColorGreen">#00FF00</color>
+    <color name="PolymanColorBlack">#000000</color>
 </resources>

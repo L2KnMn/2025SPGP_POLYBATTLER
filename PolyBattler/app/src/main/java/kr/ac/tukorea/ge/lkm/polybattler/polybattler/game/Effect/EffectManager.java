@@ -501,4 +501,52 @@ public class EffectManager implements IGameManager {
             super.remove();
         }
     }
+
+    public static class HitEffect extends Effect {
+        BattleUnit victim;
+        Paint paint;
+        ArrayList<Position> effectPoints;
+        boolean areaAttack = false;
+        public HitEffect(){
+            super();
+            paint = new Paint();
+            Resources res = GameView.view.getResources();
+            paint.setStyle(Paint.Style.STROKE);
+            paint.setStrokeWidth(8);
+
+
+
+        }
+
+        public HitEffect init(BattleUnit victim, int damage){
+            Resources res = GameView.view.getResources();
+            switch (victim.getColorType()) {
+                case RED:
+                    paint.setColor(ResourcesCompat.getColor(res, R.color.PolymanColorRed, null));
+                    break;
+                case BLUE:
+                    paint.setColor(ResourcesCompat.getColor(res, R.color.PolymanColorBlue, null));
+                    break;
+                case GREEN:
+                    paint.setColor(ResourcesCompat.getColor(res, R.color.PolymanColorGreen, null));
+                    break;
+                case BLACK:
+                    paint.setColor(ResourcesCompat.getColor(res, R.color.PolymanColorBlack, null));
+                    break;
+            }
+            paint.setAlpha(128);
+
+            duration = 3.0f;
+
+            return this;
+        }
+
+        @Override
+        public void update() {
+            super.update();
+        }
+
+        public void draw(Canvas canvas){
+        }
+    }
 }

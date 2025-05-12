@@ -171,6 +171,7 @@ public class BattleUnit {
     public Polyman.ShapeType getShapeType() {
         return shapeType;
     }
+    public Polyman.ColorType getColorType() { return colorType; }
     public void setBehaviorTree(BehaviorTree behaviorTree, BattleController battleController) {
         this.behaviorTree = behaviorTree;
         this.battleController = battleController;
