@@ -448,7 +448,7 @@ public class EffectManager implements IGameManager {
             this.attacker = attacker;
             this.target = target;
 
-            duration = 5.0f;
+            duration = 100.0f;
 
             path.reset();
             Position pos1 = attacker.getTransform().getPosition();
@@ -499,6 +499,11 @@ public class EffectManager implements IGameManager {
         public void remove() {
             finished = true;
             super.remove();
+        }
+
+        @Override
+        public Layer getLayer(){
+            return Layer.effect_back;
         }
     }
 
