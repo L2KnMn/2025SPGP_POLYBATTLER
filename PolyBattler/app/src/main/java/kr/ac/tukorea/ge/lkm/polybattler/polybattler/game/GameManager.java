@@ -34,7 +34,6 @@ public class GameManager implements IGameManager {
     private static final Map<Scene, GameManager> instances = new HashMap<>();
     private final Scene master;
     private final DragAndDropEventController dragAndDropEventController;
-    private final Background backgorund;
     private GameState currentState;
     private int round;
     private int gold;
@@ -51,10 +50,8 @@ public class GameManager implements IGameManager {
         currentState = GameState.PREPARE;
         round = 1;
         gold = 100; // 초기 골드
-        backgorund = new Background();
         gameMap = new GameMap(width, height, benchSize);
         this.master = master;
-        master.add(Layer.bg, backgorund);
         master.add(Layer.map, gameMap);
 
         dragAndDropEventController = new DragAndDropEventController();

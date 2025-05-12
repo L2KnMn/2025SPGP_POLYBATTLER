@@ -21,6 +21,5 @@ public class Background implements IGameObject {
 
     @Override
     public void draw(Canvas canvas) {
-        canvas.drawBitmap(backgroundImage, null, Metrics.screenRect, null);
-    }
+        canvas.drawBitmap(backgroundImage, null, Metrics.screenRect, null);    }
 }
