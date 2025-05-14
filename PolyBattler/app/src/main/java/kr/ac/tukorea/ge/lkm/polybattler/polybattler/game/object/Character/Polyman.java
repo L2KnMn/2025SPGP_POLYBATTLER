@@ -31,8 +31,6 @@ public class Polyman extends Sprite implements IRecyclable, ILayerProvider, IRem
     }
     public final Transform transform;
     private final Paint paint;
-    private ShapeType shape;
-    private ColorType color;
     private enum ObjectState {
         IDLE, // 비전투 대기 상태
         BATTLE, // 전투 상태
@@ -42,7 +40,7 @@ public class Polyman extends Sprite implements IRecyclable, ILayerProvider, IRem
     }
     private final BattleUnit unit;
     private ObjectState state = ObjectState.IDLE;
-    private int level;
+    private int level; // 레벨 정보
 
     public Polyman(){
         super(0);
@@ -52,40 +50,55 @@ public class Polyman extends Sprite implements IRecyclable, ILayerProvider, IRem
 
         paint = new Paint();
 
-        shape = ShapeType.RECTANGLE;
-        color = ColorType.BLACK;
-        unit = new BattleUnit(transform, shape, color);
+        this.level = 1; // 기본 레벨 1
+        unit = new BattleUnit(transform, ShapeType.CIRCLE, ColorType.BLACK, this.level);
     }
 
-    public Polyman(ShapeType shape, ColorType color) {
+    public Polyman(ShapeType shape, ColorType color){
         super(0);
         transform = new Transform(this);
         transform.setSize(Metrics.GRID_UNIT);
         transform.setRigid(true);
 
         paint = new Paint();
-        unit = new BattleUnit(transform, shape, color);
+        this.level = 1; // 레벨 초기화
+        unit = new BattleUnit(transform, shape, color, this.level);
 
-        init(shape, color);
+        init(shape, color, level); // init 호출 시 레벨 전달
     }
 
-    // ObjectPool에서 초기화 하기 위해 호출
-    public void init(ShapeType shape, ColorType color){
-        this.shape = shape;
-        this.color = color;
+    public Polyman(ShapeType shape, ColorType color, int level) { // 레벨 파라미터 추가
+        super(0);
+        transform = new Transform(this);
+        transform.setSize(Metrics.GRID_UNIT);
+        transform.setRigid(true);
+
+        paint = new Paint();
+        this.level = level; // 레벨 초기화
+        unit = new BattleUnit(transform, shape, color, this.level);
+
+        init(shape, color, level); // init 호출 시 레벨 전달
+    }
+
+    // ObjectPool에서 초기화 하기 위해 호출 (레벨 파라미터 추가)
+    public void init(ShapeType shape, ColorType color, int level){
+        setShape(shape);
+        setColorType(color);
+        this.level = level; // 레벨 초기화
 
         transform.set(0, 0);
 
-        paint.setColor(getColor());
+        paint.setColor(getColor(color));
         paint.setStyle(Paint.Style.FILL);
 
-        resetBattleStatus();
+        resetBattleStatus(); // resetBattleStatus 내부에서 unit.reset 호출
     }
 
     @Override
     public void update() {
         switch (state) {
             case IDLE:
+                // IDLE 상태에서 레벨 표시는 Polyman에서 그릴 수 있습니다.
                 transform.turnLeft(30 * GameView.frameTime);
                 break;
             case BATTLE:
@@ -107,7 +120,7 @@ public class Polyman extends Sprite implements IRecyclable, ILayerProvider, IRem
             return;
         canvas.save();
         canvas.rotate(transform.getAngle(), transform.getPosition().x, transform.getPosition().y);
-        switch (shape){
+        switch (getShape()){
             case RECTANGLE:
                 canvas.drawRect(transform.getRect(), paint);
                 break;
@@ -120,16 +133,23 @@ public class Polyman extends Sprite implements IRecyclable, ILayerProvider, IRem
             default:
                 break;
         }
+        // TODO: 유닛 레벨을 표시하는 로직 추가
+        // 예시:
+        Paint levelPaint = new Paint();
+        levelPaint.setColor(ResourcesCompat.getColor(GameView.view.getResources(), R.color.white, null));
+        levelPaint.setTextSize(Metrics.GRID_UNIT * 0.3f);
+        levelPaint.setTextAlign(Paint.Align.CENTER);
+        canvas.drawText("★" + level, transform.getPosition().x, transform.getPosition().y - transform.getSize()/2 - 10, levelPaint); // 레벨 텍스트 그리기 예시
+
         if(state == ObjectState.BATTLE){
             float attackPercent = unit.getAttackPercent();
             Gauge gauge = new Gauge(0.1f, R.color.attackPercent, R.color.attackPercentBg);
             gauge.draw(canvas, transform.getPosition().x - 50, transform.getPosition().y + 100, 100, attackPercent);
         }
         canvas.restore();
-        //canvas.drawCircle(transform.getPosition().x, transform.getPosition().y, transform.getSize(), paint);
     }
 
-    private int getColor(){
+    private static int getColor(ColorType color){
         Resources res = GameView.view.getResources();
         switch (color) {
             case RED:
@@ -144,33 +164,14 @@ public class Polyman extends Sprite implements IRecyclable, ILayerProvider, IRem
         return ResourcesCompat.getColor(res, R.color.PolymanColorBlack, null);
     }
 
-//    public boolean inPoint(Position point){
-//        switch (shape){
-//            case RECTANGLE:
-//                if(transform.getRect().contains(point.x, point.y)){
-//                    return true;
-//                }
-//            case CIRCLE:
-//                if(transform.distance(point.x, point.y) < transform.getSize()){
-//                    return true;
-//                }
-//            case TRIANGLE:
-//                if(transform.isPointInTriangle(point)){
-//                    return true;
-//                }
-//            default:
-//                return false;
-//        }
-//    }
-
     public void startBattle() {
         state = ObjectState.BATTLE;
-        // IDLE 애니메이션 초기화
         transform.setAngle(0);
     }
 
     public void resetBattleStatus(){
-        unit.reset(shape, color);
+        // BattleUnit reset 호출 시 레벨 정보 전달 (능력치 재설정을 위해)
+        unit.reset(getShape(), getColorType(), this.level);
         state = ObjectState.IDLE;
     }
 
@@ -181,6 +182,20 @@ public class Polyman extends Sprite implements IRecyclable, ILayerProvider, IRem
     public BattleUnit getBattleUnit() {
         return unit;
     }
+
+    public int getLevel() { // Polyman에서도 레벨을 얻을 수 있도록 추가
+        return level;
+    }
+
+    // 레벨업 처리 메소드
+    public void levelUp() {
+        this.level++;
+        // BattleUnit의 능력치를 새로운 레벨에 맞게 업데이트
+        unit.preset(getShape(), getColorType(), this.level);
+        unit.fillHp(unit.getMaxHp()); // 레벨업 시 체력 완전 회복 등 처리
+        // TODO: 레벨업 시 이펙트나 사운드 추가
+    }
+
 
     @Override
     public void onRecycle() {
@@ -197,8 +212,18 @@ public class Polyman extends Sprite implements IRecyclable, ILayerProvider, IRem
         state = ObjectState.REMOVE;
     }
 
+    public void setShape(ShapeType shape) {
+        getBattleUnit().setShapeType(shape);
+    }
     public ShapeType getShape() {
-        return shape;
+        return getBattleUnit().getShapeType();
+    }
+
+    public void setColorType(ColorType color){
+        getBattleUnit().setColorType(color);
+    }
+    public ColorType getColorType() {
+        return getBattleUnit().getColorType();
     }
 
     @Override

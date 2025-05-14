@@ -255,7 +255,7 @@ public class GameManager implements IGameManager {
         if(polyman == null){
             polyman = new Polyman(shape, color);
         } else {
-            polyman.init(shape, color);
+            polyman.init(shape, color, 1);
         }
         return polyman;
     }
