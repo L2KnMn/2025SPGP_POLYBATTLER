@@ -219,8 +219,8 @@ public class GameManager implements IGameManager {
     public boolean purchaseCharacter(int price, Polyman.ShapeType shape, Polyman.ColorType color) {
         if (spendGold(price)) {
             return addCharacter(shape, color);
-        }
-        return false;
+        }else
+            return false;
     }
 
     public boolean addCharacter(Polyman.ShapeType shape, Polyman.ColorType color) {

@@ -12,7 +12,7 @@ class Field extends MapPart {
 
     Field(int width, int height) {
         super(width, height);
-        countMax = 5;
+        countMax = 6;
         blocked = new boolean[height][width];
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height - 3; j++) {

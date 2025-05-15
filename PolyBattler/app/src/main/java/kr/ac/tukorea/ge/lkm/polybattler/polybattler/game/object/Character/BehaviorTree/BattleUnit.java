@@ -1,5 +1,6 @@
 package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.BehaviorTree;
 
+import android.os.Build;
 import android.util.Log;
 
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.Effect.EffectManager;
@@ -191,10 +192,7 @@ public class BattleUnit {
                 break;
             case MAX_HP_BONUS:
                 // 최대 체력 감소 시 현재 체력이 최대 체력보다 높으면 최대 체력으로 맞춤
-                updateCurrentStats(); // 먼저 최대 체력 갱신
-                if (currentHp > currentMaxHp) {
-                    currentHp = currentMaxHp;
-                }
+                synergyMaxHpBonus -= effect.getValue();
                 break;
             // 다른 시너지 효과 타입에 대한 처리 추가
             case ATTACK_SPEED_BONUS:
@@ -215,21 +213,24 @@ public class BattleUnit {
 
     // 기본 능력치와 시너지 보너스를 합산하여 현재 능력치를 갱신하는 메소드
     private void updateCurrentStats() {
-        this.currentMaxHp = this.baseMaxHp + this.synergyMaxHpBonus;
+        if(this.currentMaxHp < this.baseMaxHp + this.synergyMaxHpBonus){
+            // 최대 체력이 늘어나면 늘어난만큼 현재 hp 회복
+            currentHp += this.baseMaxHp + this.synergyMaxHpBonus - this.currentMaxHp;;
+            this.currentMaxHp = this.baseMaxHp + this.synergyMaxHpBonus;
+        }else {
+            this.currentMaxHp = this.baseMaxHp + this.synergyMaxHpBonus;
+            // 현재 체력이 최대 체력을 초과하지 않도록 보정
+            if (currentHp > currentMaxHp) {
+                currentHp = currentMaxHp;
+            }
+        }
         this.currentAttack = this.baseAttack + this.synergyAttackBonus;
         this.currentDefense = this.baseDefense + this.synergyDefenseBonus;
         this.currentAttackRange = this.baseAttackRange + this.synergyAttackRangeBonus;
         this.currentAttackPerSecond = this.baseAttackPerSecond + this.synergyAttackPerSecondBonus;
         this.currentAreaRange = this.baseAreaRange + this.synergyAreaRangeBonus;
         this.currentSpeed = this.baseSpeed + this.synergySpeedBonus;
-        // 현재 체력이 최대 체력을 초과하지 않도록 보정
-        if (currentHp > currentMaxHp) {
-            currentHp = currentMaxHp;
-        }
     }
-
-
-    // --- 기존 코드 ---
 
     public boolean isDead() {
         return currentHp <= 0;
@@ -376,7 +377,7 @@ public class BattleUnit {
         public enum EffectType {
             ATTACK_BONUS, DEFENSE_BONUS, MAX_HP_BONUS,
             ATTACK_SPEED_BONUS, ATTACK_RANGE_BONUS, AREA_RANGE_BONUS, SPEED_BONUS
-            // TODO: 다른 효과 타입 추가 (치명타, 흡혈, 보호막 등)
+            // TODO: 다른 효과 타입 추가 가능서 (치명타, 흡혈, 보호막 등)
         }
 
         private final EffectType type;

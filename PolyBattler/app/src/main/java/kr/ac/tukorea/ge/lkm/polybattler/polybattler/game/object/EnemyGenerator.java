@@ -252,7 +252,7 @@ public class EnemyGenerator {
                 if (enemy == null) {
                     enemy = new Polyman(info.shape, Polyman.ColorType.BLACK); // 색상은 BLACK 고정
                 } else {
-                    enemy.init(info.shape, Polyman.ColorType.BLACK);
+                    enemy.init(info.shape, Polyman.ColorType.BLACK, 1);
                 }
 
                 Position spawnPos = enemyPositions.get(positionIndex++);

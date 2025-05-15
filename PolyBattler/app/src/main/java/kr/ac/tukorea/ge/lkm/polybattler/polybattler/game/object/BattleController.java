@@ -17,6 +17,7 @@ import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.MasterManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.BehaviorTree.BattleUnit;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.BehaviorTree.BehaviorTreeFactory;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Polyman;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.SynergyFactory;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.UiManager;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene.Scene;
@@ -37,6 +38,7 @@ public class BattleController {
         CONTINUE,
         NONE,
     }
+    SynergyFactory synergyFactory = new SynergyFactory();
     private final Map<Team, ArrayList<BattleUnit>> battlers;
     private final Map<Team, Integer> counts;
     private final String winMassage;
@@ -57,6 +59,7 @@ public class BattleController {
         Resources res = GameView.view.getResources();
         signage.setColors(ResourcesCompat.getColor(res, R.color.resultBoardbg, null), ResourcesCompat.getColor(res, R.color.resultBoardText, null));
         signage.setVisibility(GameState.RESULT, true);
+        synergyFactory = new SynergyFactory();
     }
 
     public void resignPlayer() {
@@ -79,6 +82,13 @@ public class BattleController {
     public void startBattle(){
         // 전투 상태로 만들고, 행동 트리 삽입
         result = Result.CONTINUE;
+
+        // 전투 시작 전 시너지 효과 계산 및 적용
+        ArrayList<BattleUnit> enemyunits = battlers.get(Team.ENEMY);
+        ArrayList<BattleUnit> playerUnits = battlers.get(Team.PLAYER);
+        if (playerUnits != null) {
+            synergyFactory.calculateAndApplySynergies(playerUnits, enemyunits);
+        }
         // Log.d("BattleManager", "setGameState() called" + state.name());
         for(Team team : Team.values()) {
             ArrayList<BattleUnit> units = battlers.get(team);
@@ -93,6 +103,12 @@ public class BattleController {
     }
 
     public void endBattle(){
+        // 전투 시작 전 시너지 효과 계산 및 적용
+        ArrayList<BattleUnit> enemyunits = battlers.get(Team.ENEMY);
+        ArrayList<BattleUnit> playerUnits = battlers.get(Team.PLAYER);
+        if (playerUnits != null) {
+            synergyFactory.removeAllSynergies(playerUnits, enemyunits);
+        }
         // 중지 시키고 원복
         for(Team team : Team.values()) {
             ArrayList<BattleUnit> units = battlers.get(team);

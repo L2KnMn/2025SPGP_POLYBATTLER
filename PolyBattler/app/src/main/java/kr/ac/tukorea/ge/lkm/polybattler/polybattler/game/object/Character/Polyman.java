@@ -31,6 +31,7 @@ public class Polyman extends Sprite implements IRecyclable, ILayerProvider, IRem
     }
     public final Transform transform;
     private final Paint paint;
+    private final Paint levelPaint;
     private enum ObjectState {
         IDLE, // 비전투 대기 상태
         BATTLE, // 전투 상태
@@ -52,6 +53,11 @@ public class Polyman extends Sprite implements IRecyclable, ILayerProvider, IRem
 
         this.level = 1; // 기본 레벨 1
         unit = new BattleUnit(transform, ShapeType.CIRCLE, ColorType.BLACK, this.level);
+
+        levelPaint = new Paint();
+        levelPaint.setColor(ResourcesCompat.getColor(GameView.view.getResources(), R.color.white, null));
+        levelPaint.setTextSize(Metrics.GRID_UNIT * 0.3f);
+        levelPaint.setTextAlign(Paint.Align.CENTER);
     }
 
     public Polyman(ShapeType shape, ColorType color){
@@ -63,6 +69,11 @@ public class Polyman extends Sprite implements IRecyclable, ILayerProvider, IRem
         paint = new Paint();
         this.level = 1; // 레벨 초기화
         unit = new BattleUnit(transform, shape, color, this.level);
+
+        levelPaint = new Paint();
+        levelPaint.setColor(ResourcesCompat.getColor(GameView.view.getResources(), R.color.white, null));
+        levelPaint.setTextSize(Metrics.GRID_UNIT * 0.3f);
+        levelPaint.setTextAlign(Paint.Align.CENTER);
 
         init(shape, color, level); // init 호출 시 레벨 전달
     }
@@ -76,6 +87,11 @@ public class Polyman extends Sprite implements IRecyclable, ILayerProvider, IRem
         paint = new Paint();
         this.level = level; // 레벨 초기화
         unit = new BattleUnit(transform, shape, color, this.level);
+
+        levelPaint = new Paint();
+        levelPaint.setColor(ResourcesCompat.getColor(GameView.view.getResources(), R.color.white, null));
+        levelPaint.setTextSize(Metrics.GRID_UNIT * 0.3f);
+        levelPaint.setTextAlign(Paint.Align.CENTER);
 
         init(shape, color, level); // init 호출 시 레벨 전달
     }
@@ -99,7 +115,7 @@ public class Polyman extends Sprite implements IRecyclable, ILayerProvider, IRem
         switch (state) {
             case IDLE:
                 // IDLE 상태에서 레벨 표시는 Polyman에서 그릴 수 있습니다.
-                transform.turnLeft(30 * GameView.frameTime);
+                // transform.turnLeft(30 * GameView.frameTime);
                 break;
             case BATTLE:
                 unit.tick();
@@ -118,6 +134,13 @@ public class Polyman extends Sprite implements IRecyclable, ILayerProvider, IRem
     public void draw(Canvas canvas) {
         if(state == ObjectState.DEAD || state == ObjectState.REMOVE)
             return;
+
+        canvas.drawText("★" + level, transform.getPosition().x, transform.getPosition().y - transform.getSize()/2 - 10, levelPaint); // 레벨 텍스트 그리기 예시
+        if(state == ObjectState.BATTLE){
+            float attackPercent = unit.getAttackPercent();
+            Gauge gauge = new Gauge(0.1f, R.color.attackPercent, R.color.attackPercentBg);
+            gauge.draw(canvas, transform.getPosition().x - 50, transform.getPosition().y + 100, 100, attackPercent);
+        }
         canvas.save();
         canvas.rotate(transform.getAngle(), transform.getPosition().x, transform.getPosition().y);
         switch (getShape()){
@@ -132,19 +155,6 @@ public class Polyman extends Sprite implements IRecyclable, ILayerProvider, IRem
                 break;
             default:
                 break;
-        }
-        // TODO: 유닛 레벨을 표시하는 로직 추가
-        // 예시:
-        Paint levelPaint = new Paint();
-        levelPaint.setColor(ResourcesCompat.getColor(GameView.view.getResources(), R.color.white, null));
-        levelPaint.setTextSize(Metrics.GRID_UNIT * 0.3f);
-        levelPaint.setTextAlign(Paint.Align.CENTER);
-        canvas.drawText("★" + level, transform.getPosition().x, transform.getPosition().y - transform.getSize()/2 - 10, levelPaint); // 레벨 텍스트 그리기 예시
-
-        if(state == ObjectState.BATTLE){
-            float attackPercent = unit.getAttackPercent();
-            Gauge gauge = new Gauge(0.1f, R.color.attackPercent, R.color.attackPercentBg);
-            gauge.draw(canvas, transform.getPosition().x - 50, transform.getPosition().y + 100, 100, attackPercent);
         }
         canvas.restore();
     }
