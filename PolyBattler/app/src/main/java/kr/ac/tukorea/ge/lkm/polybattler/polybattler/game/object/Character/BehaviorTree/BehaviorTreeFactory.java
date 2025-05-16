@@ -51,7 +51,6 @@ public class BehaviorTreeFactory {
             BattleUnit target = manager.findClosestEnemy(unit);
             unit.setCurrentTarget(target); // 찾은 타겟을 유닛 내부에 저장
             if(target != null) {
-                unit.initAttackEffect();
                 return BTStatus.SUCCESS;
             }else{
                 return BTStatus.FAILURE;
@@ -63,11 +62,13 @@ public class BehaviorTreeFactory {
             BattleUnit target = unit.getCurrentTarget();
             // 타겟 없거나 죽었으면 실패
             if (target == null || target.isDead()) {
-                unit.resetAttackCooldown();
+                unit.setCurrentTarget(null);
                 return BTStatus.FAILURE;
             }
             // 공격 쿨다운 준비 안됐으면 진행중
+            unit.initAttackEffect();
             if (!unit.isAttackReady()){
+                Log.d("attackSingleTargetAction", "not ready");
                 return BTStatus.RUNNING;
             }
 
@@ -83,10 +84,14 @@ public class BehaviorTreeFactory {
             // 여기서는 일단 현재 타겟 주변 범위로 가정
             BattleUnit target = unit.getCurrentTarget();
             if (target == null || target.isDead()){
+                unit.setCurrentTarget(null);
                 return BTStatus.FAILURE; // 기준 타겟 필요
             }
+
+            // 공격 쿨다운 준비 안됐으면 진행중
+            unit.initAttackEffect();
             if (!unit.isAttackReady()){
-                unit.initAttackEffect();
+                Log.d("attackAreaTargetAction", "not ready");
                 return BTStatus.RUNNING;
             }
 
@@ -114,8 +119,9 @@ public class BehaviorTreeFactory {
         });
 
         resetTarget = new ActionNode((unit, battleController) -> {
-            if(unit.getCurrentTarget() != null)
-                unit.setCurrentTarget(null);
+            unit.setCurrentTarget(null);
+            unit.resetAttackCooldown();
+            unit.stopAttackEffect();
             return BTStatus.SUCCESS;
         });
 

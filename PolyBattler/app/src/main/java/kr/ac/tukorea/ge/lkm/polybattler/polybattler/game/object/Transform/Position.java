@@ -44,4 +44,11 @@ public class Position {
         x *= scale;
         y *= scale;
     }
+
+    public Position normalize(){
+        float scale = 1.0f / (float) Math.sqrt(x * x + y * y);
+        x *= scale;
+        y *= scale;
+        return this;
+    }
 }

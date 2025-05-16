@@ -8,6 +8,7 @@ import android.graphics.RectF;
 import androidx.core.content.res.ResourcesCompat;
 
 import kr.ac.tukorea.ge.lkm.polybattler.R;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.Layer;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.BehaviorTree.BattleUnit;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
@@ -22,7 +23,13 @@ import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.GameView;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 
 public class Polyman extends Sprite implements IRecyclable, ILayerProvider, IRemovable, IBoxCollidable {
-
+    static Paint debugPaint;
+    static{
+        debugPaint = new Paint();
+        debugPaint.setColor(0xFFFF0000);
+        debugPaint.setStyle(Paint.Style.STROKE);
+        debugPaint.setStrokeWidth(20);
+    }
     public enum ShapeType {
         RECTANGLE, CIRCLE, TRIANGLE,
     }
@@ -141,9 +148,19 @@ public class Polyman extends Sprite implements IRecyclable, ILayerProvider, IRem
             Gauge gauge = new Gauge(0.1f, R.color.attackPercent, R.color.attackPercentBg);
             gauge.draw(canvas, transform.getPosition().x - 50, transform.getPosition().y + 100, 100, attackPercent);
         }
+
+        drawShape(canvas, transform, paint, getShape());
+    }
+    public static void drawShape(Canvas canvas, Transform transform, Paint paint, ShapeType shape) {
         canvas.save();
         canvas.rotate(transform.getAngle(), transform.getPosition().x, transform.getPosition().y);
-        switch (getShape()){
+        // 방향 그리기 (디버깅)
+        if(GameView.drawsDebugStuffs){
+            canvas.drawLine(transform.getPosition().x, transform.getPosition().y,
+                    transform.getPosition().x, transform.getPosition().y - transform.getSize(), debugPaint);
+        }
+        // 도형 그리기
+        switch (shape){
             case RECTANGLE:
                 canvas.drawRect(transform.getRect(), paint);
                 break;
@@ -209,7 +226,6 @@ public class Polyman extends Sprite implements IRecyclable, ILayerProvider, IRem
 
     @Override
     public void onRecycle() {
-
     }
 
     @Override

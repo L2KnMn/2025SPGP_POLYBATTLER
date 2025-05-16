@@ -343,13 +343,20 @@ public class BattleUnit {
     public void tick(){
         if(behaviorTree != null && battleController != null) {
             behaviorTree.tick(this, battleController);
+            if(target == null) {
+                transform.lookAt(transform.position.x, transform.position.y - 1.0f);
+            }else{
+                transform.lookAt(target.getTransform().getPosition());
+            }
         }
     }
 
     public void initAttackEffect(){
-        Log.d("Battle Unit", "initAttack() called");
         if(attackEffect == null && target != null){
-            attackEffect = new EffectManager.AttackEffect().init(this, target);
+            attackEffect = Scene.top().getRecyclable(EffectManager.AttackEffect.class);
+            if(attackEffect != null){
+                ((EffectManager.AttackEffect)attackEffect).init(this, target);
+            }
         }
     }
 

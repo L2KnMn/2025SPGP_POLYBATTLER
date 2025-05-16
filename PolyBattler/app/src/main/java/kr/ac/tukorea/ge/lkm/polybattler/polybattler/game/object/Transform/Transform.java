@@ -46,8 +46,8 @@ public class Transform {
     public void set(Position pos){
         position.set(pos);
     }
-    public void setAngle(float radian){
-        this.radian = radian;
+    public void setAngle(float angle){
+        this.radian = angle * (float) Math.PI / 180.0f;
     }
     public void turnLeft(float radian){
         this.radian -= radian;
@@ -68,7 +68,7 @@ public class Transform {
         return this.rigid;
     }
     public float getAngle(){
-        return this.radian;
+        return this.radian * 180.0f / (float) Math.PI;
     }
     public float getSize(){
         return Math.min(this.width, this.height);
@@ -161,5 +161,14 @@ public class Transform {
     }
     public boolean isActive(){
         return active;
+    }
+
+    public void lookAt(float x, float y){
+        float dx = x - position.x;
+        float dy = y - position.y;
+        radian = (float) (Math.atan2(dy, dx) + Math.PI/2.0f);
+    }
+    public void lookAt(Position pos){
+        lookAt(pos.x, pos.y);
     }
 }
