@@ -3,6 +3,7 @@ package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Behav
 import android.os.Build;
 import android.util.Log;
 
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.Effect.AttackEffect;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.Effect.EffectManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.BattleController;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Polyman;
@@ -19,7 +20,7 @@ public class BattleUnit {
     final Transform transform;
     private BehaviorTree behaviorTree;
     private BattleController battleController;
-    private EffectManager.Effect attackEffect;
+    private AttackEffect attackEffect;
 
     BattleController.Team team;
     Polyman.ShapeType shapeType;
@@ -247,6 +248,9 @@ public class BattleUnit {
         int actualDamage = Math.max(0, damage - currentDefense); // 현재 방어력 적용
         currentHp -= actualDamage;
         EffectManager.getInstance(Scene.top()).createDamageTextEffect(transform.getPosition().x + (float)Math.random() * 25.0f, transform.getPosition().y, actualDamage);
+        if(isDead()){
+            stopAttackEffect();
+        }
     }
 
     public void fillHp(int hp){
@@ -254,7 +258,13 @@ public class BattleUnit {
     }
 
     public void setCurrentTarget(BattleUnit target) {
+        BattleUnit prevTarget = this.target;
         this.target = target;
+        if(target != null && prevTarget != target) {
+            initAttackEffect();
+        }else {
+            stopAttackEffect();
+        }
     }
 
     public BattleUnit getCurrentTarget() {
@@ -343,21 +353,17 @@ public class BattleUnit {
     public void tick(){
         if(behaviorTree != null && battleController != null) {
             behaviorTree.tick(this, battleController);
-            if(target == null) {
-                transform.lookAt(transform.position.x, transform.position.y - 1.0f);
-            }else{
+            if(target != null) {
                 transform.lookAt(target.getTransform().getPosition());
             }
         }
     }
 
     public void initAttackEffect(){
-        if(attackEffect == null && target != null){
-            attackEffect = Scene.top().getRecyclable(EffectManager.AttackEffect.class);
-            if(attackEffect != null){
-                ((EffectManager.AttackEffect)attackEffect).init(this, target);
-            }
+        if(attackEffect == null){
+            attackEffect = Scene.top().getRecyclable(AttackEffect.class);
         }
+        attackEffect.init(this, target);
     }
 
     public void stopAttackEffect() {

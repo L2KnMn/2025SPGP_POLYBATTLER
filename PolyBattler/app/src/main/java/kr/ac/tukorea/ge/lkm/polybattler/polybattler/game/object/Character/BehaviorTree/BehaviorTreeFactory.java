@@ -30,11 +30,9 @@ public class BehaviorTreeFactory {
     static BTNode attackSingleTargetAction;
     static BTNode attackAreaAction;
     static BTNode moveToTargetAction;
-    static BTNode resetTarget;
 
     static BiPredicate<BattleUnit, BattleController> hasTarget;
     static BiPredicate<BattleUnit, BattleController> isTargetInRange;
-    static BiPredicate<BattleUnit, BattleController> isAttackReady;
 
     // 실제 트리 생성 로직
     private static void buildAndCacheNodes() {
@@ -66,9 +64,7 @@ public class BehaviorTreeFactory {
                 return BTStatus.FAILURE;
             }
             // 공격 쿨다운 준비 안됐으면 진행중
-            unit.initAttackEffect();
             if (!unit.isAttackReady()){
-                Log.d("attackSingleTargetAction", "not ready");
                 return BTStatus.RUNNING;
             }
 
@@ -89,9 +85,7 @@ public class BehaviorTreeFactory {
             }
 
             // 공격 쿨다운 준비 안됐으면 진행중
-            unit.initAttackEffect();
             if (!unit.isAttackReady()){
-                Log.d("attackAreaTargetAction", "not ready");
                 return BTStatus.RUNNING;
             }
 
@@ -118,13 +112,6 @@ public class BehaviorTreeFactory {
             return unit.isMovementComplete() ? BTStatus.SUCCESS : BTStatus.RUNNING;
         });
 
-        resetTarget = new ActionNode((unit, battleController) -> {
-            unit.setCurrentTarget(null);
-            unit.resetAttackCooldown();
-            unit.stopAttackEffect();
-            return BTStatus.SUCCESS;
-        });
-
         // Condition: 타겟이 있고 살아있는가?
         hasTarget = (unit, manager) ->
                 unit.getCurrentTarget() != null && !unit.getCurrentTarget().isDead();
@@ -133,11 +120,6 @@ public class BehaviorTreeFactory {
         isTargetInRange = (unit, manager) ->
                 hasTarget.test(unit, manager) && manager != null && unit.isTargetInRange();
 
-        // Condition: 공격 준비가 되었는가? (쿨다운 완료)
-        isAttackReady = ((unit, manager) -> {
-                return unit.isAttackReady();
-            }
-        );
     }
 
     private BehaviorTreeFactory(){}
@@ -163,11 +145,8 @@ public class BehaviorTreeFactory {
                                 // 1순위: 공격 가능하면 범위 공격
                                 new Sequence(
                                         "Attack Area",
-                                        new ConditionNode(hasTarget), // 타겟을 가지고 있는지 확인
-                                        new ConditionNode(isTargetInRange), // 범위 공격 사거리
-                                        new ConditionNode(isAttackReady),
-                                        attackAreaAction, // 범위 공격 액션 사용
-                                        resetTarget // 공격 했으니 Target 초기화 (다음에 재탐색)
+                                        new ConditionNode(isTargetInRange),
+                                        attackAreaAction // 범위 공격 액션 사용
                                 ),
                                 // 2순위: 타겟 있으면 이동 (최적 위치 선정 로직 추가 가능)
                                 new Sequence(
@@ -187,9 +166,7 @@ public class BehaviorTreeFactory {
                                 // 1순위: 공격 가능하면 공격
                                 new Sequence(
                                         "Attack Single",
-                                        new ConditionNode(hasTarget),
-                                        new ConditionNode(isTargetInRange), // 근접해야 함
-                                        new ConditionNode(isAttackReady),
+                                        new ConditionNode(isTargetInRange),
                                         attackSingleTargetAction
                                 ),
                                 // 2순위: 타겟 있으면 이동
@@ -210,11 +187,8 @@ public class BehaviorTreeFactory {
                                 // 1순위: 공격 가능하면 공격
                                 new Sequence(
                                         "Attack Single",
-                                        new ConditionNode(hasTarget),
                                         new ConditionNode(isTargetInRange), // 원거리
-                                        new ConditionNode(isAttackReady),
-                                        attackSingleTargetAction,
-                                        resetTarget // 공격 했으니 Target 초기화 (다음에 재탐색)
+                                        attackSingleTargetAction
                                 ),
                                 // 2순위: 타겟 있으면 이동 (추후 Kiting 등 추가 가능)
                                 new Sequence(

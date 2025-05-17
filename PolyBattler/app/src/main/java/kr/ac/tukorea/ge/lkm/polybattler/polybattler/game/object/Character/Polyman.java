@@ -154,11 +154,11 @@ public class Polyman extends Sprite implements IRecyclable, ILayerProvider, IRem
     public static void drawShape(Canvas canvas, Transform transform, Paint paint, ShapeType shape) {
         canvas.save();
         canvas.rotate(transform.getAngle(), transform.getPosition().x, transform.getPosition().y);
-        // 방향 그리기 (디버깅)
-        if(GameView.drawsDebugStuffs){
-            canvas.drawLine(transform.getPosition().x, transform.getPosition().y,
-                    transform.getPosition().x, transform.getPosition().y - transform.getSize(), debugPaint);
-        }
+//        // 방향 그리기 (디버깅)
+//        if(GameView.drawsDebugStuffs){
+//            canvas.drawLine(transform.getPosition().x, transform.getPosition().y,
+//                    transform.getPosition().x, transform.getPosition().y - transform.getSize(), debugPaint);
+//        }
         // 도형 그리기
         switch (shape){
             case RECTANGLE:

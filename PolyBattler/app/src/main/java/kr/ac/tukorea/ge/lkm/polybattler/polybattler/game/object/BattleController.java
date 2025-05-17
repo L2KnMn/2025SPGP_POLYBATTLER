@@ -79,16 +79,21 @@ public class BattleController {
         polyman.getBattleUnit().setTeam(Team.ENEMY);
     }
 
-    public void startBattle(){
-        // 전투 상태로 만들고, 행동 트리 삽입
-        result = Result.CONTINUE;
-
+    public void updateSynergy() {
         // 전투 시작 전 시너지 효과 계산 및 적용
         ArrayList<BattleUnit> enemyunits = battlers.get(Team.ENEMY);
         ArrayList<BattleUnit> playerUnits = battlers.get(Team.PLAYER);
         if (playerUnits != null) {
             synergyFactory.calculateAndApplySynergies(playerUnits, enemyunits);
         }
+    }
+
+    public void startBattle(){
+        // 전투 상태로 만들고, 행동 트리 삽입
+        result = Result.CONTINUE;
+
+        updateSynergy();
+
         // Log.d("BattleManager", "setGameState() called" + state.name());
         for(Team team : Team.values()) {
             ArrayList<BattleUnit> units = battlers.get(team);
@@ -103,12 +108,6 @@ public class BattleController {
     }
 
     public void endBattle(){
-        // 전투 시작 전 시너지 효과 계산 및 적용
-        ArrayList<BattleUnit> enemyunits = battlers.get(Team.ENEMY);
-        ArrayList<BattleUnit> playerUnits = battlers.get(Team.PLAYER);
-        if (playerUnits != null) {
-            synergyFactory.removeAllSynergies(playerUnits, enemyunits);
-        }
         // 중지 시키고 원복
         for(Team team : Team.values()) {
             ArrayList<BattleUnit> units = battlers.get(team);
@@ -116,6 +115,7 @@ public class BattleController {
                 continue;
             for(BattleUnit unit : units){
                 BehaviorTreeFactory.releaseTree(unit);
+                unit.stopAttackEffect();
                 UiManager.getInstance(master).removeHpBar(unit);
             }
             units.clear();

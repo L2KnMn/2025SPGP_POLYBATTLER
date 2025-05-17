@@ -61,7 +61,6 @@ public class ImageFixScene extends Scene {
 //                    tester.get(0).getBattleUnit(), tester.get(1).getBattleUnit()));
 
         tester.get(0).getBattleUnit().setCurrentTarget(tester.get(1).getBattleUnit());
-        tester.get(0).getBattleUnit().initAttackEffect();
 
         return true;
     }

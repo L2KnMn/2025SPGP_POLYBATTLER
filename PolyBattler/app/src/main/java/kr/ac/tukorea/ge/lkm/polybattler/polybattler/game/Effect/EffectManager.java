@@ -175,9 +175,9 @@ public class EffectManager implements IGameManager {
 
         @Override
         public void onRecycle(){
-//            Log.d("Effect", "onRecycle() called");
             elapsedTime = 0;
             finished = false;
+            remove = false;
         }
 
         @Override
@@ -407,98 +407,6 @@ public class EffectManager implements IGameManager {
             }
             Scene.top().remove(coin);
             coin = null;
-        }
-
-        @Override
-        public Layer getLayer(){
-            return Layer.effect_back;
-        }
-    }
-
-    public static class AttackEffect extends Effect {
-        BattleUnit attacker;
-        BattleUnit target;
-        Paint paint;
-        ArrayList<DashPathEffect> dashPathEffects;
-        Path path;
-        boolean areaAttack = false;
-
-        public AttackEffect(){
-            super();
-            paint = new Paint();
-            Resources res = GameView.view.getResources();
-            paint.setColor(ResourcesCompat.getColor(res, R.color.TargetEffect, null));
-            paint.setStyle(Paint.Style.STROKE);
-            paint.setStrokeWidth(8);
-
-            // 점선 패턴 설정: [그려질 길이, 간격, 그려질 길이, 간격, ...]
-            // 예: 10px 그리고, 20px 건너뛰고, 10px 그리고, 20px 건너뛰는 패턴
-            dashPathEffects = new ArrayList<>();
-            dashPathEffects.add(new DashPathEffect(new float[]{25f, 25f}, 0f));
-            dashPathEffects.add(new DashPathEffect(new float[]{25f, 25f}, 12.5f));
-            dashPathEffects.add(new DashPathEffect(new float[]{25f, 25f}, 25f));
-            paint.setPathEffect(dashPathEffects.get(0));
-
-            path = new Path();
-
-
-        }
-
-        public AttackEffect init(BattleUnit attacker, BattleUnit target){
-            this.attacker = attacker;
-            this.target = target;
-
-            duration = 100.0f;
-
-            path.reset();
-            Position pos1 = attacker.getTransform().getPosition();
-            Position pos2 = target.getTransform().getPosition();
-            path.moveTo(pos1.x, pos1.y);
-            path.lineTo(pos2.x, pos2.y);
-
-            EffectManager.getInstance(Scene.top()).addEffect(this);
-
-            areaAttack = attacker.getShapeType() == Polyman.ShapeType.CIRCLE;
-
-            return this;
-        }
-
-        @Override
-        public void update() {
-            super.update();
-        }
-
-        float elapsedTimeNext = 0;
-        public void draw(Canvas canvas){
-            if(finished)
-                return;
-            if(elapsedTime > elapsedTimeNext) {
-                path.reset();
-                if(!attacker.isDead() && !target.isDead()) {
-                    Position pos1 = attacker.getTransform().getPosition();
-                    Position pos2 = target.getTransform().getPosition();
-                    path.moveTo(pos1.x, pos1.y);
-                    path.lineTo(pos2.x, pos2.y);
-
-                    DashPathEffect temp = dashPathEffects.get(0);
-                    dashPathEffects.remove(0);
-                    paint.setPathEffect(dashPathEffects.get(0));
-                    dashPathEffects.add(temp);
-                    elapsedTimeNext = elapsedTime + 0.2f;
-                }else{
-                    attacker.stopAttackEffect();
-                }
-            }
-            if(areaAttack){
-                canvas.drawCircle(target.getTransform().getPosition().x, target.getTransform().getPosition().y, attacker.getAreaRange(), paint);
-            }
-            canvas.drawPath(path, paint);
-        }
-
-        @Override
-        public void remove() {
-            finished = true;
-            super.remove();
         }
 
         @Override

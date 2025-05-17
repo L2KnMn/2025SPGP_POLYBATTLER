@@ -502,16 +502,10 @@ public class UiManager implements IGameManager {
 
     public SynergyDisplay addSynergyDisplay(float x, float y, float width, float height) {
         SynergyDisplay synergyDisplay = new SynergyDisplay(x, y, width, height);
-        add(synergyDisplay);
+        master.add(Layer.priority_ui, synergyDisplay);
+        uiObjects.add(synergyDisplay);
+        handleEvents.add(synergyDisplay);
         return synergyDisplay;
-    }
-
-    public void add(IGameObject ui){
-        master.add(Layer.ui, ui);
-        uiObjects.add(ui);
-        if (ui instanceof IEventHandle) {
-            handleEvents.add((IEventHandle)ui);
-        }
     }
 
     // 특정 UI 요소 제거 (필요시)

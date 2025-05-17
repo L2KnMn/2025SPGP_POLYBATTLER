@@ -272,8 +272,14 @@ public class GameManager implements IGameManager {
     }
     @Override
     public boolean onTouch(MotionEvent event) {
-        if (currentState == GameState.PREPARE)
-            return dragAndDropEventController.onTouch(event, gameMap);
+        if (currentState == GameState.PREPARE) {
+            boolean result = dragAndDropEventController.onTouch(event, gameMap);
+            if(result && event.getAction() == MotionEvent.ACTION_UP){
+                addBattlePlayers();
+                battleController.updateSynergy();
+            }
+            return result;
+        }
         return false;
     }
     @Override
@@ -305,7 +311,6 @@ public class GameManager implements IGameManager {
                 endBattlePhase();
                 break;
             case POST_GAME: // 플레이어가 게임 오버되면 진입하는 단계, 전투 결과 저장 후 게임 종료 -> MainActivity로 돌아가기
-//                cleanGamePhase();
                 break;
         }
         this.currentState = newState;
@@ -336,12 +341,12 @@ public class GameManager implements IGameManager {
                 }
             }
         }
+        battleController.endBattle();
         gameMap.restore();
         for(Polyman enemy : enemies){
             enemy.remove();
         }
         enemies.clear();
-        battleController.endBattle();
     }
     private void startBattlePhase() {
         gameMap.setDrawBlocked(false);
@@ -364,6 +369,7 @@ public class GameManager implements IGameManager {
             }
         }
     }
+
     private Polyman.ShapeType getRandomShape(){
         return Polyman.ShapeType.values()[random.nextInt(Polyman.ShapeType.values().length)];
     }
