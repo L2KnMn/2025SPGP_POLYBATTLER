@@ -1,6 +1,7 @@
 package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character;
 
 import android.util.Log;
+import android.view.MotionEvent;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -9,12 +10,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors; // Collectors Import
 
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameState;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.BehaviorTree.BattleUnit;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.BehaviorTree.BattleUnit.SynergyEffect; // SynergyEffect Import
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.IEventHandle;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.UiManager;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.SynergyDisplay;
+import kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene.Scene;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 
 public class SynergyFactory {
-
+    private final SynergyDisplay synergyDisplay;
     // 현재 활성화된 시너지 효과 목록
     private List<ActiveSynergy> activeSynergies = new ArrayList<>();
 
@@ -62,8 +68,23 @@ public class SynergyFactory {
         blueSynergy.put(4, List.of(new SynergyEffect(SynergyEffect.EffectType.ATTACK_SPEED_BONUS, -0.25f)));
         blueSynergy.put(6, List.of(new SynergyEffect(SynergyEffect.EffectType.ATTACK_SPEED_BONUS, -0.5f)));
         colorSynergies.put(Polyman.ColorType.BLUE, blueSynergy);
+    }
 
-        // TODO: Black 시너지 정의
+    public SynergyFactory(Scene master) {
+        // SynergyDisplay 인스턴스 생성 및 초기 위치 설정
+        // 화면 좌측에 패널 배치 예시
+        float panelWidth = Metrics.GRID_UNIT * (4.5f); // 패널 너비 (그리드 4.5칸)
+        float panelHeight = Metrics.height; // 화면 전체 높이
+        float panelX = panelWidth / 2; // 중앙 정렬을 위해 너비의 절반
+        float panelY = Metrics.height / 2; // 화면 중앙
+
+        synergyDisplay = UiManager.getInstance(master).addSynergyDisplay(panelX, panelY, panelWidth, panelHeight);
+        synergyDisplay.updateSynergies(this.getActiveSynergies());
+        synergyDisplay.setVisibility(false); // 시너지 패널은 항상 보이도록 설정 (또는 게임 상태에 따라 제어)
+        UiManager.Button button = UiManager.getInstance(master).addButton("시너지 확인", Metrics.GRID_UNIT, Metrics.GRID_UNIT, Metrics.GRID_UNIT, Metrics.GRID_UNIT,
+                synergyDisplay::open
+        ).setVisibility(GameState.PREPARE, true).setVisibility(GameState.BATTLE, true);
+        synergyDisplay.addOpener(button);
     }
 
     // 시너지 계산 및 적용 (아군 유닛 목록과 적 유닛 목록 모두 필요)

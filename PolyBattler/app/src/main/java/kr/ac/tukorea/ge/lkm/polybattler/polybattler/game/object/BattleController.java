@@ -38,7 +38,7 @@ public class BattleController {
         CONTINUE,
         NONE,
     }
-    SynergyFactory synergyFactory = new SynergyFactory();
+    SynergyFactory synergyFactory;
     private final Map<Team, ArrayList<BattleUnit>> battlers;
     private final Map<Team, Integer> counts;
     private final String winMassage;
@@ -59,7 +59,7 @@ public class BattleController {
         Resources res = GameView.view.getResources();
         signage.setColors(ResourcesCompat.getColor(res, R.color.resultBoardbg, null), ResourcesCompat.getColor(res, R.color.resultBoardText, null));
         signage.setVisibility(GameState.RESULT, true);
-        synergyFactory = new SynergyFactory();
+        synergyFactory = new SynergyFactory(master);
     }
 
     public void resignPlayer() {

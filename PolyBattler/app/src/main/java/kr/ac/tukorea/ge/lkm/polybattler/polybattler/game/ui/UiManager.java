@@ -19,6 +19,7 @@ import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameState;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.IGameManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.Layer;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.BehaviorTree.BattleUnit;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.SynergyFactory;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IGameObject;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.ILayerProvider;
@@ -34,7 +35,7 @@ public class UiManager implements IGameManager {
     private final HpBarManager hpBarManager;
     private GameState currentState = GameState.PREPARE; // 초기 상태 설정
     private final List<IGameObject> uiObjects; // 관리할 UI 요소 리스트
-    private final List<Button> buttons; // 터치 이벤트를 받을 버튼 리스트
+    private final List<IEventHandle> handleEvents; // 터치 이벤트를 받을 버튼 리스트
     private final Paint textPaint; // 텍스트용 Paint
     private final Paint backgroundPaint; // 배경용 Paint
     private final String TAG = "UiManager";
@@ -237,7 +238,7 @@ public class UiManager implements IGameManager {
     }
 
     // Button 구현
-    public class Button implements IGameObject {
+    public class Button implements IGameObject, IEventHandle {
         private final Transform transform;
         private final String text; // 버튼 텍스트 (이미지 버튼도 가능하도록 확장 가능)
         private final Runnable action; // 버튼 클릭 시 실행될 동작
@@ -265,7 +266,7 @@ public class UiManager implements IGameManager {
 
             master.add(Layer.ui, this); // Scene에 추가
             uiObjects.add(this); // 관리 목록에 추가
-            buttons.add(this); // 버튼 리스트에 추가
+            handleEvents.add(this); // 버튼 리스트에 추가
         }
 
         public Button addImage(int bitmapId){
@@ -298,7 +299,7 @@ public class UiManager implements IGameManager {
                     buttonPaint.setColor(Color.GRAY); // 기본 색
                 }
                 if(bitmap != null){
-                    canvas.drawBitmap(bitmap, null, drawRect, null);
+                    canvas.drawBitmap(bitmap, null, drawRect, buttonPaint);
                 }else{
                     canvas.drawRect(drawRect, buttonPaint);
                 }
@@ -316,6 +317,7 @@ public class UiManager implements IGameManager {
         }
 
         // 터치 이벤트 처리 (UiManager의 onTouch에서 호출될 것)
+        @Override
         public boolean handleTouchEvent(MotionEvent event, float x, float y) {
             RectF area = getTouchArea();
             boolean contains = area.contains(x, y);
@@ -352,6 +354,11 @@ public class UiManager implements IGameManager {
                     break;
             }
             return false; // 이 버튼이 이벤트를 소비하지 않음 (DOWN에서 true 반환했을 경우 제외)
+        }
+
+        @Override
+        public boolean isVisible(GameState state) {
+            return visible[state.ordinal()];
         }
     }
 
@@ -401,7 +408,7 @@ public class UiManager implements IGameManager {
     private UiManager(Scene master) {
         this.master = master;
         this.uiObjects = new ArrayList<>();
-        this.buttons = new ArrayList<>();
+        this.handleEvents = new ArrayList<>();
         this.hpBarManager = new HpBarManager();
 
         // 기본 Paint 설정
@@ -429,13 +436,14 @@ public class UiManager implements IGameManager {
         float y = xy[1];
 
         // 버튼들에 터치 이벤트 전달 (역순으로 전달하여 위에 있는 버튼이 먼저 받도록 함)
-        for (int i = buttons.size() - 1; i >= 0; i--) {
-            Button button = buttons.get(i);
-            if(button.visible[currentState.ordinal()])
+        for (int i = handleEvents.size() - 1; i >= 0; i--) {
+            IEventHandle button = handleEvents.get(i);
+            if(button.isVisible(currentState)) {
                 if (button.handleTouchEvent(event, x, y)) {
-                // 특정 버튼이 터치 이벤트를 처리했다면 더 이상 다른 UI 요소나 게임 로직으로 전달하지 않음
+                    // 특정 버튼이 터치 이벤트를 처리했다면 더 이상 다른 UI 요소나 게임 로직으로 전달하지 않음
                     return true;
                 }
+            }
         }
 
         // 어떤 버튼도 이벤트를 처리하지 않았으면 다른 Manager가 처리하도록 함
@@ -492,12 +500,26 @@ public class UiManager implements IGameManager {
         hpBarManager.RemoveUnit(unit);
     }
 
+    public SynergyDisplay addSynergyDisplay(float x, float y, float width, float height) {
+        SynergyDisplay synergyDisplay = new SynergyDisplay(x, y, width, height);
+        add(synergyDisplay);
+        return synergyDisplay;
+    }
+
+    public void add(IGameObject ui){
+        master.add(Layer.ui, ui);
+        uiObjects.add(ui);
+        if (ui instanceof IEventHandle) {
+            handleEvents.add((IEventHandle)ui);
+        }
+    }
+
     // 특정 UI 요소 제거 (필요시)
     public void removeUIObject(IGameObject uiObject) {
         master.remove(Layer.ui, uiObject);
         uiObjects.remove(uiObject);
         if (uiObject instanceof Button) {
-            buttons.remove((Button) uiObject);
+            handleEvents.remove((Button) uiObject);
         }
     }
 
@@ -509,7 +531,7 @@ public class UiManager implements IGameManager {
         }
         // 관리 리스트 비우기
         uiObjects.clear();
-        buttons.clear();
+        handleEvents.clear();
         // Toast는 Scene에서 제거되지만 객체는 유지
         master.remove(toast);
         toast.reset(); // 초기화
