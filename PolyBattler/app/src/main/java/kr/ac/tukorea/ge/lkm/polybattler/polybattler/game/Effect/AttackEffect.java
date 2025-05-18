@@ -12,6 +12,8 @@ import androidx.core.content.res.ResourcesCompat;
 import java.util.ArrayList;
 
 import kr.ac.tukorea.ge.lkm.polybattler.R;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameManager;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameState;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.Layer;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.BehaviorTree.BattleUnit;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Polyman;
@@ -73,6 +75,10 @@ public class AttackEffect extends EffectManager.Effect {
     @Override
     public void update() {
         elapsedTime += GameView.frameTime;
+        if(GameManager.getInstance(Scene.top()).getGameState() != GameState.BATTLE){
+            remove();
+            return;
+        }
         if(remove){
             Scene.top().remove(this);
         }

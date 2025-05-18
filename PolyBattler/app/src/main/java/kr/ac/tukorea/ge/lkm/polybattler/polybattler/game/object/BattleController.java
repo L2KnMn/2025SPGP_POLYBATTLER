@@ -115,7 +115,6 @@ public class BattleController {
                 continue;
             for(BattleUnit unit : units){
                 BehaviorTreeFactory.releaseTree(unit);
-                unit.stopAttackEffect();
                 UiManager.getInstance(master).removeHpBar(unit);
             }
             units.clear();

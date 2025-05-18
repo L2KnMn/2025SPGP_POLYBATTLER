@@ -105,6 +105,7 @@ public class Polyman extends Sprite implements IRecyclable, ILayerProvider, IRem
 
     // ObjectPool에서 초기화 하기 위해 호출 (레벨 파라미터 추가)
     public void init(ShapeType shape, ColorType color, int level){
+        state = ObjectState.IDLE;
         setShape(shape);
         setColorType(color);
         this.level = level; // 레벨 초기화
@@ -121,8 +122,6 @@ public class Polyman extends Sprite implements IRecyclable, ILayerProvider, IRem
     public void update() {
         switch (state) {
             case IDLE:
-                // IDLE 상태에서 레벨 표시는 Polyman에서 그릴 수 있습니다.
-                // transform.turnLeft(30 * GameView.frameTime);
                 break;
             case BATTLE:
                 unit.tick();
@@ -200,6 +199,7 @@ public class Polyman extends Sprite implements IRecyclable, ILayerProvider, IRem
         // BattleUnit reset 호출 시 레벨 정보 전달 (능력치 재설정을 위해)
         unit.reset(getShape(), getColorType(), this.level);
         state = ObjectState.IDLE;
+        transform.lookAt(transform.getPosition().x, transform.getPosition().y - 1); // 시선도 초기화
     }
 
     public boolean isDead() {

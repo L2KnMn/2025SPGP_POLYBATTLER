@@ -248,9 +248,6 @@ public class BattleUnit {
         int actualDamage = Math.max(0, damage - currentDefense); // 현재 방어력 적용
         currentHp -= actualDamage;
         EffectManager.getInstance(Scene.top()).createDamageTextEffect(transform.getPosition().x + (float)Math.random() * 25.0f, transform.getPosition().y, actualDamage);
-        if(isDead()){
-            stopAttackEffect();
-        }
     }
 
     public void fillHp(int hp){
@@ -262,7 +259,7 @@ public class BattleUnit {
         this.target = target;
         if(target != null && prevTarget != target) {
             initAttackEffect();
-        }else {
+        }else if(target == null) {
             stopAttackEffect();
         }
     }

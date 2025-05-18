@@ -344,6 +344,7 @@ public class GameManager implements IGameManager {
         battleController.endBattle();
         gameMap.restore();
         for(Polyman enemy : enemies){
+            enemy.resetBattleStatus();
             enemy.remove();
         }
         enemies.clear();
