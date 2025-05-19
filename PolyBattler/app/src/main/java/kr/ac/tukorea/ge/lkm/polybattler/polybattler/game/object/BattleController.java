@@ -65,12 +65,18 @@ public class BattleController {
     public void resignPlayer() {
         result = Result.LOSE;
         signage.setText(loseMassage);
-    }
+   }
 
-    public void addBattler(Polyman polyman) {
+    public void addFriendlyBattler(Polyman polyman) {
         ArrayList<BattleUnit> units = battlers.computeIfAbsent(Team.PLAYER, k -> new ArrayList<>());
         units.add(polyman.getBattleUnit());
         polyman.getBattleUnit().setTeam(Team.PLAYER);
+    }
+
+    public void emtpyBattler(Team team){
+        ArrayList<BattleUnit> units = battlers.get(team);
+        if(units != null)
+            units.clear();
     }
 
     public void addEnemy(Polyman polyman) {

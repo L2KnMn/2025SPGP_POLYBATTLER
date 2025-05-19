@@ -392,13 +392,16 @@ public class BattleUnit {
 
         private final EffectType type;
         private final float value; // 정수형 능력치 보너스
+        private final int tier;
 
-        public SynergyEffect(EffectType type, float value) {
+        public SynergyEffect(EffectType type, float value, int tier) {
             this.type = type;
             this.value = value;
+            this.tier = tier;
         }
 
         public EffectType getType() { return type; }
         public float getValue() { return value; }
+        public int getTier(){ return tier; }
     }
 }

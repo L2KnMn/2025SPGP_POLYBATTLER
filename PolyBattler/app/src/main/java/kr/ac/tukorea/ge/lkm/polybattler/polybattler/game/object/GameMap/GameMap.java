@@ -1,6 +1,5 @@
 package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.GameMap;
 
-import android.annotation.SuppressLint;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -10,18 +9,20 @@ import android.util.Log;
 import androidx.core.content.res.ResourcesCompat;
 
 import java.util.ArrayList;
-import java.util.ResourceBundle;
+import java.util.List;
 
 import kr.ac.tukorea.ge.lkm.polybattler.R;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.UiManager;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IGameObject;
+import kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene.Scene;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.GameView;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 
 public class GameMap implements IGameObject {
     private final Field field;
-    private final MapPart bench;
+    private final Bench bench;
 
     private final float length;
     private final RectF tileRect;
@@ -34,16 +35,14 @@ public class GameMap implements IGameObject {
     private final Paint paintBenchDark;
     private final Paint paintFilter;
 
-//    private final boolean active;
-
     private final Transform predictPoint;
     private final Paint predictRectPaint;
     private boolean floatObjectOn;
     private boolean drawBlocked;
 
-    public GameMap(final int width, final int height, final int benchSize){
+    public GameMap(Scene master, final int width, final int height, final int benchSize){
         field = new Field(width, height);
-        bench = new MapPart(benchSize, 1);
+        bench = new Bench(master, benchSize, 1);
 
         int width_max = Math.max(benchSize, width);
         int height_max = height + 1;
@@ -288,8 +287,9 @@ public class GameMap implements IGameObject {
         float x = bench.leftTop.x + length * (index + 0.5f);
         float y = bench.leftTop.y + length/2;
         transform.goTo(x, y);
-        if(transform.isRigid())
+        if(transform.isRigid()){
             return putOnBench(transform);
+        }
         return true;
     }
 
@@ -499,6 +499,20 @@ public class GameMap implements IGameObject {
             randomPosition.x = getTileX(width_height[0], Gravity.CENTER);
             randomPosition.y = getTileY(width_height[1], Gravity.CENTER);
         }
+    }
+
+    public List<Transform> getAllObjects() {
+        List<Transform> result = new ArrayList<>(field.getAllObjects());
+        result.addAll(bench.getAllObjects());
+        return result;
+    }
+
+    public void addCellButton(UiManager.Button button){
+        bench.addCellButton(button);
+    }
+
+    public UiManager.Button getCellButton(int benchIndex) {
+        return bench.getCellButton(benchIndex);
     }
 }
 

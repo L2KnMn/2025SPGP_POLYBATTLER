@@ -43,8 +43,9 @@ public class DragAndDropEventController {
                 handleActionMove(x, y, gameMap);
                 return isDragging;
             case MotionEvent.ACTION_UP:
+                boolean privIsDragged = isDragging;
                 handleActionUp(x, y, gameMap);
-                return isDragging;
+                return (privIsDragged != isDragging && draggedTransform == null);
         }
         previous.set(x,y);
         return false ;

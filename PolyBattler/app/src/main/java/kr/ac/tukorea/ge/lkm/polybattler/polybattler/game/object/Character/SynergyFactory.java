@@ -1,19 +1,15 @@
 package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character;
 
 import android.util.Log;
-import android.view.MotionEvent;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors; // Collectors Import
 
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameState;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.BehaviorTree.BattleUnit;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.BehaviorTree.BattleUnit.SynergyEffect; // SynergyEffect Import
-import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.IEventHandle;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.UiManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.SynergyDisplay;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene.Scene;
@@ -31,42 +27,42 @@ public class SynergyFactory {
     static {
         // ShapeType 시너지 예시 (2/4마리)
         Map<Integer, List<SynergyEffect>> rectangleSynergy = new HashMap<>();
-        rectangleSynergy.put(2, List.of(new SynergyEffect(SynergyEffect.EffectType.DEFENSE_BONUS, 3)));
-        rectangleSynergy.put(4, List.of(new SynergyEffect(SynergyEffect.EffectType.DEFENSE_BONUS, 6),
-                new SynergyEffect(SynergyEffect.EffectType.MAX_HP_BONUS, 50))); // 방어력 및 체력 보너스
+        rectangleSynergy.put(2, List.of(new SynergyEffect(SynergyEffect.EffectType.DEFENSE_BONUS, 3, 1)));
+        rectangleSynergy.put(4, List.of(new SynergyEffect(SynergyEffect.EffectType.DEFENSE_BONUS, 6, 2),
+                new SynergyEffect(SynergyEffect.EffectType.MAX_HP_BONUS, 50, 2))); // 방어력 및 체력 보너스
         shapeSynergies.put(Polyman.ShapeType.RECTANGLE, rectangleSynergy);
 
         Map<Integer, List<SynergyEffect>> circleSynergy = new HashMap<>();
-        circleSynergy.put(2, List.of(new SynergyEffect(SynergyEffect.EffectType.ATTACK_SPEED_BONUS, 0.2f))); // 공격 속도 20% 증가
-        circleSynergy.put(4, List.of(new SynergyEffect(SynergyEffect.EffectType.ATTACK_SPEED_BONUS, 0.5f),
-                new SynergyEffect(SynergyEffect.EffectType.AREA_RANGE_BONUS, Metrics.GRID_UNIT * 0.5f))); // 공격 속도 및 범위 범위 증가
+        circleSynergy.put(2, List.of(new SynergyEffect(SynergyEffect.EffectType.ATTACK_SPEED_BONUS, 0.2f, 1))); // 공격 속도 20% 증가
+        circleSynergy.put(4, List.of(new SynergyEffect(SynergyEffect.EffectType.ATTACK_SPEED_BONUS, 0.5f, 2),
+                new SynergyEffect(SynergyEffect.EffectType.AREA_RANGE_BONUS, Metrics.GRID_UNIT * 0.5f, 2))); // 공격 속도 및 범위 범위 증가
         shapeSynergies.put(Polyman.ShapeType.CIRCLE, circleSynergy);
 
         Map<Integer, List<SynergyEffect>> triangleSynergy = new HashMap<>();
-        triangleSynergy.put(2, List.of(new SynergyEffect(SynergyEffect.EffectType.ATTACK_BONUS, 5))); // 공격력 증가 (예시)
-        triangleSynergy.put(4, List.of(new SynergyEffect(SynergyEffect.EffectType.ATTACK_BONUS, 10),
-                new SynergyEffect(SynergyEffect.EffectType.ATTACK_RANGE_BONUS, Metrics.GRID_UNIT))); // 공격력 및 공격 범위 증가 (예시)
+        triangleSynergy.put(2, List.of(new SynergyEffect(SynergyEffect.EffectType.ATTACK_BONUS, 5, 1))); // 공격력 증가 (예시)
+        triangleSynergy.put(4, List.of(new SynergyEffect(SynergyEffect.EffectType.ATTACK_BONUS, 10, 2),
+                new SynergyEffect(SynergyEffect.EffectType.ATTACK_RANGE_BONUS, Metrics.GRID_UNIT, 2))); // 공격력 및 공격 범위 증가 (예시)
         shapeSynergies.put(Polyman.ShapeType.TRIANGLE, triangleSynergy);
 
 
         // ColorType 시너지 예시 (2/4/6마리)
         Map<Integer, List<SynergyEffect>> redSynergy = new HashMap<>();
-        redSynergy.put(2, List.of(new SynergyEffect(SynergyEffect.EffectType.ATTACK_BONUS, 4)));
-        redSynergy.put(4, List.of(new SynergyEffect(SynergyEffect.EffectType.ATTACK_BONUS, 10), new SynergyEffect(SynergyEffect.EffectType.SPEED_BONUS, 1)));
-        redSynergy.put(6, List.of(new SynergyEffect(SynergyEffect.EffectType.ATTACK_BONUS, 20), new SynergyEffect(SynergyEffect.EffectType.SPEED_BONUS, 2)));
+        redSynergy.put(2, List.of(new SynergyEffect(SynergyEffect.EffectType.ATTACK_BONUS, 4, 1)));
+        redSynergy.put(4, List.of(new SynergyEffect(SynergyEffect.EffectType.ATTACK_BONUS, 10, 2), new SynergyEffect(SynergyEffect.EffectType.SPEED_BONUS, 1, 2)));
+        redSynergy.put(6, List.of(new SynergyEffect(SynergyEffect.EffectType.ATTACK_BONUS, 20, 3), new SynergyEffect(SynergyEffect.EffectType.SPEED_BONUS, 2, 3)));
         colorSynergies.put(Polyman.ColorType.RED, redSynergy);
 
         Map<Integer, List<SynergyEffect>> greenSynergy = new HashMap<>();
-        greenSynergy.put(2, List.of(new SynergyEffect(SynergyEffect.EffectType.MAX_HP_BONUS, 20)));
-        greenSynergy.put(4, List.of(new SynergyEffect(SynergyEffect.EffectType.MAX_HP_BONUS, 50), new SynergyEffect(SynergyEffect.EffectType.DEFENSE_BONUS, 5)));
-        greenSynergy.put(6, List.of(new SynergyEffect(SynergyEffect.EffectType.MAX_HP_BONUS, 100), new SynergyEffect(SynergyEffect.EffectType.DEFENSE_BONUS, 10)));
+        greenSynergy.put(2, List.of(new SynergyEffect(SynergyEffect.EffectType.MAX_HP_BONUS, 20, 1)));
+        greenSynergy.put(4, List.of(new SynergyEffect(SynergyEffect.EffectType.MAX_HP_BONUS, 50, 2), new SynergyEffect(SynergyEffect.EffectType.DEFENSE_BONUS, 5, 2)));
+        greenSynergy.put(6, List.of(new SynergyEffect(SynergyEffect.EffectType.MAX_HP_BONUS, 100, 3), new SynergyEffect(SynergyEffect.EffectType.DEFENSE_BONUS, 10, 3)));
         colorSynergies.put(Polyman.ColorType.GREEN, greenSynergy);
 
         Map<Integer, List<SynergyEffect>> blueSynergy = new HashMap<>();
         // 파랑 시너지는 적에게 공격 속도 감소 디버프를 적용
-        blueSynergy.put(2, List.of(new SynergyEffect(SynergyEffect.EffectType.ATTACK_SPEED_BONUS, -0.1f)));
-        blueSynergy.put(4, List.of(new SynergyEffect(SynergyEffect.EffectType.ATTACK_SPEED_BONUS, -0.25f)));
-        blueSynergy.put(6, List.of(new SynergyEffect(SynergyEffect.EffectType.ATTACK_SPEED_BONUS, -0.5f)));
+        blueSynergy.put(2, List.of(new SynergyEffect(SynergyEffect.EffectType.ATTACK_SPEED_BONUS, -0.1f, 1)));
+        blueSynergy.put(4, List.of(new SynergyEffect(SynergyEffect.EffectType.ATTACK_SPEED_BONUS, -0.25f, 2)));
+        blueSynergy.put(6, List.of(new SynergyEffect(SynergyEffect.EffectType.ATTACK_SPEED_BONUS, -0.5f, 3)));
         colorSynergies.put(Polyman.ColorType.BLUE, blueSynergy);
     }
 
@@ -115,13 +111,13 @@ public class SynergyFactory {
             int count = entry.getValue();
 
             if (shapeSynergies.containsKey(shapeType)) {
-                Map<Integer, List<SynergyEffect>> tiers = shapeSynergies.get(shapeType);
-                List<Integer> sortedTiers = new ArrayList<>(tiers.keySet());
-                sortedTiers.sort(Integer::compareTo); // 낮은 단계부터 정렬
+                Map<Integer, List<SynergyEffect>> buffs = shapeSynergies.get(shapeType);
+                List<Integer> sortedcondition = new ArrayList<>(buffs.keySet());
+                sortedcondition.sort(Integer::compareTo); // 낮은 단계부터 정렬
 
-                for (int tier : sortedTiers) {
-                    if (count >= tier) {
-                        List<SynergyEffect> effects = tiers.get(tier);
+                for (int condition : sortedcondition) {
+                    if (count >= condition) {
+                        List<SynergyEffect> effects = buffs.get(condition);
                         if (effects != null) {
                             for (SynergyEffect effect : effects) {
                                 // 해당 ShapeType 유닛들에게 버프 적용
@@ -130,7 +126,7 @@ public class SynergyFactory {
                                         unit.applySynergyBuff(effect);
                                     }
                                 }
-                                activeSynergies.add(new ActiveSynergy(shapeType, null, tier, effect)); // 활성화된 시너지 목록에 추가
+                                activeSynergies.add(new ActiveSynergy(shapeType, null, condition, count, effect)); // 활성화된 시너지 목록에 추가
                             }
                         }
                     }
@@ -144,13 +140,13 @@ public class SynergyFactory {
             int count = entry.getValue();
 
             if (colorSynergies.containsKey(colorType)) {
-                Map<Integer, List<SynergyEffect>> tiers = colorSynergies.get(colorType);
-                List<Integer> sortedTiers = new ArrayList<>(tiers.keySet());
-                sortedTiers.sort(Integer::compareTo); // 낮은 단계부터 정렬
+                Map<Integer, List<SynergyEffect>> buffs = colorSynergies.get(colorType);
+                List<Integer> sortedcondition = new ArrayList<>(buffs.keySet());
+                sortedcondition.sort(Integer::compareTo); // 낮은 단계부터 정렬
 
-                for (int tier : sortedTiers) {
-                    if (count >= tier) {
-                        List<SynergyEffect> effects = tiers.get(tier);
+                for (int condition : sortedcondition) {
+                    if (count >= condition) {
+                        List<SynergyEffect> effects = buffs.get(condition);
                         if (effects != null) {
                             for (SynergyEffect effect : effects) {
                                 // 효과 타입에 따라 아군 또는 적에게 적용
@@ -169,7 +165,7 @@ public class SynergyFactory {
                                         }
                                     }
                                 }
-                                activeSynergies.add(new ActiveSynergy(null, colorType, tier, effect)); // 활성화된 시너지 목록에 추가
+                                activeSynergies.add(new ActiveSynergy(null, colorType, condition, count, effect)); // 활성화된 시너지 목록에 추가
                             }
                         }
                     }
@@ -180,9 +176,9 @@ public class SynergyFactory {
         // TODO: UI에 현재 활성화된 시너지 목록 및 다음 단계 시너지 조건 표시
         for(ActiveSynergy activeSynergy : activeSynergies) {
             if(activeSynergy.shapeType == null){
-                Log.i("ActiveSynergy", "ColorType: " + activeSynergy.colorType + ", Tier: " + activeSynergy.tier + ", Effect: " + activeSynergy.effect.toString());
+                Log.i("ActiveSynergy", "ColorType: " + activeSynergy.colorType + ", Tier: " + activeSynergy.condition + ", Effect: " + activeSynergy.effect.toString());
             }else{
-                Log.i("ActiveSynergy", "ShapeType: " + activeSynergy.shapeType + ", Tier: " + activeSynergy.tier + ", Effect: " + activeSynergy.effect.toString());
+                Log.i("ActiveSynergy", "ShapeType: " + activeSynergy.shapeType + ", Tier: " + activeSynergy.condition + ", Effect: " + activeSynergy.effect.toString());
             }
         }
     }
@@ -213,20 +209,30 @@ public class SynergyFactory {
     public static class ActiveSynergy { // public으로 변경하여 BattleController에서 접근 가능하도록
         private final Polyman.ShapeType shapeType;
         private final Polyman.ColorType colorType;
-        private final int tier;
+        private final int condition;
+        private final int count;
         private final SynergyEffect effect;
 
-        public ActiveSynergy(Polyman.ShapeType shapeType, Polyman.ColorType colorType, int tier, SynergyEffect effect) {
+        public ActiveSynergy(Polyman.ShapeType shapeType, Polyman.ColorType colorType, int condition, int count, SynergyEffect effect) {
             this.shapeType = shapeType;
             this.colorType = colorType;
-            this.tier = tier;
+            this.condition = condition;
+            this.count = count;
             this.effect = effect;
         }
 
         public Polyman.ShapeType getShapeType() { return shapeType; }
         public Polyman.ColorType getColorType() { return colorType; }
-        public int getTier() { return tier; }
+        public int getCondition() { return condition; }
         public SynergyEffect getEffect() { return effect; }
+
+        public int getTier() {
+            return effect.getTier();
+        }
+
+        public int getCount() {
+            return count;
+        }
     }
 
     // BattleController 등에서 사용할 수 있도록 현재 활성화된 시너지 목록을 반환하는 메소드

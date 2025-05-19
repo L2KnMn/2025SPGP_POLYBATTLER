@@ -1,6 +1,7 @@
 package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.GameMap;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;

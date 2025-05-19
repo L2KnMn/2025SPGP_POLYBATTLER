@@ -3,6 +3,9 @@ package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.GameMap;
 
 import android.graphics.RectF;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
 
@@ -79,6 +82,18 @@ class MapPart{
 
     public int getCount(){
         return count;
+    }
+
+    public List<Transform> getAllObjects() {
+        List<Transform> result = new ArrayList<>();
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                if (tiles[i].transforms[j] != null) {
+                    result.add(tiles[i].transforms[j]);
+                }
+            }
+        }
+        return result;
     }
 }
 
