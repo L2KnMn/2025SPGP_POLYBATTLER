@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.widget.Toast;
 
 import androidx.core.content.res.ResourcesCompat;
 
@@ -151,29 +152,27 @@ public class GameManager implements IGameManager {
                 }
         ).setVisibility(GameState.POST_GAME, true);
 
-        for (int j = 0; j < height; ++j) {
-            for (int i = 0; i < width; ++i) {
-                final int benchIndex = i;
-                final float centerX = gameMap.getBenchX(benchIndex);
-                final float centerY = gameMap.getBenchY();
-                buttonWidth = gameMap.getTileSize();
-                buttonHeight = gameMap.getTileSize() / 2;
-                gameMap.addCellButton(
-                        UiManager.getInstance(master).addButton("판매", centerX, centerY + gameMap.getTileSize(),
-                                buttonWidth, buttonHeight,
-                                () -> {            // 버튼 클릭 시 실행될 동작
-                                    if (currentState == GameState.SHOPPING) {
-                                        boolean result = cellCharacter(benchIndex);
-                                        if (result) {
-                                            UiManager.getInstance(master).showToast("판매되었습니다."); // 사용자 피드백
-                                            gameMap.getCellButton(benchIndex).setVisibility(GameState.SHOPPING, false);
-                                        } else
-                                            UiManager.getInstance(master).showToast("판매할 수 없습니다."); // 사용자 피드백
-                                    }
+        for (int i = 0; i < benchSize; ++i) {
+            final int benchIndex = i;
+            final float centerX = gameMap.getBenchX(benchIndex);
+            final float centerY = gameMap.getBenchY();
+            buttonWidth = gameMap.getTileSize();
+            buttonHeight = gameMap.getTileSize() / 2;
+            gameMap.addCellButton(
+                    UiManager.getInstance(master).addButton("판매", centerX, centerY + gameMap.getTileSize(),
+                            buttonWidth, buttonHeight,
+                            () -> {            // 버튼 클릭 시 실행될 동작
+                                if (currentState == GameState.SHOPPING) {
+                                    boolean result = cellCharacter(benchIndex);
+                                    if (result) {
+                                        UiManager.getInstance(master).showToast("판매되었습니다."); // 사용자 피드백
+                                        gameMap.getCellButton(benchIndex).setVisibility(GameState.SHOPPING, false);
+                                    } else
+                                        UiManager.getInstance(master).showToast("판매할 수 없습니다."); // 사용자 피드백
                                 }
-                        )
-                );
-            }
+                            }
+                    )
+            );
         }
     }
 
@@ -203,7 +202,6 @@ public class GameManager implements IGameManager {
         return gold;
     }
 
-    StringBuilder stringBuilder = new StringBuilder();
     public void addGold(int amount) {
         this.gold += amount;
         goldBoard.setScore(gold);
@@ -227,12 +225,14 @@ public class GameManager implements IGameManager {
     public boolean addCharacter(Polyman.ShapeType shape, Polyman.ColorType color) {
         // Polyman 생성을 PolymanGenerator에 위임
         Polyman polyman = polymanGenerator.generateCharacterBench(shape, color);
+        if(polyman == null)
+            return false;
         int index = gameMap.getIndex(polyman.transform.getPosition().x, polyman.transform.getPosition().y);
         if(index >= 0 && index < benchSize){
             // 벤치에 추가 성공 시 합성 가능한 3개를 찾아서 합성
             if(polymanGenerator.checkAndSynthesize(polyman)){
-                // 해당 벤치 버튼 가시성 처리 (필요하다면 GameManager에서)
-
+                //TODO: 나중에 level up 효과 같은 걸 구현하기
+                UiManager.getInstance(master).showToast("LEVEL UP!");
             }
             return true;
         }

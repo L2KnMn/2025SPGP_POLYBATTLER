@@ -26,6 +26,7 @@ public class Bench extends MapPart{
     @Override
     protected void set(int width, Transform transform){
         super.set(width, 0, transform);
-        cellButtons.get(width).setVisibility(GameState.SHOPPING,transform != null);
+        if(isCorrectWidth(width))
+            cellButtons.get(width).setVisibility(GameState.SHOPPING,transform != null);
     }
 }

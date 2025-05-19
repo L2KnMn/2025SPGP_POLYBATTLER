@@ -73,7 +73,7 @@ public class PolymanGenerator {
             List<Polyman> toSynthesize = candidates.subList(1, fusion_condition);
 
             // 새로운 레벨의 Polyman 생성
-            Polyman synthesizedPolyman = candidates.get(fusion_condition);
+            Polyman synthesizedPolyman = candidates.get(0);
 
             // 기존 2개의 Polyman 제거
             for (Polyman p : toSynthesize) {
@@ -83,6 +83,9 @@ public class PolymanGenerator {
             }
 
             synthesizedPolyman.levelUp(); // Polyman 자체 레벨 업데이트 메소드 호출
+
+            // 레벨 업 된 객체가 다시 레벨업 가능하므로 한 번 더 확인
+            checkAndSynthesize(synthesizedPolyman);
             return true;
         }
         return false;

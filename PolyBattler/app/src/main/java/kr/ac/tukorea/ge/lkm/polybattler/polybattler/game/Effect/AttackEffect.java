@@ -76,6 +76,7 @@ public class AttackEffect extends EffectManager.Effect {
     public void update() {
         elapsedTime += GameView.frameTime;
         if(GameManager.getInstance(Scene.top()).getGameState() != GameState.BATTLE){
+            attacker.stopAttackEffect();
             remove();
             return;
         }

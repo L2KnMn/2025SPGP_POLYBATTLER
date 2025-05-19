@@ -43,7 +43,7 @@ public class Polyman extends Sprite implements IRecyclable, ILayerProvider, IRem
         IDLE, // 비전투 대기 상태
         BATTLE, // 전투 상태
         DEAD, // 전투 중 사망
-        REMOVE, // 삭제 대기 중 update 때가 되면 알아서 삭제할 것임
+        REMOVE, // 삭제 대기 혹은 삭제 된 상태
         WAIT // 업데이트는 안 하고 그리기만
     }
     private final BattleUnit unit;
@@ -148,17 +148,12 @@ public class Polyman extends Sprite implements IRecyclable, ILayerProvider, IRem
             gauge.draw(canvas, transform.getPosition().x - 50, transform.getPosition().y + 100, 100, attackPercent);
         }
 
-        drawShape(canvas, transform, paint, getShape());
-    }
-    public static void drawShape(Canvas canvas, Transform transform, Paint paint, ShapeType shape) {
         canvas.save();
         canvas.rotate(transform.getAngle(), transform.getPosition().x, transform.getPosition().y);
-//        // 방향 그리기 (디버깅)
-//        if(GameView.drawsDebugStuffs){
-//            canvas.drawLine(transform.getPosition().x, transform.getPosition().y,
-//                    transform.getPosition().x, transform.getPosition().y - transform.getSize(), debugPaint);
-//        }
-        // 도형 그리기
+        drawShape(canvas, transform, paint, getShape());
+        canvas.restore();
+    }
+    public static void drawShape(Canvas canvas, Transform transform, Paint paint, ShapeType shape) {
         switch (shape){
             case RECTANGLE:
                 canvas.drawRect(transform.getRect(), paint);
@@ -172,10 +167,9 @@ public class Polyman extends Sprite implements IRecyclable, ILayerProvider, IRem
             default:
                 break;
         }
-        canvas.restore();
     }
 
-    private static int getColor(ColorType color){
+    public static int getColor(ColorType color){
         Resources res = GameView.view.getResources();
         switch (color) {
             case RED:
@@ -226,6 +220,7 @@ public class Polyman extends Sprite implements IRecyclable, ILayerProvider, IRem
 
     @Override
     public void onRecycle() {
+        state = ObjectState.REMOVE;
     }
 
     @Override

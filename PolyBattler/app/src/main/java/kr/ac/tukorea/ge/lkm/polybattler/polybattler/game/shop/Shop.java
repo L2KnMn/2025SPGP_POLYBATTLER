@@ -3,6 +3,7 @@ package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.shop;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.media.tv.TableRequest;
 import android.util.Log;
 
 import java.util.Random;
@@ -12,6 +13,7 @@ import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameState;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.MasterManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Polyman;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.UiManager;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IGameObject;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.res.BitmapPool;
@@ -28,18 +30,44 @@ public class Shop implements IGameObject {
     private final Paint backboardPaint;
     private final RectF boxOutline;
     private final Paint boxOutlinePaint;
-    static class Goods {
+    static class Goods implements IGameObject {
+        private final Paint paint;
         protected int price;
         protected Polyman.ShapeType shape;
         protected Polyman.ColorType color;
+        protected Transform transform;
         protected boolean soldOut;
 
-        Goods(int price, Polyman.ShapeType shape, Polyman.ColorType color){
+        Goods(int price, Polyman.ShapeType shape, Polyman.ColorType color, float x, float y){
             this.price = price;
             this.shape = shape;
             this.color = color;
             this.soldOut = false;
+
+            transform = new Transform(this, new Position(x, y));
+            transform.setSize(Metrics.GRID_UNIT);
+
+            paint = new Paint();
+            paint.setColor(Polyman.getColor(color));
+            paint.setStyle(Paint.Style.FILL);
         }
+
+        void reset(Random random){
+            this.soldOut = false;
+            this.price = random.nextInt(10);
+            this.shape = Polyman.ShapeType.values()[random.nextInt(Polyman.ShapeType.values().length)];
+            this.color = Polyman.ColorType.values()[random.nextInt(Polyman.ColorType.values().length-1)];
+            this.paint.setColor(Polyman.getColor(color));
+
+        }
+
+        @Override
+        public void draw(Canvas canvas){
+            Polyman.drawShape(canvas, transform, paint, shape);
+        }
+
+        @Override
+        public void update(){}
     }
 
     private final int numberOfBox = 3;
@@ -66,7 +94,7 @@ public class Shop implements IGameObject {
 
         boxOutline = new RectF(0, 0, Metrics.GRID_UNIT * 2.0f, Metrics.GRID_UNIT * 2.5f);
         boxOutlinePaint = new Paint();
-        boxOutlinePaint.setColor(0x88aa0000); // 나중에 레벨이나 상품 별로 다른 외곽선으로 직관적 구분할까?
+        boxOutlinePaint.setColor(0x88FFFFFF); // 나중에 레벨이나 상품 별로 다른 외곽선으로 직관적 구분할까?
         boxOutlinePaint.setStyle(Paint.Style.STROKE);
         boxOutlinePaint.setStrokeWidth(Metrics.GRID_UNIT / 5);
 
@@ -82,7 +110,9 @@ public class Shop implements IGameObject {
         interlude.y = (backboardRect.height() - boxOutline.height()) / 2;
 
         for(int i = 0; i < numberOfBox; i++){
-            goods[i] = new Goods(1, Polyman.ShapeType.CIRCLE, Polyman.ColorType.RED);
+            goods[i] = new Goods(1, Polyman.ShapeType.CIRCLE, Polyman.ColorType.RED,
+                    backboardRect.left + interlude.x + boxOutline.width() / 2 + (boxOutline.width() + interlude.x) * i,
+                    backboardRect.top + interlude.y + boxOutline.height() / 2);
         }
         setRandomGoods();
     }
@@ -109,14 +139,13 @@ public class Shop implements IGameObject {
     public void draw(Canvas canvas) {
         // 드로잉 로직
         if (active) {
-            if (fold) {
-                //drawIconButton(canvas);
-            } else {
+            if (!fold) {
                 canvas.drawRect(backboardRect, backboardPaint);
                 boxOutline.offsetTo(backboardRect.left + interlude.x, backboardRect.top + interlude.y);
                 for (int i = 0; i < numberOfBox; i++) {
                     if(!goods[i].soldOut){
                         canvas.drawRect(boxOutline, boxOutlinePaint);
+                        goods[i].draw(canvas);
                         drawText(canvas,goods[i].shape.name(), boxOutline.centerX(), boxOutline.centerY() - boxOutline.height() / 4);
                         drawText(canvas, String.valueOf(goods[i].price), boxOutline.centerX(), boxOutline.centerY() + boxOutline.height() / 4);
                     }
@@ -161,6 +190,7 @@ public class Shop implements IGameObject {
             goods[i].price = random.nextInt(10);
             goods[i].shape = Polyman.ShapeType.values()[random.nextInt(Polyman.ShapeType.values().length)];
             goods[i].color = Polyman.ColorType.values()[random.nextInt(Polyman.ColorType.values().length-1)];
+            goods[i].paint.setColor(Polyman.getColor(goods[i].color));
         }
     }
 
