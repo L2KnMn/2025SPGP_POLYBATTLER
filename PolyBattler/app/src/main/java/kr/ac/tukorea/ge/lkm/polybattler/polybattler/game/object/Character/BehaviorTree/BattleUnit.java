@@ -390,18 +390,24 @@ public class BattleUnit {
             // TODO: 다른 효과 타입 추가 가능서 (치명타, 흡혈, 보호막 등)
         }
 
+        private final BattleController.Team application;
         private final EffectType type;
         private final float value; // 정수형 능력치 보너스
         private final int tier;
 
-        public SynergyEffect(EffectType type, float value, int tier) {
+        public SynergyEffect(BattleController.Team application, EffectType type, float value, int tier) {
             this.type = type;
             this.value = value;
             this.tier = tier;
+            this.application = application;
         }
 
         public EffectType getType() { return type; }
         public float getValue() { return value; }
         public int getTier(){ return tier; }
+        public BattleController.Team applicateTeam() {
+            return application;
+        }
+
     }
 }

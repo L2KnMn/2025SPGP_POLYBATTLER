@@ -4,12 +4,15 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.util.Log;
 import android.view.MotionEvent;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map; // Map import
 
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameState;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.BattleController;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.BehaviorTree.BattleUnit;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.SynergyFactory;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
@@ -19,25 +22,20 @@ import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 // Synergy 정보를 표시하는 내부 클래스
 public class SynergyDisplay implements IGameObject, IEventHandle {
     private List<SynergyFactory.ActiveSynergy> activeSynergies = new ArrayList<>();
-    // TODO: 다음 시너지 달성 정보 및 모든 시너지 타입 정보도 필요
+    // 현재 유닛 수를 저장 (ActiveSynergy에 count가 있다면 이 Map은 필요 없음)
+    // private Map<Polyman.ShapeType, Integer> shapeCounts = new HashMap<>();
+    // private Map<Polyman.ColorType, Integer> colorCounts = new HashMap<>();
 
     private final Transform transform; // 패널 자체의 위치와 크기
     private final Paint panelBackgroundPaint; // 패널 배경 Paint
     private final Paint sectionTitlePaint; // 섹션 제목 Paint
-    private final Paint synergyItemPaint; // 시너지 항목 텍스트 Paint
-    private final Paint progressBackgroundPaint; // 진행 바 배경 Paint
-    private final Paint progressFillPaint; // 진행 바 채우기 Paint
-    private final Paint activeTierPaint; // 활성화된 티어 표시 Paint
+    private final Paint synergyItemPaint; // 시너지 항목 텍스트 Paint (버프 이름, 단계)
+    private final Paint synergyEffectPaint; // 상세 버프 효과 텍스트 Paint
+    private final Paint activeTierPaint; // 활성화된 티어 표시 Paint (별, 조건)
 
     private boolean isVisible = false; // 패널 가시성
 
-    // 상세 정보 팝업 관련 변수
-    private SynergyFactory.ActiveSynergy selectedSynergy = null; // 현재 선택된 시너지 (상세 보기용)
-    private RectF detailPopupRect = new RectF();
-    private Paint detailPopupBackgroundPaint;
-    private Paint detailPopupTextPaint;
-    private boolean showDetailPopup = false;
-    private UiManager.Button openerButton;
+    private UiManager.Button openerButton; // 시너지 패널을 연 버튼
 
     public SynergyDisplay(float x, float y, float width, float height) {
         transform = new Transform(this, x, y);
@@ -49,33 +47,29 @@ public class SynergyDisplay implements IGameObject, IEventHandle {
         sectionTitlePaint = new Paint();
         sectionTitlePaint.setTextSize(Metrics.GRID_UNIT * 0.5f); // 섹션 제목 크기
         sectionTitlePaint.setColor(Color.YELLOW); // 섹션 제목 색상
+        sectionTitlePaint.setTextAlign(Paint.Align.LEFT); // 섹션 제목 좌측 정렬
+
 
         synergyItemPaint = new Paint();
         synergyItemPaint.setTextSize(Metrics.GRID_UNIT * (0.4f)); // 시너지 항목 텍스트 크기
         synergyItemPaint.setColor(Color.WHITE); // 시너지 항목 텍스트 색상
+        synergyItemPaint.setTextAlign(Paint.Align.LEFT); // 시너지 항목 텍스트 좌측 정렬
 
-        progressBackgroundPaint = new Paint();
-        progressBackgroundPaint.setColor(Color.GRAY); // 진행 바 배경색
+        synergyEffectPaint = new Paint();
+        synergyEffectPaint.setTextSize(Metrics.GRID_UNIT * (0.35f)); // 상세 버프 효과 텍스트 크기
+        synergyEffectPaint.setColor(Color.LTGRAY); // 상세 버프 효과 텍스트 색상 (회색)
+        synergyEffectPaint.setTextAlign(Paint.Align.LEFT); // 상세 버프 효과 텍스트 좌측 정렬
 
-        progressFillPaint = new Paint();
-        progressFillPaint.setColor(Color.GREEN); // 진행 바 채우기 색상
 
         activeTierPaint = new Paint();
         activeTierPaint.setTextSize(Metrics.GRID_UNIT * (0.4f));
         activeTierPaint.setColor(Color.CYAN); // 활성화된 티어 표시 색상 (예: 별 색상)
-
-        // 상세 정보 팝업 Paint 설정
-        detailPopupBackgroundPaint = new Paint();
-        detailPopupBackgroundPaint.setColor(Color.argb(220, 30, 30, 30)); // 어두운 배경
-        detailPopupTextPaint = new Paint();
-        detailPopupTextPaint.setTextSize(Metrics.GRID_UNIT * (0.35f));
-        detailPopupTextPaint.setColor(Color.WHITE);
+        activeTierPaint.setTextAlign(Paint.Align.LEFT);
     }
 
-    // 시너지 데이터 업데이트
+    // 시너지 데이터 업데이트 (ActiveSynergy에 count와 condition이 있다고 가정)
     public void updateSynergies(List<SynergyFactory.ActiveSynergy> synergies) {
         this.activeSynergies = synergies;
-        // TODO: 유닛 관리 시스템으로부터 현재 유닛 수를 받아와서 다음 시너지 달성 정보 업데이트 필요
     }
 
     // 패널 가시성 설정
@@ -83,23 +77,24 @@ public class SynergyDisplay implements IGameObject, IEventHandle {
         this.isVisible = visible;
     }
 
-    // 터치 이벤트 처리
+    // 터치 이벤트 처리 (상세 팝업 제거로 인해 간소화)
     @Override
     public boolean handleTouchEvent(MotionEvent event, float x, float y) {
         if (!isVisible) return false; // 패널이 보이지 않으면 터치 처리 안 함
 
         RectF panelRect = transform.getRect();
-        if (!panelRect.contains(x, y)) { // 패널 영역 밖 터치 하면 패널 닫음
-            // 상태 초기화
-            isVisible = false;
-            showDetailPopup = false;
-            selectedSynergy = null;
-            // 버튼 다시 활성화
-            setOpenerButtonVisibility(true);
-            return true;
-        }
 
-        return false; // 패널 영역 내 터치지만 시너지 항목에 해당하지 않음
+        // 패널 영역 밖 터치 처리
+        if (!panelRect.contains(x, y)) {
+            if (event.getAction() == MotionEvent.ACTION_UP) {
+                // 상태 초기화
+                isVisible = false;
+                // 버튼 다시 활성화
+                setOpenerButtonVisibility(true);
+                Log.d("SynergyDisplay", "Synergy Panel Closed");
+            }
+        }
+        return true;
     }
 
     @Override
@@ -118,150 +113,147 @@ public class SynergyDisplay implements IGameObject, IEventHandle {
 
         float currentY = panelRect.top + Metrics.GRID_UNIT * (0.5f); // 시작 Y 위치
         float itemStartX = panelRect.left + Metrics.GRID_UNIT * (0.2f); // 항목 시작 X 위치
-        float itemWidth = panelRect.width() - Metrics.GRID_UNIT * (0.4f); // 항목 너비
-        float itemHeight = Metrics.GRID_UNIT * (0.5f); // 항목 높이 예시
+        float itemContentWidth = panelRect.width() - Metrics.GRID_UNIT * (0.4f); // 항목 내용 너비 (좌우 여백 제외)
+        float itemLineHeight = Metrics.GRID_UNIT * 0.4f; // 기본 줄 높이 (synergyItemPaint 텍스트 크기 기반)
 
         // ShapeType 섹션 제목
-        canvas.drawText("모양 시너지", itemStartX, currentY, sectionTitlePaint);
+        canvas.drawText("모양 시너지", itemStartX, currentY + sectionTitlePaint.getTextSize() / 2 + getTextBaselineOffset(sectionTitlePaint), sectionTitlePaint);
         currentY += Metrics.GRID_UNIT * (0.6f); // 다음 요소 Y 위치
 
-        // TODO: 모든 ShapeType에 대해 현재 유닛 수, 진행 상황, 활성화된 티어 표시 로직 구현
-        // (현재는 activeSynergies 목록만 사용하므로 활성화된 시너지들만 표시)
+        // ShapeType 시너지 항목 그리기
         for (SynergyFactory.ActiveSynergy synergy : activeSynergies) {
             if (synergy.getShapeType() != null) {
-                String text = getSynergyText(synergy);
-                // 아이콘 그리기 (TODO: 실제 아이콘 이미지 사용)
-                // canvas.drawBitmap(getShapeIcon(synergy.getShapeType()), itemStartX, currentY - itemHeight / 2, null); // 예시
+                float itemSectionCurrentY = currentY; // 각 시너지 항목 섹션의 시작 Y
 
-                float textX = itemStartX + Metrics.GRID_UNIT * (0.8f); // 아이콘 옆 텍스트 위치
-                canvas.drawText(text, textX, currentY + itemHeight / 2, synergyItemPaint);
+                // 1. 버프 이름 출력 (예: "사각형 시너지")
+                String nameText = getSynergyName(synergy); // 시너지 이름만 가져오는 헬퍼
+                canvas.drawText(nameText, itemStartX, itemSectionCurrentY + getTextBaselineOffset(synergyItemPaint), synergyItemPaint);
+                itemSectionCurrentY += itemLineHeight; // 다음 줄로 이동
 
-                // TODO: 진행 상황 바 그리기 (현재 유닛 수 정보를 받아와야 함)
-                // drawProgressBar(canvas, itemX + Metrics.gridToPixel(2), currentY + itemHeight / 4, Metrics.gridToPixel(3), itemHeight / 2, currentCount, nextTierCount);
+                // 2. Tier (별) 및 조건 출력 (예: "★★ (2/4)")
+                // ActiveSynergy에 count와 condition이 있다고 가정합니다.
+                String tierConditionText = "★".repeat(synergy.getTier()) + " (" + synergy.getCount() + "/" + synergy.getCondition() + ")";
+                canvas.drawText(tierConditionText, itemStartX, itemSectionCurrentY + getTextBaselineOffset(activeTierPaint), activeTierPaint);
+                itemSectionCurrentY += itemLineHeight; // 다음 줄로 이동
 
-                // 활성화된 티어 표시 (예: 별 아이콘)
-                drawActiveTier(canvas, textX + synergyItemPaint.measureText(text) + Metrics.GRID_UNIT * (0.2f),
-                        currentY + itemHeight / 2, synergy);
-                currentY += itemHeight + Metrics.GRID_UNIT * (0.1f); // 다음 항목 Y 위치
+                // 3. 상세 버프 설명 출력 (해당 티어의 모든 효과를 가져와 표시)
+                // TODO: SynergyFactory에서 해당 시너지 타입, 색상, 티어의 모든 효과 목록을 가져와야 합니다.
+                List<BattleUnit.SynergyEffect> effectsToDisplay = new ArrayList<>();
+                effectsToDisplay.add(synergy.getEffect());
+
+                for (BattleUnit.SynergyEffect effect : effectsToDisplay) {
+                    String effectDescription = getEffectDescription(effect);
+                    List<String> lines = splitTextIntoLines(effectDescription, itemContentWidth - Metrics.GRID_UNIT * 0.2f, synergyEffectPaint); // 들여쓰기 공간 제외
+                    for (String line : lines) {
+                        canvas.drawText("- " + line, itemStartX + Metrics.GRID_UNIT * 0.2f, itemSectionCurrentY + getTextBaselineOffset(synergyEffectPaint), synergyEffectPaint); // 들여쓰기
+                        itemSectionCurrentY += synergyEffectPaint.getTextSize() * 1.1f; // 다음 줄로 이동
+                    }
+                }
+                currentY = itemSectionCurrentY + Metrics.GRID_UNIT * 0.1f; // 다음 시너지 항목 시작 Y (여백 추가)
             }
         }
 
         currentY += Metrics.GRID_UNIT * (0.5f); // 섹션 간 간격
 
         // ColorType 섹션 제목
-        canvas.drawText("색상 시너지", itemStartX, currentY, sectionTitlePaint);
+        canvas.drawText("색상 시너지", itemStartX, currentY + sectionTitlePaint.getTextSize() / 2 + getTextBaselineOffset(sectionTitlePaint), sectionTitlePaint);
         currentY += Metrics.GRID_UNIT * (0.6f); // 다음 요소 Y 위치
 
-        // TODO: 모든 ColorType에 대해 현재 유닛 수, 진행 상황, 활성화된 티어 표시 로직 구현
+        // ColorType 시너지 항목 그리기
         for (SynergyFactory.ActiveSynergy synergy : activeSynergies) {
             if (synergy.getColorType() != null) {
-                String text = getSynergyText(synergy);
-                // 아이콘 그리기 (TODO: 실제 아이콘 이미지 사용)
-                // canvas.drawRect(itemStartX, currentY, itemStartX + Metrics.gridToPixel(0.6f), currentY + itemHeight, getColorPaint(synergy.getColorType())); // 색상 사각형 예시
+                float itemSectionCurrentY = currentY; // 각 시너지 항목 섹션의 시작 Y
 
-                float textX = itemStartX + Metrics.GRID_UNIT * (0.8f); // 아이콘 옆 텍스트 위치
-                canvas.drawText(text, textX, currentY + itemHeight / 2, synergyItemPaint);
+                // 1. 버프 이름 출력
+                String nameText = getSynergyName(synergy);
+                canvas.drawText(nameText, itemStartX, itemSectionCurrentY + getTextBaselineOffset(synergyItemPaint), synergyItemPaint);
+                itemSectionCurrentY += itemLineHeight; // 다음 줄로 이동
 
-                // TODO: 진행 상황 바 그리기 (현재 유닛 수 정보를 받아와야 함)
+                // 2. Tier (별) 및 조건 출력
+                // ActiveSynergy에 count와 condition이 있다고 가정합니다.
+                String tierConditionText = "★".repeat(synergy.getTier()) + " (" + synergy.getCount() + "/" + synergy.getCondition() + ")";
+                canvas.drawText(tierConditionText, itemStartX, itemSectionCurrentY + getTextBaselineOffset(activeTierPaint), activeTierPaint);
+                itemSectionCurrentY += itemLineHeight; // 다음 줄로 이동
 
-                // 활성화된 티어 표시
-                drawActiveTier(canvas, textX + synergyItemPaint.measureText(text) + Metrics.GRID_UNIT * (0.2f),
-                        currentY + itemHeight / 2, synergy);
+                // 3. 상세 버프 설명 출력
+                List<BattleUnit.SynergyEffect> effectsToDisplay = new ArrayList<>();
+                effectsToDisplay.add(synergy.getEffect());
 
-
-                currentY += itemHeight + Metrics.GRID_UNIT * (0.1f); // 다음 항목 Y 위치
+                for (BattleUnit.SynergyEffect effect : effectsToDisplay) {
+                    String effectDescription = getEffectDescription(effect);
+                    List<String> lines = splitTextIntoLines(effectDescription, itemContentWidth - Metrics.GRID_UNIT * 0.2f, synergyEffectPaint); // 들여쓰기 공간 제외
+                    for (String line : lines) {
+                        canvas.drawText("- " + line, itemStartX + Metrics.GRID_UNIT * 0.2f, itemSectionCurrentY + getTextBaselineOffset(synergyEffectPaint), synergyEffectPaint); // 들여쓰기
+                        itemSectionCurrentY += synergyEffectPaint.getTextSize() * 1.1f; // 다음 줄로 이동
+                    }
+                }
+                currentY = itemSectionCurrentY + Metrics.GRID_UNIT * 0.1f; // 다음 시너지 항목 시작 Y (여백 추가)
             }
         }
-
-        // 상세 정보 팝업 그리기
-        if (showDetailPopup && selectedSynergy != null) {
-            drawDetailPopup(canvas, selectedSynergy);
-        }
     }
 
-    // 시너지 정보 텍스트 생성 헬퍼
-    private String getSynergyText(SynergyFactory.ActiveSynergy synergy) {
+    // 텍스트를 주어진 너비에 맞춰 여러 줄로 나누는 헬퍼 메소드
+    private List<String> splitTextIntoLines(String text, float maxWidth, Paint paint) {
+        List<String> lines = new ArrayList<>();
+        if (text == null || text.isEmpty()) {
+            lines.add("");
+            return lines;
+        }
+
+        int start = 0;
+        while (start < text.length()) {
+            int end = paint.breakText(text, start, text.length(), true, maxWidth, null);
+            if (end == 0 && text.length() > start) { // 한 글자도 들어가지 않는 경우 (매우 좁은 폭)
+                end = 1; // 최소 한 글자는 포함 (무한 루프 방지)
+            }
+            lines.add(text.substring(start, start + end));
+            start += end;
+        }
+        return lines;
+    }
+
+    // 시너지 이름만 가져오는 헬퍼 (예: "사각형 시너지")
+    private String getSynergyName(SynergyFactory.ActiveSynergy synergy) {
         String name = "";
         if (synergy.getShapeType() != null) {
-            name = synergy.getShapeType().toString(); // ShapeType 이름 사용
+            // TODO: ShapeType 열거형에 한글 이름 매핑 필요 (예: "사각형")
+            name = synergy.getShapeType().toString();
         } else if (synergy.getColorType() != null) {
-            name = synergy.getColorType().toString(); // ColorType 이름 사용
+            // TODO: ColorType 열거형에 한글 이름 매핑 필요 (예: "빨강")
+            name = synergy.getColorType().toString();
         }
-        // TODO: 실제 게임에서는 ShapeType과 ColorType의 한글 이름을 사용하도록 매핑 필요
-
-        return name + " " + synergy.getTier() + "단계";
+        return name + " 시너지";
     }
 
-    // 활성화된 티어 표시 (예: 별 그리기)
-    private void drawActiveTier(Canvas canvas, float x, float y, SynergyFactory.ActiveSynergy synergy) {
-        // TODO: 별 아이콘 또는 다른 시각적 표시 구현
-        String stars = "";
-        for (int i = 0; i < synergy.getTier(); i++) {
-            stars += "★"; // 별 문자 사용 예시
-        }
-        stars += " (" + synergy.getCount() + "/" + synergy.getCondition() + ")";
-        canvas.drawText(stars, x, y, activeTierPaint);
-    }
-
-    // 상세 정보 팝업 그리기
-    private void drawDetailPopup(Canvas canvas, SynergyFactory.ActiveSynergy synergy) {
-        canvas.drawRoundRect(detailPopupRect, 20, 20, detailPopupBackgroundPaint); // 둥근 모서리 배경
-
-        float textStartX = detailPopupRect.left + Metrics.GRID_UNIT * (0.2f);
-        float textStartY = detailPopupRect.top + Metrics.GRID_UNIT * (0.2f);
-        float lineHeight = Metrics.GRID_UNIT * (0.4f);
-
-        // 시너지 이름 및 단계
-        canvas.drawText(getSynergyText(synergy), textStartX, textStartY, detailPopupTextPaint);
-        textStartY += lineHeight;
-
-        // TODO: 시너지 효과 설명 표시 로직 구현
-        // ActiveSynergy 객체는 효과 목록(List<SynergyEffect>)을 직접 가지고 있지 않음.
-        // SynergyFactory에서 해당 시너지의 모든 단계별 효과 정보를 가져와야 함.
-        // 여기서는 간략하게 효과 타입을 문자열로 표시하는 예시
-        canvas.drawText("효과:", textStartX, textStartY, detailPopupTextPaint);
-        textStartY += lineHeight;
-
-        // TODO: SynergyFactory에서 해당 시너지 타입 및 단계의 구체적인 효과 설명을 가져와서 표시
-        // 예시:
-        // List<SynergyEffect> effects = SynergyFactory.getSynergyEffects(synergy.getShapeType(), synergy.getColorType(), synergy.getTier());
-        // for (SynergyEffect effect : effects) {
-        //     canvas.drawText("- " + getEffectDescription(effect), textStartX, textStartY, detailPopupTextPaint);
-        //     textStartY += lineHeight;
-        // }
-
-        // 임시 효과 표시 (효과 타입만 표시)
-        canvas.drawText("- " + synergy.getEffect().getType().toString() + ": " + synergy.getEffect().getValue(), textStartX, textStartY, detailPopupTextPaint);
-        textStartY += lineHeight;
-
-
-        // TODO: 다음 시너지 단계 정보 표시 (필요시)
-        // int nextTier = synergy.getTier() + 1;
-        // if (SynergyFactory.hasSynergyTier(synergy.getShapeType(), synergy.getColorType(), nextTier)) {
-        //     canvas.drawText("다음 단계 (" + nextTier + "):", textStartX, textStartY, detailPopupTextPaint);
-        //     textStartY += lineHeight;
-        //     List<SynergyEffect> nextEffects = SynergyFactory.getSynergyEffects(synergy.getShapeType(), synergy.getColorType(), nextTier);
-        //     for (SynergyEffect effect : nextEffects) {
-        //         canvas.drawText("- " + getEffectDescription(effect), textStartX, textStartY, detailPopupTextPaint);
-        //         textStartY += lineHeight;
-        //     }
-        // }
-    }
-
-    // 효과 타입에 따른 설명 문자열 반환 헬퍼 (SynergyFactory에 구현하는 것이 더 적합)
+    // 효과 타입에 따른 설명 문자열 반환 헬퍼 (Metrics.GRID_UNIT 사용)
     private String getEffectDescription(BattleUnit.SynergyEffect effect) {
-        // TODO: SynergyEffect 타입에 따른 구체적인 한글 설명 반환 로직 구현
+        String team = effect.applicateTeam() == BattleController.Team.PLAYER ? "아군 " : "적군 ";
+        String effectText = "";
         switch (effect.getType()) {
-            case ATTACK_BONUS: return "공격력 +" + (int)effect.getValue();
-            case DEFENSE_BONUS: return "방어력 +" + (int)effect.getValue();
-            case MAX_HP_BONUS: return "최대 체력 +" + (int)effect.getValue();
-            case ATTACK_SPEED_BONUS: return "공격 속도 " + (effect.getValue() > 0 ? "+" : "") + String.format("%.1f", effect.getValue() * 100) + "%";
-            case ATTACK_RANGE_BONUS: return "공격 범위 +" + String.format("%.1f", Metrics.GRID_UNIT * (effect.getValue())); // 픽셀 값을 그리드 단위로 변환
-            case AREA_RANGE_BONUS: return "범위 공격 범위 +" + String.format("%.1f", Metrics.GRID_UNIT * (effect.getValue()));
-            case SPEED_BONUS: return "이동 속도 +" + (int)effect.getValue();
-            // TODO: 다른 효과 타입에 대한 설명 추가
-            default: return effect.getType().toString();
+            case ATTACK_BONUS: effectText = "공격력 +" + (int)effect.getValue();
+                break;
+            case DEFENSE_BONUS: effectText = "방어력 +" + (int)effect.getValue();
+                break;
+            case MAX_HP_BONUS: effectText = "최대 체력 +" + (int)effect.getValue();
+                break;
+            case ATTACK_SPEED_BONUS: effectText = "공격 속도 " + (effect.getValue() > 0 ? "+" : "") + String.format("%.1f", effect.getValue() * 100) + "%";
+                break;
+            // Metrics.GRID_UNIT을 직접 곱하여 그리드 단위로 환산된 값을 표시
+            case ATTACK_RANGE_BONUS: effectText = "공격 범위 +" + String.format("%.1f", effect.getValue() * Metrics.GRID_UNIT);
+                break;
+            case AREA_RANGE_BONUS: effectText = "범위 공격 범위 +" + String.format("%.1f", effect.getValue() * Metrics.GRID_UNIT);
+                break;
+            case SPEED_BONUS: effectText = "이동 속도 +" + (int)effect.getValue();
+                break;
+            default: effectText = effect.getType().toString();
         }
+        return team + effectText;
+    }
+
+    // 텍스트 세로 중앙 정렬을 위한 기준선 오프셋 계산 헬퍼
+    private float getTextBaselineOffset(Paint paint) {
+        Paint.FontMetrics fm = paint.getFontMetrics();
+        return -(fm.ascent + fm.descent) / 2;
     }
 
     @Override

@@ -83,8 +83,6 @@ public class ShopManager implements IGameManager {
                             }
                         }
                         return true;
-                    } else if(shop.RerollButtonRect().contains(x, y)){
-                        reRoll();
                     }
                     // 일단 이벤트를 소비하긴 해서 다른 거 작동 안 하게 만듦
                     return true;
@@ -100,8 +98,12 @@ public class ShopManager implements IGameManager {
     }
 
     public void reRoll(){
-        if(GameManager.getInstance(master).spendGold(1)) {
-            shop.setRandomGoods();
+        shop.setRandomGoods(1);
+    }
+
+    public void reRoll(int price){
+        if(GameManager.getInstance(master).spendGold(price)) {
+            shop.setRandomGoods(price);
         }else{
             UiManager.getInstance(master).showToast("not enough gold");
         }

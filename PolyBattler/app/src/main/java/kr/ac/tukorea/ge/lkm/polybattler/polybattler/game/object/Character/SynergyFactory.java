@@ -6,8 +6,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameState;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.BattleController;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.BehaviorTree.BattleUnit;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.BehaviorTree.BattleUnit.SynergyEffect; // SynergyEffect Import
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.UiManager;
@@ -25,44 +27,48 @@ public class SynergyFactory {
     private static final Map<Polyman.ColorType, Map<Integer, List<SynergyEffect>>> colorSynergies = new HashMap<>();
 
     static {
-        // ShapeType 시너지 예시 (2/4마리)
+        // ShapeType 시너지 (2/4마리)
         Map<Integer, List<SynergyEffect>> rectangleSynergy = new HashMap<>();
-        rectangleSynergy.put(2, List.of(new SynergyEffect(SynergyEffect.EffectType.DEFENSE_BONUS, 3, 1)));
-        rectangleSynergy.put(4, List.of(new SynergyEffect(SynergyEffect.EffectType.DEFENSE_BONUS, 6, 2),
-                new SynergyEffect(SynergyEffect.EffectType.MAX_HP_BONUS, 50, 2))); // 방어력 및 체력 보너스
+        rectangleSynergy.put(2, List.of(new SynergyEffect(BattleController.Team.PLAYER, SynergyEffect.EffectType.DEFENSE_BONUS, 3, 1)));
+        rectangleSynergy.put(4, List.of(new SynergyEffect(BattleController.Team.PLAYER, SynergyEffect.EffectType.DEFENSE_BONUS, 6, 2),
+                new SynergyEffect(BattleController.Team.PLAYER, SynergyEffect.EffectType.MAX_HP_BONUS, 50, 2))); // 방어력 및 체력 보너스
         shapeSynergies.put(Polyman.ShapeType.RECTANGLE, rectangleSynergy);
 
         Map<Integer, List<SynergyEffect>> circleSynergy = new HashMap<>();
-        circleSynergy.put(2, List.of(new SynergyEffect(SynergyEffect.EffectType.ATTACK_SPEED_BONUS, 0.2f, 1))); // 공격 속도 20% 증가
-        circleSynergy.put(4, List.of(new SynergyEffect(SynergyEffect.EffectType.ATTACK_SPEED_BONUS, 0.5f, 2),
-                new SynergyEffect(SynergyEffect.EffectType.AREA_RANGE_BONUS, Metrics.GRID_UNIT * 0.5f, 2))); // 공격 속도 및 범위 범위 증가
+        circleSynergy.put(2, List.of(new SynergyEffect(BattleController.Team.PLAYER, SynergyEffect.EffectType.ATTACK_SPEED_BONUS, 0.2f, 1))); // 공격 속도 20% 증가
+        circleSynergy.put(4, List.of(new SynergyEffect(BattleController.Team.PLAYER, SynergyEffect.EffectType.ATTACK_SPEED_BONUS, 0.5f, 2),
+                new SynergyEffect(BattleController.Team.PLAYER, SynergyEffect.EffectType.AREA_RANGE_BONUS, Metrics.GRID_UNIT * 0.5f, 2))); // 공격 속도 및 범위 범위 증가
         shapeSynergies.put(Polyman.ShapeType.CIRCLE, circleSynergy);
 
         Map<Integer, List<SynergyEffect>> triangleSynergy = new HashMap<>();
-        triangleSynergy.put(2, List.of(new SynergyEffect(SynergyEffect.EffectType.ATTACK_BONUS, 5, 1))); // 공격력 증가 (예시)
-        triangleSynergy.put(4, List.of(new SynergyEffect(SynergyEffect.EffectType.ATTACK_BONUS, 10, 2),
-                new SynergyEffect(SynergyEffect.EffectType.ATTACK_RANGE_BONUS, Metrics.GRID_UNIT, 2))); // 공격력 및 공격 범위 증가 (예시)
+        triangleSynergy.put(2, List.of(new SynergyEffect(BattleController.Team.PLAYER, SynergyEffect.EffectType.ATTACK_BONUS, 5, 1))); // 공격력 증가 (예시)
+        triangleSynergy.put(4, List.of(new SynergyEffect(BattleController.Team.PLAYER, SynergyEffect.EffectType.ATTACK_BONUS, 10, 2),
+                new SynergyEffect(BattleController.Team.PLAYER, SynergyEffect.EffectType.ATTACK_RANGE_BONUS, Metrics.GRID_UNIT, 2))); // 공격력 및 공격 범위 증가 (예시)
         shapeSynergies.put(Polyman.ShapeType.TRIANGLE, triangleSynergy);
 
 
-        // ColorType 시너지 예시 (2/4/6마리)
+        // ColorType 시너지 (2/4/6마리)
         Map<Integer, List<SynergyEffect>> redSynergy = new HashMap<>();
-        redSynergy.put(2, List.of(new SynergyEffect(SynergyEffect.EffectType.ATTACK_BONUS, 4, 1)));
-        redSynergy.put(4, List.of(new SynergyEffect(SynergyEffect.EffectType.ATTACK_BONUS, 10, 2), new SynergyEffect(SynergyEffect.EffectType.SPEED_BONUS, 1, 2)));
-        redSynergy.put(6, List.of(new SynergyEffect(SynergyEffect.EffectType.ATTACK_BONUS, 20, 3), new SynergyEffect(SynergyEffect.EffectType.SPEED_BONUS, 2, 3)));
+        redSynergy.put(2, List.of(new SynergyEffect(BattleController.Team.PLAYER, SynergyEffect.EffectType.ATTACK_BONUS, 4, 1)));
+        redSynergy.put(4, List.of(new SynergyEffect(BattleController.Team.PLAYER, SynergyEffect.EffectType.ATTACK_BONUS, 10, 2),
+                new SynergyEffect(BattleController.Team.PLAYER, SynergyEffect.EffectType.SPEED_BONUS, 1, 2)));
+        redSynergy.put(6, List.of(new SynergyEffect(BattleController.Team.PLAYER, SynergyEffect.EffectType.ATTACK_BONUS, 20, 3),
+                new SynergyEffect(BattleController.Team.PLAYER,SynergyEffect.EffectType.SPEED_BONUS, 2, 3)));
         colorSynergies.put(Polyman.ColorType.RED, redSynergy);
 
         Map<Integer, List<SynergyEffect>> greenSynergy = new HashMap<>();
-        greenSynergy.put(2, List.of(new SynergyEffect(SynergyEffect.EffectType.MAX_HP_BONUS, 20, 1)));
-        greenSynergy.put(4, List.of(new SynergyEffect(SynergyEffect.EffectType.MAX_HP_BONUS, 50, 2), new SynergyEffect(SynergyEffect.EffectType.DEFENSE_BONUS, 5, 2)));
-        greenSynergy.put(6, List.of(new SynergyEffect(SynergyEffect.EffectType.MAX_HP_BONUS, 100, 3), new SynergyEffect(SynergyEffect.EffectType.DEFENSE_BONUS, 10, 3)));
+        greenSynergy.put(2, List.of(new SynergyEffect(BattleController.Team.PLAYER, SynergyEffect.EffectType.MAX_HP_BONUS, 20, 1)));
+        greenSynergy.put(4, List.of(new SynergyEffect(BattleController.Team.PLAYER, SynergyEffect.EffectType.MAX_HP_BONUS, 50, 2),
+                new SynergyEffect(BattleController.Team.PLAYER, SynergyEffect.EffectType.DEFENSE_BONUS, 5, 2)));
+        greenSynergy.put(6, List.of(new SynergyEffect(BattleController.Team.PLAYER, SynergyEffect.EffectType.MAX_HP_BONUS, 100, 3),
+                new SynergyEffect(BattleController.Team.PLAYER, SynergyEffect.EffectType.DEFENSE_BONUS, 10, 3)));
         colorSynergies.put(Polyman.ColorType.GREEN, greenSynergy);
 
         Map<Integer, List<SynergyEffect>> blueSynergy = new HashMap<>();
         // 파랑 시너지는 적에게 공격 속도 감소 디버프를 적용
-        blueSynergy.put(2, List.of(new SynergyEffect(SynergyEffect.EffectType.ATTACK_SPEED_BONUS, -0.1f, 1)));
-        blueSynergy.put(4, List.of(new SynergyEffect(SynergyEffect.EffectType.ATTACK_SPEED_BONUS, -0.25f, 2)));
-        blueSynergy.put(6, List.of(new SynergyEffect(SynergyEffect.EffectType.ATTACK_SPEED_BONUS, -0.5f, 3)));
+        blueSynergy.put(2, List.of(new SynergyEffect(BattleController.Team.ENEMY, SynergyEffect.EffectType.ATTACK_SPEED_BONUS, -0.1f, 1)));
+        blueSynergy.put(4, List.of(new SynergyEffect(BattleController.Team.ENEMY, SynergyEffect.EffectType.ATTACK_SPEED_BONUS, -0.25f, 2)));
+        blueSynergy.put(6, List.of(new SynergyEffect(BattleController.Team.ENEMY, SynergyEffect.EffectType.ATTACK_SPEED_BONUS, -0.5f, 3)));
         colorSynergies.put(Polyman.ColorType.BLUE, blueSynergy);
     }
 
@@ -150,7 +156,7 @@ public class SynergyFactory {
                         if (effects != null) {
                             for (SynergyEffect effect : effects) {
                                 // 효과 타입에 따라 아군 또는 적에게 적용
-                                if (effect.getType() == SynergyEffect.EffectType.ATTACK_SPEED_BONUS && effect.getValue() < 0) {
+                                if (effect.applicateTeam() == BattleController.Team.ENEMY) {
                                     // 적에게 적용되는 디버프
                                     if (enemyUnits != null) {
                                         for (BattleUnit enemyUnit : enemyUnits) {

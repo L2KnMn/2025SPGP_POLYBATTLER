@@ -58,7 +58,6 @@ public class Shop implements IGameObject {
             this.shape = Polyman.ShapeType.values()[random.nextInt(Polyman.ShapeType.values().length)];
             this.color = Polyman.ColorType.values()[random.nextInt(Polyman.ColorType.values().length-1)];
             this.paint.setColor(Polyman.getColor(color));
-
         }
 
         @Override
@@ -74,7 +73,8 @@ public class Shop implements IGameObject {
     private final Goods[] goods = new Goods[numberOfBox];
     private final Position interlude;
     private final RectF RerollButtonRect;
-    private final Paint RerollButtonPaint;
+//    private final Paint RerollButtonPaint;
+    private int rerollPrice = 1;
 
 
     public Shop() {
@@ -101,9 +101,9 @@ public class Shop implements IGameObject {
         RerollButtonRect = new RectF(backboardRect.width()/2-Metrics.GRID_UNIT,
                 backboardRect.height() - Metrics.GRID_UNIT, backboardRect.width()/2 + Metrics.GRID_UNIT,
                 backboardRect.height());
-        RerollButtonPaint = new Paint();
-        RerollButtonPaint.setColor(0xFF000000);
-        RerollButtonPaint.setStyle(Paint.Style.FILL);
+//        RerollButtonPaint = new Paint();
+//        RerollButtonPaint.setColor(0xFF000000);
+//        RerollButtonPaint.setStyle(Paint.Style.FILL);
 
         interlude = new Position();
         interlude.x = (backboardRect.width() - boxOutline.width() * numberOfBox) / (numberOfBox + 1);
@@ -114,7 +114,7 @@ public class Shop implements IGameObject {
                     backboardRect.left + interlude.x + boxOutline.width() / 2 + (boxOutline.width() + interlude.x) * i,
                     backboardRect.top + interlude.y + boxOutline.height() / 2);
         }
-        setRandomGoods();
+        setRandomGoods(1);
     }
 
     public void createUI(Scene scene){
@@ -127,7 +127,8 @@ public class Shop implements IGameObject {
             ).setVisibility(GameState.PREPARE, true);
         UiManager.Button rerollButton = ui.addButton("REROLL", RerollButtonRect.centerX(), RerollButtonRect.centerY(), RerollButtonRect.width(), RerollButtonRect.height(),
                 () -> {
-                    ShopManager.getInstance(scene).reRoll();
+                    ShopManager.getInstance(scene).reRoll(rerollPrice);
+                    rerollPrice++;
                 }
         ).setVisibility(GameState.SHOPPING, true);
     }
@@ -151,10 +152,9 @@ public class Shop implements IGameObject {
                     }
                     boxOutline.offset(boxOutline.width() + interlude.x, 0);
                 }
-                canvas.drawRect(RerollButtonRect, RerollButtonPaint);
-                float height_offset = RerollButtonRect.height() / 4;
-                drawText(canvas, "REROLL", RerollButtonRect.centerX(), RerollButtonRect.centerY()-height_offset);
-                drawText(canvas, "1", RerollButtonRect.centerX(), RerollButtonRect.centerY() + height_offset);
+                // canvas.drawRect(RerollButtonRect, RerollButtonPaint);
+                float height_offset = RerollButtonRect.height() / 3;
+                drawText(canvas, "price : " + rerollPrice, RerollButtonRect.centerX(), RerollButtonRect.centerY() + height_offset);
             }
         }
     }
@@ -184,13 +184,10 @@ public class Shop implements IGameObject {
     }
 
     Random random = new Random();
-    public void setRandomGoods(){
+    public void setRandomGoods(int price){
+        rerollPrice = price;
         for (int i = 0; i < numberOfBox; i++) {
-            goods[i].soldOut = false;
-            goods[i].price = random.nextInt(10);
-            goods[i].shape = Polyman.ShapeType.values()[random.nextInt(Polyman.ShapeType.values().length)];
-            goods[i].color = Polyman.ColorType.values()[random.nextInt(Polyman.ColorType.values().length-1)];
-            goods[i].paint.setColor(Polyman.getColor(goods[i].color));
+            goods[i].reset(random);
         }
     }
 
