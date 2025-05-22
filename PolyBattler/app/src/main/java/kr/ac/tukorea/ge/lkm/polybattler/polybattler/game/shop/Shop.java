@@ -32,6 +32,7 @@ public class Shop implements IGameObject {
     private final Paint boxOutlinePaint;
     static class Goods implements IGameObject {
         private final Paint paint;
+        private int level;
         protected int price;
         protected Polyman.ShapeType shape;
         protected Polyman.ColorType color;
@@ -44,6 +45,8 @@ public class Shop implements IGameObject {
             this.color = color;
             this.soldOut = false;
 
+            this.level = 1;
+
             transform = new Transform(this, new Position(x, y));
             transform.setSize(Metrics.GRID_UNIT);
 
@@ -52,12 +55,24 @@ public class Shop implements IGameObject {
             paint.setStyle(Paint.Style.FILL);
         }
 
+        int getRandomLevel(Random random){
+            int rand = random.nextInt(100);
+            if(rand <= 1){
+                return 3;
+            }else if(rand <= 9){
+                return 2;
+            }else {
+                return 1;
+            }
+        }
+
         void reset(Random random){
             this.soldOut = false;
             this.price = random.nextInt(10);
             this.shape = Polyman.ShapeType.values()[random.nextInt(Polyman.ShapeType.values().length)];
             this.color = Polyman.ColorType.values()[random.nextInt(Polyman.ColorType.values().length-1)];
             this.paint.setColor(Polyman.getColor(color));
+            this.level = getRandomLevel(random);
         }
 
         @Override
