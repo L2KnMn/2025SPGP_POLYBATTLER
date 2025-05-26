@@ -74,7 +74,7 @@ public class ShopManager implements IGameManager {
                         if(GameManager.getInstance(master).getGold() < shop.getPrice(selectedBox))
                             UiManager.getInstance(master).showToast("not enough gold");
                         else{
-                            boolean result = GameManager.getInstance(master).purchaseCharacter(shop.getPrice(selectedBox), shop.getShape(selectedBox), shop.getColor(selectedBox));
+                            boolean result = GameManager.getInstance(master).purchaseCharacter(shop.getGoods(selectedBox));
                             if (result) {
                                 shop.makeSoldOut(selectedBox);
                             } else {
@@ -82,7 +82,6 @@ public class ShopManager implements IGameManager {
                                 UiManager.getInstance(master).showToast("full bench");
                             }
                         }
-                        return true;
                     }
                     // 일단 이벤트를 소비하긴 해서 다른 거 작동 안 하게 만듦
                     return true;
@@ -90,7 +89,7 @@ public class ShopManager implements IGameManager {
                     // 상품 창 밖을 터치하면 상품창 닫고 준비 단계로 돌아가기
                     shop.foldShop();
                     MasterManager.getInstance(master).setGameState(GameState.PREPARE);
-                    return false;
+                    return true;
                 }
             }
         }

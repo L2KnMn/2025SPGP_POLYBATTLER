@@ -32,11 +32,10 @@ public class PolymanGenerator {
     }
 
     // 벤치에 Polyman을 생성하는 메소드
-    public Polyman generateCharacterBench(Polyman.ShapeType shape, Polyman.ColorType color) {
+    public Polyman generateCharacterBench(Polyman.ShapeType shape, Polyman.ColorType color, int level) {
         int index = gameMap.getEmptyBenchIndex();
         if (index >= 0) {
-            // 상점에서 구매하는 캐릭터는 기본 레벨 1
-            Polyman polyman = getCharacterFromPool(shape, color, 1);
+            Polyman polyman = getCharacterFromPool(shape, color, level);
             gameMap.setObjectOnBench(polyman.transform, index);
             master.add(polyman);
             return polyman;

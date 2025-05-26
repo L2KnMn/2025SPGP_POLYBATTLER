@@ -30,59 +30,6 @@ public class Shop implements IGameObject {
     private final Paint backboardPaint;
     private final RectF boxOutline;
     private final Paint boxOutlinePaint;
-    static class Goods implements IGameObject {
-        private final Paint paint;
-        private int level;
-        protected int price;
-        protected Polyman.ShapeType shape;
-        protected Polyman.ColorType color;
-        protected Transform transform;
-        protected boolean soldOut;
-
-        Goods(int price, Polyman.ShapeType shape, Polyman.ColorType color, float x, float y){
-            this.price = price;
-            this.shape = shape;
-            this.color = color;
-            this.soldOut = false;
-
-            this.level = 1;
-
-            transform = new Transform(this, new Position(x, y));
-            transform.setSize(Metrics.GRID_UNIT);
-
-            paint = new Paint();
-            paint.setColor(Polyman.getColor(color));
-            paint.setStyle(Paint.Style.FILL);
-        }
-
-        int getRandomLevel(Random random){
-            int rand = random.nextInt(100);
-            if(rand <= 1){
-                return 3;
-            }else if(rand <= 9){
-                return 2;
-            }else {
-                return 1;
-            }
-        }
-
-        void reset(Random random){
-            this.soldOut = false;
-            this.price = random.nextInt(10);
-            this.shape = Polyman.ShapeType.values()[random.nextInt(Polyman.ShapeType.values().length)];
-            this.color = Polyman.ColorType.values()[random.nextInt(Polyman.ColorType.values().length-1)];
-            this.paint.setColor(Polyman.getColor(color));
-            this.level = getRandomLevel(random);
-        }
-
-        @Override
-        public void draw(Canvas canvas){
-            Polyman.drawShape(canvas, transform, paint, shape);
-        }
-
-        @Override
-        public void update(){}
-    }
 
     private final int numberOfBox = 3;
     private final Goods[] goods = new Goods[numberOfBox];
@@ -90,7 +37,6 @@ public class Shop implements IGameObject {
     private final RectF RerollButtonRect;
 //    private final Paint RerollButtonPaint;
     private int rerollPrice = 1;
-
 
     public Shop() {
         active = true;
@@ -160,10 +106,7 @@ public class Shop implements IGameObject {
                 boxOutline.offsetTo(backboardRect.left + interlude.x, backboardRect.top + interlude.y);
                 for (int i = 0; i < numberOfBox; i++) {
                     if(!goods[i].soldOut){
-                        canvas.drawRect(boxOutline, boxOutlinePaint);
-                        goods[i].draw(canvas);
-                        drawText(canvas,goods[i].shape.name(), boxOutline.centerX(), boxOutline.centerY() - boxOutline.height() / 4);
-                        drawText(canvas, String.valueOf(goods[i].price), boxOutline.centerX(), boxOutline.centerY() + boxOutline.height() / 4);
+                        drawGoods(canvas, i);
                     }
                     boxOutline.offset(boxOutline.width() + interlude.x, 0);
                 }
@@ -172,6 +115,13 @@ public class Shop implements IGameObject {
                 drawText(canvas, "price : " + rerollPrice, RerollButtonRect.centerX(), RerollButtonRect.centerY() + height_offset);
             }
         }
+    }
+
+    public void drawGoods(Canvas canvas, int index){
+        canvas.drawRect(boxOutline, boxOutlinePaint);
+        goods[index].draw(canvas);
+//        drawText(canvas,goods[index].shape.name(), boxOutline.centerX(), boxOutline.centerY() - boxOutline.height() / 4);
+        drawText(canvas, String.valueOf(goods[index].price), boxOutline.centerX(), boxOutline.centerY() + boxOutline.height() / 4);
     }
 
     private void drawText(Canvas canvas, String string, float x, float y) {
@@ -208,12 +158,6 @@ public class Shop implements IGameObject {
 
     public int getPrice(int index){
         return this.goods[index].price;
-    }
-    public Polyman.ShapeType getShape(int index){
-        return this.goods[index].shape;
-    }
-    public Polyman.ColorType getColor(int index){
-        return this.goods[index].color;
     }
 
     public boolean isSoldOut(int goods){
@@ -257,5 +201,9 @@ public class Shop implements IGameObject {
         Paint.FontMetrics fontMetrics = shopTextPaint.getFontMetrics();
         this.textOffsetX = -textWidth / 2;
         this.textOffsetY = -(fontMetrics.ascent + fontMetrics.descent) / 2;
+    }
+
+    public Goods getGoods(int selectedBox) {
+        return goods[selectedBox];
     }
 }

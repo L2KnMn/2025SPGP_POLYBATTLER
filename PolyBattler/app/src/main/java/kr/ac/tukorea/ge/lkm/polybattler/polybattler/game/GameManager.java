@@ -21,6 +21,7 @@ import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.GameMap.GameMap;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Polyman;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.PolymanGenerator;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.shop.Goods;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.shop.ShopManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.DragAndDropEventController;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.UiManager;
@@ -210,22 +211,25 @@ public class GameManager implements IGameManager {
     public boolean spendGold(int amount) {
         if (this.gold >= amount) {
             addGold(-amount);
+            if(GameView.drawsDebugStuffs){
+                addGold(amount);
+            }
             return true;
         }
         return false;
     }
 
-    public boolean purchaseCharacter(int price, Polyman.ShapeType shape, Polyman.ColorType color) {
-        if (spendGold(price)) {
-            return addCharacter(shape, color);
+    public boolean purchaseCharacter(Goods goods) {
+        if (spendGold(goods.price)) {
+            return addCharacter(goods.shape, goods.color, goods.level);
         }else
             return false;
     }
 
-    public boolean addCharacter(Polyman.ShapeType shape, Polyman.ColorType color) {
+    public boolean addCharacter(Polyman.ShapeType shape, Polyman.ColorType color, int level) {
         // Polyman 생성을 PolymanGenerator에 위임
-        Polyman polyman = polymanGenerator.generateCharacterBench(shape, color);
-        if(polyman == null)
+        Polyman polyman = polymanGenerator.generateCharacterBench(shape, color, level);
+        if(polyman == null) // 생성 실패
             return false;
         int index = gameMap.getIndex(polyman.transform.getPosition().x, polyman.transform.getPosition().y);
         if(index >= 0 && index < benchSize){
