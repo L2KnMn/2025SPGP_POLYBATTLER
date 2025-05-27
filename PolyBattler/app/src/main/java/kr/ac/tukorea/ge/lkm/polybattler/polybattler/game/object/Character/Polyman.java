@@ -8,6 +8,7 @@ import android.graphics.RectF;
 import androidx.core.content.res.ResourcesCompat;
 
 import kr.ac.tukorea.ge.lkm.polybattler.R;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.Effect.EffectManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.Layer;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.BehaviorTree.BattleUnit;
@@ -163,7 +164,7 @@ public class Polyman extends Sprite implements IRecyclable, ILayerProvider, IRem
 
 
     public static void drawLevel(Canvas canvas, Transform transform, int level) {
-        canvas.drawText("★" + level, transform.getPosition().x, transform.getPosition().y - transform.getSize()/2 - 10, levelPaint); // 레벨 텍스트 그리기 예시
+        canvas.drawText("★".repeat(level) + level, transform.getPosition().x, transform.getPosition().y - transform.getSize()/2 - 10, levelPaint); // 레벨 텍스트 그리기 예시
     }
 
     public static int getColor(ColorType color){
@@ -208,6 +209,7 @@ public class Polyman extends Sprite implements IRecyclable, ILayerProvider, IRem
         unit.preset(getShape(), getColorType(), this.level);
         unit.fillHp(unit.getMaxHp()); // 레벨업 시 체력 완전 회복 등 처리
         // TODO: 레벨업 시 이펙트나 사운드 추가
+        EffectManager.getInstance(Scene.top()).createLevelUpEffect(this.getBattleUnit());
     }
 
 

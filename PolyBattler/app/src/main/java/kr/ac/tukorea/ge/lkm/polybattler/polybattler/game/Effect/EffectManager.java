@@ -4,6 +4,7 @@ import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.view.MotionEvent;
 
 import java.util.ArrayList;
@@ -544,6 +545,116 @@ public class EffectManager implements IGameManager {
             for (Position point : effectPoints) {
                 canvas.drawCircle(point.x, point.y, PARTICLE_RADIUS, paint);
             }
+        }
+    }
+
+    public void createLevelUpEffect(BattleUnit unit) {
+        LevelUpEffect levelUpEffect = master.getRecyclable(LevelUpEffect.class);
+        if (levelUpEffect == null) {
+            levelUpEffect = new LevelUpEffect();
+        }
+        levelUpEffect.init(unit);
+        addEffect(levelUpEffect);
+    }
+    // 새로운 LevelUpEffect 클래스 정의
+    public static class LevelUpEffect extends Effect {
+        private BattleUnit targetUnit; // 이펙트가 발생할 대상 유닛
+        private final Paint textPaint;     // "LEVEL UP!" 텍스트를 그릴 Paint
+        private final Paint circlePaint;   // 원형 빛 효과를 그릴 Paint
+        private final String levelUpText = "LEVEL UP!";
+        private float textYOffset;   // 텍스트가 위로 올라가는 오프셋
+        private float circleRadius;  // 원형 빛의 현재 반지름
+        private float maxCircleRadius; // 원형 빛의 최대 반지름
+        private int initialTextAlpha; // 텍스트 초기 알파값
+        private int initialCircleAlpha; // 원형 빛 초기 알파값
+
+        public LevelUpEffect() {
+            super(); // 부모 생성자 호출
+            // 기본값 설정은 init에서 수행
+            textPaint = new Paint();
+            circlePaint = new Paint();
+            duration = 1.5f; // 이펙트 지속 시간 (초)
+        }
+
+        public LevelUpEffect init(BattleUnit unit) {
+            super.elapsedTime = 0f;
+            super.finished = false;
+            super.remove = false;
+            this.targetUnit = unit;
+
+            // 대상 유닛의 위치로 이펙트 위치 설정
+            if (targetUnit != null && targetUnit.getTransform() != null) {
+                Position unitPos = targetUnit.getTransform().getPosition();
+                transform.set(unitPos.x, unitPos.y);
+            } else {
+                // 대상 유닛 정보가 없으면 화면 중앙에라도 표시 (예외 처리)
+                transform.set(Metrics.width / 2, Metrics.height / 2);
+            }
+
+            // "LEVEL UP!" 텍스트 설정
+            textPaint.setTextSize(Metrics.height / 25); // 화면 높이에 비례한 텍스트 크기
+            textPaint.setColor(Color.YELLOW);
+            textPaint.setTextAlign(Paint.Align.CENTER); // 텍스트 중앙 정렬
+            textPaint.setAntiAlias(true);
+            textPaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD)); // 굵은 글씨
+            initialTextAlpha = 255;
+            textPaint.setAlpha(initialTextAlpha);
+            textYOffset = 0;
+
+            // 원형 빛 효과 설정
+            circlePaint.setColor(Color.argb(150, 255, 255, 0)); // 반투명 노란색
+            circlePaint.setStyle(Paint.Style.FILL);
+            circlePaint.setAntiAlias(true);
+            initialCircleAlpha = 150; // circlePaint 색상에 이미 alpha가 포함되어 있으므로, 추가 조절용
+            circlePaint.setAlpha(initialCircleAlpha);
+            circleRadius = 0;
+            maxCircleRadius = targetUnit != null ? targetUnit.getTransform().getSize() * 1.5f : Metrics.GRID_UNIT * 2; // 유닛 크기보다 약간 크게
+
+            return this;
+        }
+
+        @Override
+        public void update() {
+            // 부모 클래스의 update 호출 (elapsedTime, finished, remove 처리)
+            super.update();
+            if (finished || remove) return;
+        }
+
+        @Override
+        public void draw(Canvas canvas) {
+            if (finished || canvas == null) return;
+
+            float progress = elapsedTime / duration; // 진행도 (0.0 ~ 1.0)
+
+            // 텍스트 애니메이션: 위로 올라가면서 서서히 사라짐
+            textYOffset = -Metrics.height / 15 * progress; // 위로 올라가는 정도
+            int currentTextAlpha = (int) (initialTextAlpha * (1 - progress * 1.5f)); // 지속시간의 2/3 지점에서 사라지도록 빠르게
+            textPaint.setAlpha(Math.max(0, currentTextAlpha));
+
+            // 원형 빛 애니메이션: 점점 커지면서 서서히 사라짐
+            circleRadius = maxCircleRadius * progress;
+            int currentCircleAlpha = (int) (initialCircleAlpha * (1 - progress));
+            circlePaint.setAlpha(Math.max(0, currentCircleAlpha));
+
+            // 원형 빛 그리기
+            canvas.drawCircle(transform.getPosition().x, transform.getPosition().y, circleRadius, circlePaint);
+
+            // "LEVEL UP!" 텍스트 그리기
+            // 텍스트 Y 위치는 캐릭터 머리 위에서 시작하여 더 위로 올라가도록 조정
+            float textX = transform.getPosition().x;
+            float textBaseY = transform.getPosition().y - (targetUnit != null ? targetUnit.getTransform().getSize() / 2 : Metrics.GRID_UNIT / 2); // 캐릭터 머리 위
+            canvas.drawText(levelUpText, textX, textBaseY + textYOffset, textPaint);
+        }
+
+        @Override
+        public void onRecycle() {
+            super.onRecycle(); // 부모의 onRecycle 호출
+            targetUnit = null;
+        }
+
+        @Override
+        public Layer getLayer() {
+            return Layer.effect_front; // 다른 이펙트들처럼 앞쪽에 표시
         }
     }
 }
