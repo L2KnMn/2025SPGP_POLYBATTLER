@@ -9,7 +9,6 @@ import android.view.MotionEvent;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map; // Map import
 
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameState;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.BattleController;
@@ -22,10 +21,6 @@ import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 // Synergy 정보를 표시하는 내부 클래스
 public class SynergyDisplay implements IGameObject, IEventHandle {
     private List<SynergyFactory.ActiveSynergy> activeSynergies = new ArrayList<>();
-    // 현재 유닛 수를 저장 (ActiveSynergy에 count가 있다면 이 Map은 필요 없음)
-    // private Map<Polyman.ShapeType, Integer> shapeCounts = new HashMap<>();
-    // private Map<Polyman.ColorType, Integer> colorCounts = new HashMap<>();
-
     private final Transform transform; // 패널 자체의 위치와 크기
     private final Paint panelBackgroundPaint; // 패널 배경 Paint
     private final Paint sectionTitlePaint; // 섹션 제목 Paint
@@ -67,8 +62,8 @@ public class SynergyDisplay implements IGameObject, IEventHandle {
         activeTierPaint.setTextAlign(Paint.Align.LEFT);
     }
 
-    // 시너지 데이터 업데이트 (ActiveSynergy에 count와 condition이 있다고 가정)
-    public void updateSynergies(List<SynergyFactory.ActiveSynergy> synergies) {
+    // activeSynergies를 등록하면 display는 계속 그걸 추적해서 출력함
+    public void appendSynergies(List<SynergyFactory.ActiveSynergy> synergies) {
         this.activeSynergies = synergies;
     }
 
@@ -99,7 +94,6 @@ public class SynergyDisplay implements IGameObject, IEventHandle {
 
     @Override
     public void update() {
-        // TODO: 시너지 데이터 변경 감지 및 UI 업데이트 (필요시)
     }
 
     @Override
@@ -216,10 +210,8 @@ public class SynergyDisplay implements IGameObject, IEventHandle {
     private String getSynergyName(SynergyFactory.ActiveSynergy synergy) {
         String name = "";
         if (synergy.getShapeType() != null) {
-            // TODO: ShapeType 열거형에 한글 이름 매핑 필요 (예: "사각형")
             name = synergy.getShapeType().toString();
         } else if (synergy.getColorType() != null) {
-            // TODO: ColorType 열거형에 한글 이름 매핑 필요 (예: "빨강")
             name = synergy.getColorType().toString();
         }
         return name + " 시너지";

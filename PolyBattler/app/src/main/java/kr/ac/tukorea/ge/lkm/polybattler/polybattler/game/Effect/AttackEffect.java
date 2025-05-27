@@ -34,9 +34,9 @@ public class AttackEffect extends EffectManager.Effect {
     static {
         // 점선 패턴 설정: { 간격 }, 초기 그려질 길이
         dashPathEffects = new ArrayList<>();
-        dashPathEffects.add(new DashPathEffect(new float[]{25f, 25f}, 0f));
-        dashPathEffects.add(new DashPathEffect(new float[]{25f, 25f}, 12.5f));
-        dashPathEffects.add(new DashPathEffect(new float[]{25f, 25f}, 25f));
+        dashPathEffects.add(new DashPathEffect(new float[]{25f, 50f}, 0f));
+        dashPathEffects.add(new DashPathEffect(new float[]{25f, 50f}, 12.5f));
+        dashPathEffects.add(new DashPathEffect(new float[]{25f, 50f}, 25f));
     }
 
     public AttackEffect(){
@@ -44,7 +44,8 @@ public class AttackEffect extends EffectManager.Effect {
         path = new Path();
     }
 
-    public AttackEffect init(BattleUnit attacker, BattleUnit target){
+    //
+    public AttackEffect initAnime(BattleUnit attacker, BattleUnit target, int type){
         this.attacker = attacker;
         this.target = target;
 

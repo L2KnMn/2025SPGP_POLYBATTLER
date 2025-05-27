@@ -319,7 +319,7 @@ public class BattleUnit {
     }
 
     public void initAttackEffect(){
-        attackEffect.init(this, target);
+        attackEffect.initAnime(this, target, 0);
     }
 
     public void stopAttackEffect() {

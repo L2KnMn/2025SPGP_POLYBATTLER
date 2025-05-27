@@ -74,6 +74,9 @@ public class GameManager implements IGameManager {
         goldBoard.setTextSize(100);
         goldBoard.setVisibility(GameState.PREPARE, true);
         goldBoard.setVisibility(GameState.SHOPPING, true);
+        goldBoard.setVisibility(GameState.BATTLE, true);
+        goldBoard.setVisibility(GameState.RESULT, true);
+
 
 
         // 1. "전투 시작" 버튼 생성

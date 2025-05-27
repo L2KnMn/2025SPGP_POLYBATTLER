@@ -7,7 +7,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
+import java.util.function.Function;
 
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameState;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.BattleController;
@@ -83,7 +83,7 @@ public class SynergyFactory {
         float panelY = Metrics.height / 2; // 화면 중앙
 
         synergyDisplay = UiManager.getInstance(master).addSynergyDisplay(panelX, panelY, panelWidth, panelHeight);
-        synergyDisplay.updateSynergies(this.getActiveSynergies());
+        synergyDisplay.appendSynergies(this.getActiveSynergies()); // 자원 등록 -> 알아서 업데이트 될 것임
         synergyDisplay.setVisibility(false); // 시너지 패널은 항상 보이도록 설정 (또는 게임 상태에 따라 제어)
         UiManager.Button button = UiManager.getInstance(master).addButton("시너지 확인", Metrics.GRID_UNIT, Metrics.GRID_UNIT, Metrics.GRID_UNIT, Metrics.GRID_UNIT,
                 synergyDisplay::open
@@ -94,114 +94,120 @@ public class SynergyFactory {
     // 시너지 계산 및 적용 (아군 유닛 목록과 적 유닛 목록 모두 필요)
     Map<Polyman.ShapeType, Integer> shapeCounts = new HashMap<>();
     Map<Polyman.ColorType, Integer> colorCounts = new HashMap<>();
+
+    /**
+     * 활성화된 시너지를 기록하기 위한 함수형 인터페이스
+     * @param <T_CATEGORY> 시너지 카테고리 타입 (예: ShapeType, ColorType)
+     */
+    @FunctionalInterface
+    private interface ActiveSynergyRecorder<T_CATEGORY extends Enum<T_CATEGORY>> {
+        void record(T_CATEGORY categoryValue, int condition, int currentUnitCount, SynergyEffect effect);
+    }
+
     public void calculateAndApplySynergies(List<BattleUnit> friendlyUnits, List<BattleUnit> enemyUnits) {
-        // 이전 시너지 효과 모두 제거 (아군과 적 모두)
+        // 1. 이전 시너지 효과 모두 제거
         removeAllSynergies(friendlyUnits, enemyUnits);
         activeSynergies.clear();
-
         if (friendlyUnits == null || friendlyUnits.isEmpty()) {
+            System.out.println("아군 유닛이 없어 시너지를 계산하지 않습니다.");
             return;
         }
 
-        // ShapeType별 유닛 수 계산 (아군만 해당)
+        // 2. ShapeType별 유닛 수 계산
         shapeCounts.clear();
         for (BattleUnit unit : friendlyUnits) {
             shapeCounts.put(unit.getShapeType(), shapeCounts.getOrDefault(unit.getShapeType(), 0) + 1);
         }
 
-        // ColorType별 유닛 수 계산 (아군만 해당)
+        // 3. ColorType별 유닛 수 계산
         colorCounts.clear();
         for (BattleUnit unit : friendlyUnits) {
             colorCounts.put(unit.getColorType(), colorCounts.getOrDefault(unit.getColorType(), 0) + 1);
         }
 
-        // ShapeType 시너지 적용 (아군에게만 적용)
-        for (Map.Entry<Polyman.ShapeType, Integer> entry : shapeCounts.entrySet()) {
-            Polyman.ShapeType shapeType = entry.getKey();
-            int count = entry.getValue();
+        // 4. ShapeType 시너지 적용
+        applySynergiesForCategory(
+                shapeCounts,
+                shapeSynergies,
+                friendlyUnits,
+                enemyUnits,
+                BattleUnit::getShapeType, // 유닛에서 ShapeType을 추출하는 함수
+                (type, condition, count, effect) -> // 활성화된 Shape 시너지를 기록하는 람다
+                        activeSynergies.add(new ActiveSynergy(type, null, condition, count, effect))
+        );
 
-            if (shapeSynergies.containsKey(shapeType)) {
-                Map<Integer, List<SynergyEffect>> buffs = shapeSynergies.get(shapeType);
-                List<Integer> sortedcondition = new ArrayList<>(buffs.keySet());
-                // sortedcondition.sort(Integer::compareTo); // 낮은 단계부터 정렬
-                sortedcondition.sort(Collections.reverseOrder());
-                for (int condition : sortedcondition) {
-                    if (count >= condition) { // 조건 수 달성
-                        List<SynergyEffect> effects = buffs.get(condition);
-                        if (effects != null) {
-                            for (SynergyEffect effect : effects) {
-                                // 효과 타입에 따라 아군 또는 적에게 적용
+        // 5. ColorType 시너지 적용
+        applySynergiesForCategory(
+                colorCounts,
+                colorSynergies,
+                friendlyUnits,
+                enemyUnits,
+                BattleUnit::getColorType, // 유닛에서 ColorType을 추출하는 함수
+                (type, condition, count, effect) -> // 활성화된 Color 시너지를 기록하는 람다
+                        activeSynergies.add(new ActiveSynergy(null, type, condition, count, effect))
+        );
+        System.out.println("총 활성화된 시너지 수: " + activeSynergies.size());
+    }
+
+    /**
+     * 특정 카테고리(Shape 또는 Color)의 시너지를 처리하는 제네릭 메서드
+     * @param categoryCounts      해당 카테고리의 유닛 수 맵 (예: shapeCounts)
+     * @param synergiesMap        해당 카테고리의 시너지 정의 맵 (예: shapeSynergies)
+     * @param friendlyUnits       아군 유닛 리스트
+     * @param enemyUnits          적군 유닛 리스트
+     * @param categoryExtractor   BattleUnit에서 해당 카테고리 값을 추출하는 함수
+     * @param recorder            활성화된 시너지를 기록하는 함수
+     * @param <T_CATEGORY>        시너지 카테고리의 타입 (Polyman.ShapeType 또는 Polyman.ColorType)
+     */
+    private <T_CATEGORY extends Enum<T_CATEGORY>> void applySynergiesForCategory(
+            Map<T_CATEGORY, Integer> categoryCounts,
+            Map<T_CATEGORY, Map<Integer, List<SynergyEffect>>> synergiesMap,
+            List<BattleUnit> friendlyUnits,
+            List<BattleUnit> enemyUnits,
+            Function<BattleUnit, T_CATEGORY> categoryExtractor,
+            ActiveSynergyRecorder<T_CATEGORY> recorder
+    ) {
+        if (categoryCounts == null || synergiesMap == null) {
+            return;
+        }
+
+        for (Map.Entry<T_CATEGORY, Integer> entry : categoryCounts.entrySet()) {
+            T_CATEGORY currentCategoryValue = entry.getKey(); // 예: ShapeType.TRIANGLE 또는 ColorType.RED
+            int count = entry.getValue(); // 해당 타입의 유닛 수
+
+            if (synergiesMap.containsKey(currentCategoryValue)) {
+                Map<Integer, List<SynergyEffect>> availableBuffs = synergiesMap.get(currentCategoryValue);
+                List<Integer> sortedConditions = new ArrayList<>(availableBuffs.keySet());
+                sortedConditions.sort(Collections.reverseOrder()); // 높은 단계부터 적용하기 위해 내림차순 정렬
+
+                for (int condition : sortedConditions) {
+                    if (count >= condition) { // 시너지 발동 조건 충족
+                        List<SynergyEffect> effectsToApply = availableBuffs.get(condition);
+                        if (effectsToApply != null) {
+                            for (SynergyEffect effect : effectsToApply) {
+                                // 효과 적용 대상 결정
                                 if (effect.applicateTeam() == BattleController.Team.ENEMY) {
-                                    // 적에게 적용되는 디버프
+                                    // 적에게 디버프 적용
                                     if (enemyUnits != null) {
                                         for (BattleUnit enemyUnit : enemyUnits) {
                                             enemyUnit.applySynergyBuff(effect);
                                         }
                                     }
-                                } else {
-                                    // 해당 ShapeType 유닛들에게 버프 적용
-                                    for (BattleUnit unit : friendlyUnits) {
-                                        if (unit.getShapeType() == shapeType) {
-                                            unit.applySynergyBuff(effect);
+                                } else { // 아군에게 버프 적용
+                                    // 해당 카테고리 값을 가진 아군 유닛들에게만 버프 적용
+                                    for (BattleUnit friendlyUnit : friendlyUnits) {
+                                        if (categoryExtractor.apply(friendlyUnit) == currentCategoryValue) {
+                                            friendlyUnit.applySynergyBuff(effect);
                                         }
                                     }
                                 }
-                                activeSynergies.add(new ActiveSynergy(shapeType, null, condition, count, effect)); // 활성화된 시너지 목록에 추가
+                                // 활성화된 시너지 목록에 추가 (recorder 사용)
+                                recorder.record(currentCategoryValue, condition, count, effect);
                             }
                         }
-                        break; // 제일 높은 단계 버프 하나만 적용
+                        break; // 가장 높은 단계의 시너지 하나만 적용
                     }
                 }
-            }
-        }
-
-        // ColorType 시너지 적용 (아군 및 적에게 적용될 수 있음)
-        for (Map.Entry<Polyman.ColorType, Integer> entry : colorCounts.entrySet()) {
-            Polyman.ColorType colorType = entry.getKey();
-            int count = entry.getValue();
-
-            if (colorSynergies.containsKey(colorType)) {
-                Map<Integer, List<SynergyEffect>> buffs = colorSynergies.get(colorType);
-                List<Integer> sortedcondition = new ArrayList<>(buffs.keySet());
-//                sortedcondition.sort(Integer::compareTo); // 낮은 단계부터 정렬
-                sortedcondition.sort(Collections.reverseOrder());
-
-                for (int condition : sortedcondition) {
-                    if (count >= condition) {
-                        List<SynergyEffect> effects = buffs.get(condition);
-                        if (effects != null) {
-                            for (SynergyEffect effect : effects) {
-                                // 효과 타입에 따라 아군 또는 적에게 적용
-                                if (effect.applicateTeam() == BattleController.Team.ENEMY) {
-                                    // 적에게 적용되는 디버프
-                                    if (enemyUnits != null) {
-                                        for (BattleUnit enemyUnit : enemyUnits) {
-                                            enemyUnit.applySynergyBuff(effect);
-                                        }
-                                    }
-                                } else {
-                                    // 아군에게 적용되는 버프
-                                    for (BattleUnit unit : friendlyUnits) {
-                                        if (unit.getColorType() == colorType) {
-                                            unit.applySynergyBuff(effect);
-                                        }
-                                    }
-                                }
-                                activeSynergies.add(new ActiveSynergy(null, colorType, condition, count, effect)); // 활성화된 시너지 목록에 추가
-                            }
-                        }
-                        break;
-                    }
-                }
-            }
-        }
-
-        // TODO: UI에 현재 활성화된 시너지 목록 및 다음 단계 시너지 조건 표시
-        for(ActiveSynergy activeSynergy : activeSynergies) {
-            if(activeSynergy.shapeType == null){
-                Log.i("ActiveSynergy", "ColorType: " + activeSynergy.colorType + ", Tier: " + activeSynergy.condition + ", Effect: " + activeSynergy.effect.toString());
-            }else{
-                Log.i("ActiveSynergy", "ShapeType: " + activeSynergy.shapeType + ", Tier: " + activeSynergy.condition + ", Effect: " + activeSynergy.effect.toString());
             }
         }
     }
