@@ -50,6 +50,11 @@ public class BattleUnit {
         battleController = null;
         velocity = new Position();
         this.level = level; // 레벨 초기화
+
+        base = new Status();
+        synergy = new Status();
+        current = new Status();
+
         reset(shapeType, colorType, level); // reset 호출 시 레벨 전달
     }
 
@@ -226,7 +231,13 @@ public class BattleUnit {
     }
 
     public boolean isTargetInRange() {
-        return (target != null) && (target.getTransform().distance(transform) <= current.AttackRange); // 현재 공격 범위 적용
+        // 몇 칸 떨어졌는지 거리 측정을 하면 좋을 듯
+        // x, y 거리 차이를 구한다
+        // 거리 차이당 몇 칸인지 대략 구한다
+        // x차이 칸 + y 차이칸 =  총 거리
+        // current.AttackRange
+
+        return (target != null) && (target.getTransform().distance(transform) <= current.AttackRange * Metrics.GRID_UNIT); // 현재 공격 범위 적용
     }
 
     public float getAttackPercent() {

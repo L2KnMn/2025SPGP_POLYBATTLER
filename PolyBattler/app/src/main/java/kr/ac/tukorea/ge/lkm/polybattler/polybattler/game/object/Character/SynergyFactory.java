@@ -3,6 +3,7 @@ package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,13 +38,13 @@ public class SynergyFactory {
         Map<Integer, List<SynergyEffect>> circleSynergy = new HashMap<>();
         circleSynergy.put(2, List.of(new SynergyEffect(BattleController.Team.PLAYER, SynergyEffect.EffectType.ATTACK_SPEED_BONUS, 0.2f, 1))); // 공격 속도 20% 증가
         circleSynergy.put(4, List.of(new SynergyEffect(BattleController.Team.PLAYER, SynergyEffect.EffectType.ATTACK_SPEED_BONUS, 0.5f, 2),
-                new SynergyEffect(BattleController.Team.PLAYER, SynergyEffect.EffectType.AREA_RANGE_BONUS, Metrics.GRID_UNIT * 0.5f, 2))); // 공격 속도 및 범위 범위 증가
+                new SynergyEffect(BattleController.Team.PLAYER, SynergyEffect.EffectType.AREA_RANGE_BONUS, 1, 2))); // 공격 속도 및 범위 범위 증가
         shapeSynergies.put(Polyman.ShapeType.CIRCLE, circleSynergy);
 
         Map<Integer, List<SynergyEffect>> triangleSynergy = new HashMap<>();
         triangleSynergy.put(2, List.of(new SynergyEffect(BattleController.Team.PLAYER, SynergyEffect.EffectType.ATTACK_BONUS, 5, 1))); // 공격력 증가 (예시)
         triangleSynergy.put(4, List.of(new SynergyEffect(BattleController.Team.PLAYER, SynergyEffect.EffectType.ATTACK_BONUS, 10, 2),
-                new SynergyEffect(BattleController.Team.PLAYER, SynergyEffect.EffectType.ATTACK_RANGE_BONUS, Metrics.GRID_UNIT, 2))); // 공격력 및 공격 범위 증가 (예시)
+                new SynergyEffect(BattleController.Team.PLAYER, SynergyEffect.EffectType.ATTACK_RANGE_BONUS, 1, 2))); // 공격력 및 공격 범위 증가
         shapeSynergies.put(Polyman.ShapeType.TRIANGLE, triangleSynergy);
 
 
@@ -90,6 +91,8 @@ public class SynergyFactory {
     }
 
     // 시너지 계산 및 적용 (아군 유닛 목록과 적 유닛 목록 모두 필요)
+    Map<Polyman.ShapeType, Integer> shapeCounts = new HashMap<>();
+    Map<Polyman.ColorType, Integer> colorCounts = new HashMap<>();
     public void calculateAndApplySynergies(List<BattleUnit> friendlyUnits, List<BattleUnit> enemyUnits) {
         // 이전 시너지 효과 모두 제거 (아군과 적 모두)
         removeAllSynergies(friendlyUnits, enemyUnits);
@@ -100,13 +103,13 @@ public class SynergyFactory {
         }
 
         // ShapeType별 유닛 수 계산 (아군만 해당)
-        Map<Polyman.ShapeType, Integer> shapeCounts = new HashMap<>();
+        shapeCounts.clear();
         for (BattleUnit unit : friendlyUnits) {
             shapeCounts.put(unit.getShapeType(), shapeCounts.getOrDefault(unit.getShapeType(), 0) + 1);
         }
 
         // ColorType별 유닛 수 계산 (아군만 해당)
-        Map<Polyman.ColorType, Integer> colorCounts = new HashMap<>();
+        colorCounts.clear();
         for (BattleUnit unit : friendlyUnits) {
             colorCounts.put(unit.getColorType(), colorCounts.getOrDefault(unit.getColorType(), 0) + 1);
         }
@@ -119,22 +122,33 @@ public class SynergyFactory {
             if (shapeSynergies.containsKey(shapeType)) {
                 Map<Integer, List<SynergyEffect>> buffs = shapeSynergies.get(shapeType);
                 List<Integer> sortedcondition = new ArrayList<>(buffs.keySet());
-                sortedcondition.sort(Integer::compareTo); // 낮은 단계부터 정렬
-
+                // sortedcondition.sort(Integer::compareTo); // 낮은 단계부터 정렬
+                sortedcondition.sort(Collections.reverseOrder());
                 for (int condition : sortedcondition) {
-                    if (count >= condition) {
+                    if (count >= condition) { // 조건 수 달성
                         List<SynergyEffect> effects = buffs.get(condition);
                         if (effects != null) {
                             for (SynergyEffect effect : effects) {
-                                // 해당 ShapeType 유닛들에게 버프 적용
-                                for (BattleUnit unit : friendlyUnits) {
-                                    if (unit.getShapeType() == shapeType) {
-                                        unit.applySynergyBuff(effect);
+                                // 효과 타입에 따라 아군 또는 적에게 적용
+                                if (effect.applicateTeam() == BattleController.Team.ENEMY) {
+                                    // 적에게 적용되는 디버프
+                                    if (enemyUnits != null) {
+                                        for (BattleUnit enemyUnit : enemyUnits) {
+                                            enemyUnit.applySynergyBuff(effect);
+                                        }
+                                    }
+                                } else {
+                                    // 해당 ShapeType 유닛들에게 버프 적용
+                                    for (BattleUnit unit : friendlyUnits) {
+                                        if (unit.getShapeType() == shapeType) {
+                                            unit.applySynergyBuff(effect);
+                                        }
                                     }
                                 }
                                 activeSynergies.add(new ActiveSynergy(shapeType, null, condition, count, effect)); // 활성화된 시너지 목록에 추가
                             }
                         }
+                        break; // 제일 높은 단계 버프 하나만 적용
                     }
                 }
             }
@@ -148,7 +162,8 @@ public class SynergyFactory {
             if (colorSynergies.containsKey(colorType)) {
                 Map<Integer, List<SynergyEffect>> buffs = colorSynergies.get(colorType);
                 List<Integer> sortedcondition = new ArrayList<>(buffs.keySet());
-                sortedcondition.sort(Integer::compareTo); // 낮은 단계부터 정렬
+//                sortedcondition.sort(Integer::compareTo); // 낮은 단계부터 정렬
+                sortedcondition.sort(Collections.reverseOrder());
 
                 for (int condition : sortedcondition) {
                     if (count >= condition) {
@@ -174,6 +189,7 @@ public class SynergyFactory {
                                 activeSynergies.add(new ActiveSynergy(null, colorType, condition, count, effect)); // 활성화된 시너지 목록에 추가
                             }
                         }
+                        break;
                     }
                 }
             }

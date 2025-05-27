@@ -247,6 +247,7 @@ public class SynergyDisplay implements IGameObject, IEventHandle {
                 break;
             default: effectText = effect.getType().toString();
         }
+        effectText += effect.getValue() > 0 ? " 증가" : " 감소";
         return team + effectText;
     }
 
