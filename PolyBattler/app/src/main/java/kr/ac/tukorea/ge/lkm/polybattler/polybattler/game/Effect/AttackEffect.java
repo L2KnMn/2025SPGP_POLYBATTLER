@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.util.Log;
 
 import androidx.core.content.res.ResourcesCompat;
 
@@ -31,8 +32,7 @@ public class AttackEffect extends EffectManager.Effect {
     boolean areaAttack = false;
 
     static {
-        // 점선 패턴 설정: [그려질 길이, 간격, 그려질 길이, 간격, ...]
-        // 예: 10px 그리고, 20px 건너뛰고, 10px 그리고, 20px 건너뛰는 패턴
+        // 점선 패턴 설정: { 간격 }, 초기 그려질 길이
         dashPathEffects = new ArrayList<>();
         dashPathEffects.add(new DashPathEffect(new float[]{25f, 25f}, 0f));
         dashPathEffects.add(new DashPathEffect(new float[]{25f, 25f}, 12.5f));
@@ -62,8 +62,6 @@ public class AttackEffect extends EffectManager.Effect {
         path.moveTo(pos1.x, pos1.y);
         path.lineTo(pos2.x, pos2.y);
 
-        EffectManager.getInstance(Scene.top()).addEffect(this);
-
         areaAttack = attacker.getShapeType() == Polyman.ShapeType.CIRCLE;
 
         elapsedTime = 0;
@@ -76,33 +74,36 @@ public class AttackEffect extends EffectManager.Effect {
     public void update() {
         elapsedTime += GameView.frameTime;
         if(GameManager.getInstance(Scene.top()).getGameState() != GameState.BATTLE){
-            attacker.stopAttackEffect();
-            remove();
-            return;
+            // 혹시 전투 단계가 아니라면 삭제하기
+            if(remove)
+                Log.d("Attack Effect", "비전투 상황인데도 attack effect가 실행 중임");
+            attacker.stopAttackEffect(); // 소유주에게 자신을 삭제하라고 전달 
         }
-        if(remove){
+        if(remove){ // 삭제 표기가 있다면 자신을 삭제
             Scene.top().remove(this);
         }
     }
 
     float elapsedTimeNext = 0;
+    @Override
     public void draw(Canvas canvas){
         if(finished)
             return;
         if(elapsedTime > elapsedTimeNext) {
+            // 선 위치를 실시간 조정 => 너무 자주 하기보단 일정 시간마다 하자 
             path.reset();
-            if(!attacker.isDead() && !target.isDead()) {
-                Position pos1 = attacker.getTransform().getPosition();
-                Position pos2 = target.getTransform().getPosition();
-                path.moveTo(pos1.x, pos1.y);
-                path.lineTo(pos2.x, pos2.y);
+            Position pos1 = attacker.getTransform().getPosition();
+            Position pos2 = target.getTransform().getPosition();
+            path.moveTo(pos1.x, pos1.y);
+            path.lineTo(pos2.x, pos2.y);
 
-                currentDashEffect = (currentDashEffect + 1) % dashPathEffects.size();
-                paint.setPathEffect(dashPathEffects.get(currentDashEffect));
-                elapsedTimeNext = elapsedTime + 0.2f;
-            }
+            // 점선 패턴 이동
+            currentDashEffect = (currentDashEffect + 1) % dashPathEffects.size();
+            paint.setPathEffect(dashPathEffects.get(currentDashEffect));
+            elapsedTimeNext = elapsedTime + 0.2f;
         }
         if(areaAttack){
+            // 범위 공격이면 공격 지점에 공격 범위만큼 표시
             canvas.drawCircle(target.getTransform().getPosition().x, target.getTransform().getPosition().y, attacker.getAreaRange(), paint);
         }
         canvas.drawPath(path, paint);

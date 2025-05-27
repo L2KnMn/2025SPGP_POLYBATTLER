@@ -52,9 +52,9 @@ public class SynergyFactory {
         Map<Integer, List<SynergyEffect>> redSynergy = new HashMap<>();
         redSynergy.put(2, List.of(new SynergyEffect(BattleController.Team.PLAYER, SynergyEffect.EffectType.ATTACK_BONUS, 4, 1)));
         redSynergy.put(4, List.of(new SynergyEffect(BattleController.Team.PLAYER, SynergyEffect.EffectType.ATTACK_BONUS, 10, 2),
-                new SynergyEffect(BattleController.Team.PLAYER, SynergyEffect.EffectType.SPEED_BONUS, 1, 2)));
+                new SynergyEffect(BattleController.Team.PLAYER, SynergyEffect.EffectType.SPEED_BONUS, 0.2f, 2)));
         redSynergy.put(6, List.of(new SynergyEffect(BattleController.Team.PLAYER, SynergyEffect.EffectType.ATTACK_BONUS, 20, 3),
-                new SynergyEffect(BattleController.Team.PLAYER,SynergyEffect.EffectType.SPEED_BONUS, 2, 3)));
+                new SynergyEffect(BattleController.Team.PLAYER,SynergyEffect.EffectType.SPEED_BONUS, 0.5f, 3)));
         colorSynergies.put(Polyman.ColorType.RED, redSynergy);
 
         Map<Integer, List<SynergyEffect>> greenSynergy = new HashMap<>();
@@ -69,7 +69,8 @@ public class SynergyFactory {
         // 파랑 시너지는 적에게 공격 속도 감소 디버프를 적용
         blueSynergy.put(2, List.of(new SynergyEffect(BattleController.Team.ENEMY, SynergyEffect.EffectType.ATTACK_SPEED_BONUS, -0.1f, 1)));
         blueSynergy.put(4, List.of(new SynergyEffect(BattleController.Team.ENEMY, SynergyEffect.EffectType.ATTACK_SPEED_BONUS, -0.25f, 2)));
-        blueSynergy.put(6, List.of(new SynergyEffect(BattleController.Team.ENEMY, SynergyEffect.EffectType.ATTACK_SPEED_BONUS, -0.5f, 3)));
+        blueSynergy.put(6, List.of(new SynergyEffect(BattleController.Team.ENEMY, SynergyEffect.EffectType.ATTACK_SPEED_BONUS, -0.5f, 3),
+                new SynergyEffect(BattleController.Team.ENEMY, SynergyEffect.EffectType.ATTACK_BONUS, -1, 3))); // 추가로 적 공격력도 감소
         colorSynergies.put(Polyman.ColorType.BLUE, blueSynergy);
     }
 

@@ -111,6 +111,8 @@ public class BehaviorTreeFactory {
             // 이동 중인 상태
             // TODO: 현재 이동 방식 변경 중
             // * 원하는 것 : 이동은 자유롭게 하되 하나의 객체는 하나의 타일 위에 도착해서 공격한다
+            // 타겟까지의 이동을 movoTo로 유닛에게 일임하는 게 아니라
+            // 이 내부에서 타겟까지의 경로를 생성하고 그 경로에 이동 속도만큼을 이동
             //
             unit.moveTo(target.getTransform()); // BattleUnit의 이동 메서드 호출
             return unit.isMovementComplete() ? BTStatus.SUCCESS : BTStatus.RUNNING;
@@ -134,78 +136,28 @@ public class BehaviorTreeFactory {
      */
     private static BehaviorTree createNewTreeForShape(ShapeType shapeType) {
         BehaviorTree treeCache = null;
-//        treeCache = new BehaviorTree(
-//                new Selector(
-//                        "Route Node",
-//                        moveToTargetAction,
-//                        findTargetAction
-//                )
-//        );
-        switch (shapeType){
-            case CIRCLE:
-                treeCache = new BehaviorTree(
-                        new Selector(
-                                "Route Node",
-                                // 1순위: 공격 가능하면 범위 공격
-                                new Sequence(
-                                        "Attack Area",
-                                        new ConditionNode(isTargetInRange),
-                                        attackAreaAction // 범위 공격 액션 사용
-                                ),
-                                // 2순위: 타겟 있으면 이동 (최적 위치 선정 로직 추가 가능)
-                                new Sequence(
-                                        "Move to target",
-                                        new ConditionNode(hasTarget),
-                                        moveToTargetAction
-                                ),
-                                // 3순위: 타겟 없으면 찾기
-                                findTargetAction
-                        )
-                );
-                break;
-            case RECTANGLE:
-                treeCache = new BehaviorTree(
-                        new Selector( // 우선순위대로 시도
-                                "Route Node",
-                                // 1순위: 공격 가능하면 공격
-                                new Sequence(
-                                        "Attack Single",
-                                        new ConditionNode(isTargetInRange),
-                                        attackSingleTargetAction
-                                ),
-                                // 2순위: 타겟 있으면 이동
-                                new Sequence(
-                                        "Move to target",
-                                        new ConditionNode(hasTarget),
-                                        moveToTargetAction
-                                ),
-                                // 3순위: 타겟 없으면 찾기
-                                findTargetAction
-                        )
-                );
-                break;
-            case TRIANGLE:
-                treeCache = new BehaviorTree(
-                        new Selector( // 동일한 구조, 단지 유닛의 attackRange가 다름
-                                "Route Node",
-                                // 1순위: 공격 가능하면 공격
-                                new Sequence(
-                                        "Attack Single",
-                                        new ConditionNode(isTargetInRange), // 원거리
-                                        attackSingleTargetAction
-                                ),
-                                // 2순위: 타겟 있으면 이동 (추후 Kiting 등 추가 가능)
-                                new Sequence(
-                                        "Move to target",
-                                        new ConditionNode(hasTarget),
-                                        moveToTargetAction
-                                ),
-                                // 3순위: 타겟 없으면 찾기
-                                findTargetAction
-                        )
-                );
-                break;
-        }
+        treeCache = new BehaviorTree(
+                new Selector(
+                        "Route Node",
+                        // 1순위: 공격 가능하면 범위 공격
+                        new Sequence(
+                                "Attack Area",
+                                new ConditionNode(isTargetInRange),
+                                // 타입에 따라 다른 공격 노드 사용
+                                shapeType == ShapeType.CIRCLE ?
+                                        attackAreaAction // 범위 공격용
+                                        : attackSingleTargetAction // 단일 공격용(근원거리 동일)
+                        ),
+                        // 2순위: 타겟 있으면 이동 (최적 위치 선정 로직 추가 가능)
+                        new Sequence(
+                                "Move to target",
+                                new ConditionNode(hasTarget),
+                                moveToTargetAction
+                        ),
+                        // 3순위: 타겟 없으면 찾기
+                        findTargetAction
+                )
+        );
         return treeCache;
     }
     public static BehaviorTree getTreeForShape(ShapeType shapeType) {

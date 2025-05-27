@@ -6,6 +6,7 @@ import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.BattleController
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Polyman;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
+import kr.ac.tukorea.ge.spgp2025.a2dg.framework.interfaces.IRecyclable;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene.Scene;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.GameView;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
@@ -14,20 +15,20 @@ public class BattleUnit {
     final Transform transform;
     private BehaviorTree behaviorTree;
     private BattleController battleController;
-    private AttackEffect attackEffect;
+    private final AttackEffect attackEffect;
 
     BattleController.Team team;
     Polyman.ShapeType shapeType;
     Polyman.ColorType colorType;
-    private int currentHp;
-    static class Status{
-        int MaxHp = 0;
-        int Attack = 0;
-        int Defense = 0;
-        int AttackRange = 0;
+    private float currentHp;
+    static class Status{ // 모든 스텟은 float를 기본으로
+        float MaxHp = 0;
+        float Attack = 0;
+        float Defense = 0;
+        float AttackRange = 0;
         float AttackPerSecond = 0;
         float AreaRange = 0;
-        int Speed = 0;
+        float Speed = 0;
     }
 
 
@@ -55,6 +56,8 @@ public class BattleUnit {
         synergy = new Status();
         current = new Status();
 
+        attackEffect = Scene.top().getRecyclable(AttackEffect.class); // 이제 항상 AttackEffect를 가지고 있자
+
         reset(shapeType, colorType, level); // reset 호출 시 레벨 전달
     }
 
@@ -64,7 +67,7 @@ public class BattleUnit {
         this.level = level; // 레벨 초기화
         preset(shapeType, colorType, level); // preset 호출 시 레벨 전달
         fillHp(current.MaxHp); // 현재 최대 체력으로 체력 채움
-        target = null;
+        setCurrentTarget(null);
         // 시너지 보너스 초기화 (새로운 라운드 시작 시 필요할 수 있습니다)
         resetSynergyBonuses();
     }
@@ -72,8 +75,7 @@ public class BattleUnit {
     // 레벨 및 타입에 따른 기본 능력치 설정
     public void preset(Polyman.ShapeType shapeType, Polyman.ColorType colorType, int level) { // 레벨 파라미터 추가
         // TODO: 실제 게임 밸런스에 맞춰 능력치 테이블 구현 필요
-        // 여기서는 레벨에 따른 간단한 능력치 증가 로직 예시를 보여줍니다.
-        float levelMultiplier = 1.0f + (level - 1) * 0.5f; // 레벨업당 능력치 50% 증가 예시
+        float levelMultiplier = 1.0f + (level - 1) * 0.5f; // 일단 레벨업당 능력치 50% 증가
 
         this.base.Defense = 0;
         this.base.Speed = 1;
@@ -82,21 +84,21 @@ public class BattleUnit {
         switch (shapeType){
             case CIRCLE:
                 this.base.AttackRange = 3;
-                this.base.AttackPerSecond = 3f/5f;
+                this.base.AttackPerSecond = 2.0f;
                 this.base.Attack = 9;
                 this.base.MaxHp = 80; // 예시 체력
                 this.base.AreaRange = Metrics.GRID_UNIT;
                 break;
             case RECTANGLE:
                 this.base.Defense = 1;
-                this.base.AttackRange = 1;
-                this.base.AttackPerSecond = 3f/3f;
+                this.base.AttackRange = 1; // 1칸 거리까지 범위 공격
+                this.base.AttackPerSecond = 1.8f;
                 this.base.Attack = 11;
                 this.base.MaxHp = 120; // 예시 체력
                 break;
             case TRIANGLE:
                 this.base.AttackRange = 5;
-                this.base.AttackPerSecond = 3f/4f;
+                this.base.AttackPerSecond = 1.8f;
                 this.base.Attack = 11;
                 this.base.MaxHp = 90; // 예시 체력
                 break;
@@ -106,17 +108,11 @@ public class BattleUnit {
         this.base.MaxHp = (int)(this.base.MaxHp * levelMultiplier);
         this.base.Attack = (int)(this.base.Attack * levelMultiplier);
         this.base.Defense = (int)(this.base.Defense * levelMultiplier);
-        // 공격 범위, 공격 속도, 범위 범위는 레벨에 따라 크게 바뀌지 않는 경우가 많지만,
-        // 필요하다면 여기서 레벨에 따라 조정할 수 있습니다.
-        // this.baseAttackRange *= levelMultiplier;
-        // this.baseAttackPerSecond *= levelMultiplier;
-        // this.baseAreaRange *= levelMultiplier;
 
         // 현재 능력치를 기본 능력치로 초기화
         updateCurrentStats();
 
         lastAttackTime = 0;
-        attackEffect = null;
     }
 
     // 시너지 보너스를 초기화하는 메소드
@@ -137,30 +133,29 @@ public class BattleUnit {
         // 예시:
         switch (effect.getType()) {
             case ATTACK_BONUS:
-                synergy.Attack += (int) effect.getValue();
+                synergy.Attack += effect.getValue();
                 break;
             case DEFENSE_BONUS:
-                synergy.Defense += (int) effect.getValue();
+                synergy.Defense += effect.getValue();
                 break;
             case MAX_HP_BONUS:
-                synergy.MaxHp += (int) effect.getValue();
+                synergy.MaxHp += effect.getValue();
                 // 최대 체력 증가 시 현재 체력도 비례하여 증가시키거나 그대로 두는 정책 결정 필요
-                int oldMaxHp = current.MaxHp;
+                float oldMaxHp = current.MaxHp;
                 updateCurrentStats(); // 먼저 최대 체력 갱신
                 currentHp += (current.MaxHp - oldMaxHp); // 늘어난 최대 체력만큼 현재 체력도 증가
                 break;
-            // 다른 시너지 효과 타입에 대한 처리 추가
             case ATTACK_SPEED_BONUS:
                 synergy.AttackPerSecond += effect.getValue();
                 break;
             case ATTACK_RANGE_BONUS:
-                synergy.AttackRange += (int) effect.getValue();
+                synergy.AttackRange += effect.getValue();
                 break;
             case AREA_RANGE_BONUS:
                 synergy.AreaRange += effect.getValue();
                 break;
             case SPEED_BONUS:
-                synergy.Speed += (int)effect.getValue(); // 속도는 int일 경우 캐스팅
+                synergy.Speed += effect.getValue();
                 break;
             // TODO: 체력 회복, 보호막, 특수 효과 등은 별도의 로직 필요
         }
@@ -192,32 +187,34 @@ public class BattleUnit {
         return currentHp <= 0;
     }
 
-    public int getMaxHp(){
+    public float getMaxHp(){
         return current.MaxHp; // 현재 최대 체력 반환
     }
-    public int getHp(){
+    public float getHp(){
         return currentHp; // 현재 체력 반환
     }
 
-    public void damage(int damage){
-        int actualDamage = Math.max(0, damage - current.Defense); // 현재 방어력 적용
+    public void damage(float damage){
+        float actualDamage = Math.max(0, damage - current.Defense); // 현재 방어력 적용
         currentHp -= actualDamage;
         EffectManager.getInstance(Scene.top()).createDamagEffects(
                 transform.getPosition().x + (float)Math.random() * 25.0f,
                 transform.getPosition().y,
-                this, actualDamage);
+                this, (int) Math.ceil(actualDamage)); // 데미지는 소수점으로 존재하지만 출력은 정수 단위로 올림 해서 출력
     }
 
-    public void fillHp(int hp){
+    public void fillHp(float hp){
         this.currentHp = Math.min(this.currentHp + hp, current.MaxHp); // 현재 최대 체력까지만 회복
     }
 
     public void setCurrentTarget(BattleUnit target) {
-        BattleUnit prevTarget = this.target;
-        this.target = target;
-        if(target != null && prevTarget != target) {
+        BattleUnit prevTarget = this.target; // 이전 타겟 저장
+        this.target = target; // 새 타겟 저장
+        if(target != null && prevTarget != target) { // 새 타겟이 null이 아니고, 이전 타겟과 다르면
+            // 공격 효과 새로 시작
             initAttackEffect();
-        }else if(target == null) {
+        }else if(target == null) { // 타겟이 없는 상태가 되면 
+            // 공격 효과 종료
             stopAttackEffect();
         }
     }
@@ -272,6 +269,7 @@ public class BattleUnit {
     }
 
     public float getSpeed() {
+        // 초당 이동 칸 수 * 프레임 당 시간
         return current.Speed * Metrics.GRID_UNIT * GameView.frameTime; // 현재 이동 속도 적용
     }
 
@@ -311,9 +309,9 @@ public class BattleUnit {
         return behaviorTree;
     }
 
-    public void tick(){
+    public void tick(){ // Battle unit의 소유주가 전투 상황에서 update마다 호출하는 일종의 update 루틴
         if(behaviorTree != null && battleController != null) {
-            behaviorTree.tick(this, battleController);
+            behaviorTree.tick(this, battleController); // 행동 트리 한 틱 실행
             if(target != null) {
                 transform.lookAt(target.getTransform().getPosition());
             }
@@ -321,21 +319,15 @@ public class BattleUnit {
     }
 
     public void initAttackEffect(){
-        if(attackEffect == null){
-            attackEffect = Scene.top().getRecyclable(AttackEffect.class);
-        }
         attackEffect.init(this, target);
     }
 
     public void stopAttackEffect() {
-        if(attackEffect != null) {
-            attackEffect.remove();
-            attackEffect = null;
-        }
+        attackEffect.remove();
     }
 
     public float getAreaRange() {
-        return current.AreaRange; // 현재 범위 공격 범위 적용
+        return current.AreaRange ; // 현재 범위 공격 범위 적용
     }
 
     public void setShapeType(Polyman.ShapeType shape) {
@@ -347,17 +339,17 @@ public class BattleUnit {
     }
 
     // 시너지 효과 정의를 위한 간단한 클래스 (별도의 파일로 분리 가능)
-    public static class SynergyEffect {
+    public static class SynergyEffect implements IRecyclable {
         public enum EffectType {
             ATTACK_BONUS, DEFENSE_BONUS, MAX_HP_BONUS,
             ATTACK_SPEED_BONUS, ATTACK_RANGE_BONUS, AREA_RANGE_BONUS, SPEED_BONUS
             // TODO: 다른 효과 타입 추가 가능서 (치명타, 흡혈, 보호막 등)
         }
 
-        private final BattleController.Team application;
-        private final EffectType type;
-        private final float value; // 정수형 능력치 보너스
-        private final int tier;
+        private BattleController.Team application;
+        private EffectType type;
+        private float value; // 능력치 보너스 (정수형이더라도 float로 받아서 int에 더하기)
+        private int tier;
 
         public SynergyEffect(BattleController.Team application, EffectType type, float value, int tier) {
             this.type = type;
@@ -373,5 +365,12 @@ public class BattleUnit {
             return application;
         }
 
+        @Override
+        public void onRecycle() {
+            type = null;
+            value = 0;
+            tier = 0;
+            application = null;
+        }
     }
 }

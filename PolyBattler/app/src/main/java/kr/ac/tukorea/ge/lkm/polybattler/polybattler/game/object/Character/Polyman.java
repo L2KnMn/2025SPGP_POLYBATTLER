@@ -190,11 +190,7 @@ public class Polyman extends Sprite implements IRecyclable, ILayerProvider, IRem
         // BattleUnit reset 호출 시 레벨 정보 전달 (능력치 재설정을 위해)
         unit.reset(getShape(), getColorType(), this.level);
         state = ObjectState.IDLE;
-        transform.lookAt(transform.getPosition().x, transform.getPosition().y - 1); // 시선도 초기화
-    }
-
-    public boolean isDead() {
-        return unit.isDead();
+        transform.setAngle(0); // 시선도 초기화
     }
 
     public BattleUnit getBattleUnit() {
