@@ -102,12 +102,16 @@ public class BehaviorTreeFactory {
         // Action: 타겟에게 이동 (성공/실패/진행중)
         moveToTargetAction = new ActionNode((unit, manager) -> {
             BattleUnit target = unit.getCurrentTarget();
+            // 타겟이 이미 죽었으면 이동 실패
             if (target == null || target.isDead()) return BTStatus.FAILURE;
-            // 이미 범위 내에 있으면 성공
+            // 이미 범위 내에 있으면 이동 성공
             if (unit.isTargetInRange()) {
                 return BTStatus.SUCCESS;
             }
-            // 이동 명령 및 상태 반환
+            // 이동 중인 상태
+            // TODO: 현재 이동 방식 변경 중
+            // * 원하는 것 : 이동은 자유롭게 하되 하나의 객체는 하나의 타일 위에 도착해서 공격한다
+            //
             unit.moveTo(target.getTransform()); // BattleUnit의 이동 메서드 호출
             return unit.isMovementComplete() ? BTStatus.SUCCESS : BTStatus.RUNNING;
         });

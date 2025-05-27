@@ -1,8 +1,5 @@
 package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.BehaviorTree;
 
-import android.os.Build;
-import android.util.Log;
-
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.Effect.AttackEffect;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.Effect.EffectManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.BattleController;
@@ -13,9 +10,6 @@ import kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene.Scene;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.GameView;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 
-import java.util.ArrayList;
-import java.util.List; // List Import
-
 public class BattleUnit {
     final Transform transform;
     private BehaviorTree behaviorTree;
@@ -25,34 +19,22 @@ public class BattleUnit {
     BattleController.Team team;
     Polyman.ShapeType shapeType;
     Polyman.ColorType colorType;
+    private int currentHp;
+    static class Status{
+        int MaxHp = 0;
+        int Attack = 0;
+        int Defense = 0;
+        int AttackRange = 0;
+        float AttackPerSecond = 0;
+        float AreaRange = 0;
+        int Speed = 0;
+    }
+
 
     // 기본 능력치
-    private int baseMaxHp;
-    private int baseAttack;
-    private int baseDefense;
-    private float baseAttackRange;
-    private float baseAttackPerSecond;
-    private float baseAreaRange;
-    private int baseSpeed;
-
-    // 시너지/버프 적용으로 인한 추가 능력치 (초기값 0)
-    private int synergyMaxHpBonus = 0;
-    private int synergyAttackBonus = 0;
-    private int synergyDefenseBonus = 0;
-    private float synergyAttackRangeBonus = 0;
-    private float synergyAttackPerSecondBonus = 0;
-    private float synergyAreaRangeBonus = 0;
-    private int synergySpeedBonus = 0;
-
-    // 현재 능력치 (기본 + 시너지 + 기타 버프/디버프 합산)
-    private int currentHp; // 현재 체력
-    private int currentMaxHp;
-    private int currentAttack;
-    private int currentDefense;
-    private float currentAttackRange;
-    private float currentAttackPerSecond;
-    private float currentAreaRange;
-    private int currentSpeed;
+    Status base;
+    Status synergy;
+    Status current;
 
     private long lastAttackTime;
     private BattleUnit target;
@@ -76,7 +58,7 @@ public class BattleUnit {
         this.colorType = colorType;
         this.level = level; // 레벨 초기화
         preset(shapeType, colorType, level); // preset 호출 시 레벨 전달
-        fillHp(currentMaxHp); // 현재 최대 체력으로 체력 채움
+        fillHp(current.MaxHp); // 현재 최대 체력으로 체력 채움
         target = null;
         // 시너지 보너스 초기화 (새로운 라운드 시작 시 필요할 수 있습니다)
         resetSynergyBonuses();
@@ -88,37 +70,37 @@ public class BattleUnit {
         // 여기서는 레벨에 따른 간단한 능력치 증가 로직 예시를 보여줍니다.
         float levelMultiplier = 1.0f + (level - 1) * 0.5f; // 레벨업당 능력치 50% 증가 예시
 
-        this.baseDefense = 0;
-        this.baseSpeed = 1;
-        this.baseAreaRange = 0; // 기본값
+        this.base.Defense = 0;
+        this.base.Speed = 1;
+        this.base.AreaRange = 0; // 기본값
 
         switch (shapeType){
             case CIRCLE:
-                this.baseAttackRange = Metrics.GRID_UNIT * 5;
-                this.baseAttackPerSecond = 3f/5f;
-                this.baseAttack = 9;
-                this.baseMaxHp = 80; // 예시 체력
-                this.baseAreaRange = Metrics.GRID_UNIT;
+                this.base.AttackRange = 3;
+                this.base.AttackPerSecond = 3f/5f;
+                this.base.Attack = 9;
+                this.base.MaxHp = 80; // 예시 체력
+                this.base.AreaRange = Metrics.GRID_UNIT;
                 break;
             case RECTANGLE:
-                this.baseDefense = 1;
-                this.baseAttackRange = Metrics.GRID_UNIT * 1;
-                this.baseAttackPerSecond = 3f/3f;
-                this.baseAttack = 11;
-                this.baseMaxHp = 120; // 예시 체력
+                this.base.Defense = 1;
+                this.base.AttackRange = 1;
+                this.base.AttackPerSecond = 3f/3f;
+                this.base.Attack = 11;
+                this.base.MaxHp = 120; // 예시 체력
                 break;
             case TRIANGLE:
-                this.baseAttackRange = Metrics.GRID_UNIT * 6;
-                this.baseAttackPerSecond = 3f/4f;
-                this.baseAttack = 11;
-                this.baseMaxHp = 90; // 예시 체력
+                this.base.AttackRange = 5;
+                this.base.AttackPerSecond = 3f/4f;
+                this.base.Attack = 11;
+                this.base.MaxHp = 90; // 예시 체력
                 break;
         }
 
         // 레벨에 따른 기본 능력치 조정
-        this.baseMaxHp = (int)(this.baseMaxHp * levelMultiplier);
-        this.baseAttack = (int)(this.baseAttack * levelMultiplier);
-        this.baseDefense = (int)(this.baseDefense * levelMultiplier);
+        this.base.MaxHp = (int)(this.base.MaxHp * levelMultiplier);
+        this.base.Attack = (int)(this.base.Attack * levelMultiplier);
+        this.base.Defense = (int)(this.base.Defense * levelMultiplier);
         // 공격 범위, 공격 속도, 범위 범위는 레벨에 따라 크게 바뀌지 않는 경우가 많지만,
         // 필요하다면 여기서 레벨에 따라 조정할 수 있습니다.
         // this.baseAttackRange *= levelMultiplier;
@@ -134,13 +116,13 @@ public class BattleUnit {
 
     // 시너지 보너스를 초기화하는 메소드
     public void resetSynergyBonuses() {
-        synergyMaxHpBonus = 0;
-        synergyAttackBonus = 0;
-        synergyDefenseBonus = 0;
-        synergyAttackRangeBonus = 0;
-        synergyAttackPerSecondBonus = 0;
-        synergyAreaRangeBonus = 0;
-        synergySpeedBonus = 0;
+        synergy.MaxHp = 0;
+        synergy.Attack = 0;
+        synergy.Defense = 0;
+        synergy.AttackRange = 0;
+        synergy.AttackPerSecond = 0;
+        synergy.AreaRange = 0;
+        synergy.Speed = 0;
         updateCurrentStats(); // 능력치 갱신
     }
 
@@ -150,87 +132,55 @@ public class BattleUnit {
         // 예시:
         switch (effect.getType()) {
             case ATTACK_BONUS:
-                synergyAttackBonus += effect.getValue();
+                synergy.Attack += (int) effect.getValue();
                 break;
             case DEFENSE_BONUS:
-                synergyDefenseBonus += effect.getValue();
+                synergy.Defense += (int) effect.getValue();
                 break;
             case MAX_HP_BONUS:
-                synergyMaxHpBonus += effect.getValue();
+                synergy.MaxHp += (int) effect.getValue();
                 // 최대 체력 증가 시 현재 체력도 비례하여 증가시키거나 그대로 두는 정책 결정 필요
-                int oldMaxHp = currentMaxHp;
+                int oldMaxHp = current.MaxHp;
                 updateCurrentStats(); // 먼저 최대 체력 갱신
-                currentHp += (currentMaxHp - oldMaxHp); // 늘어난 최대 체력만큼 현재 체력도 증가
+                currentHp += (current.MaxHp - oldMaxHp); // 늘어난 최대 체력만큼 현재 체력도 증가
                 break;
             // 다른 시너지 효과 타입에 대한 처리 추가
             case ATTACK_SPEED_BONUS:
-                synergyAttackPerSecondBonus += effect.getValue();
+                synergy.AttackPerSecond += effect.getValue();
                 break;
             case ATTACK_RANGE_BONUS:
-                synergyAttackRangeBonus += effect.getValue();
+                synergy.AttackRange += (int) effect.getValue();
                 break;
             case AREA_RANGE_BONUS:
-                synergyAreaRangeBonus += effect.getValue();
+                synergy.AreaRange += effect.getValue();
                 break;
             case SPEED_BONUS:
-                synergySpeedBonus += (int)effect.getValue(); // 속도는 int일 경우 캐스팅
+                synergy.Speed += (int)effect.getValue(); // 속도는 int일 경우 캐스팅
                 break;
             // TODO: 체력 회복, 보호막, 특수 효과 등은 별도의 로직 필요
         }
         updateCurrentStats(); // 능력치 갱신
     }
 
-    // 시너지 버프를 제거하는 메소드 (시너지 조건 미충족 시)
-    public void removeSynergyBuff(SynergyEffect effect) {
-        // TODO: SynergyEffect 타입에 따라 해당 보너스 변수에서 값을 빼는 로직 구현
-        // 예시:
-        switch (effect.getType()) {
-            case ATTACK_BONUS:
-                synergyAttackBonus -= effect.getValue();
-                break;
-            case DEFENSE_BONUS:
-                synergyDefenseBonus -= effect.getValue();
-                break;
-            case MAX_HP_BONUS:
-                // 최대 체력 감소 시 현재 체력이 최대 체력보다 높으면 최대 체력으로 맞춤
-                synergyMaxHpBonus -= effect.getValue();
-                break;
-            // 다른 시너지 효과 타입에 대한 처리 추가
-            case ATTACK_SPEED_BONUS:
-                synergyAttackPerSecondBonus -= effect.getValue();
-                break;
-            case ATTACK_RANGE_BONUS:
-                synergyAttackRangeBonus -= effect.getValue();
-                break;
-            case AREA_RANGE_BONUS:
-                synergyAreaRangeBonus -= effect.getValue();
-                break;
-            case SPEED_BONUS:
-                synergySpeedBonus -= (int)effect.getValue();
-                break;
-        }
-        updateCurrentStats(); // 능력치 갱신
-    }
-
     // 기본 능력치와 시너지 보너스를 합산하여 현재 능력치를 갱신하는 메소드
     private void updateCurrentStats() {
-        if(this.currentMaxHp < this.baseMaxHp + this.synergyMaxHpBonus){
+        if(this.current.MaxHp < this.base.MaxHp + this.synergy.MaxHp){
             // 최대 체력이 늘어나면 늘어난만큼 현재 hp 회복
-            currentHp += this.baseMaxHp + this.synergyMaxHpBonus - this.currentMaxHp;;
-            this.currentMaxHp = this.baseMaxHp + this.synergyMaxHpBonus;
+            currentHp += this.base.MaxHp + this.synergy.MaxHp - this.current.MaxHp;;
+            this.current.MaxHp = this.base.MaxHp + this.synergy.MaxHp;
         }else {
-            this.currentMaxHp = this.baseMaxHp + this.synergyMaxHpBonus;
+            this.current.MaxHp = this.base.MaxHp + this.synergy.MaxHp;
             // 현재 체력이 최대 체력을 초과하지 않도록 보정
-            if (currentHp > currentMaxHp) {
-                currentHp = currentMaxHp;
+            if (currentHp > current.MaxHp) {
+                currentHp = current.MaxHp;
             }
         }
-        this.currentAttack = this.baseAttack + this.synergyAttackBonus;
-        this.currentDefense = this.baseDefense + this.synergyDefenseBonus;
-        this.currentAttackRange = this.baseAttackRange + this.synergyAttackRangeBonus;
-        this.currentAttackPerSecond = this.baseAttackPerSecond + this.synergyAttackPerSecondBonus;
-        this.currentAreaRange = this.baseAreaRange + this.synergyAreaRangeBonus;
-        this.currentSpeed = this.baseSpeed + this.synergySpeedBonus;
+        this.current.Attack = this.base.Attack + this.synergy.Attack;
+        this.current.Defense = this.base.Defense + this.synergy.Defense;
+        this.current.AttackRange = this.base.AttackRange + this.synergy.AttackRange;
+        this.current.AttackPerSecond = this.base.AttackPerSecond + this.synergy.AttackPerSecond;
+        this.current.AreaRange = this.base.AreaRange + this.synergy.AreaRange;
+        this.current.Speed = this.base.Speed + this.synergy.Speed;
     }
 
     public boolean isDead() {
@@ -238,20 +188,23 @@ public class BattleUnit {
     }
 
     public int getMaxHp(){
-        return currentMaxHp; // 현재 최대 체력 반환
+        return current.MaxHp; // 현재 최대 체력 반환
     }
     public int getHp(){
         return currentHp; // 현재 체력 반환
     }
 
     public void damage(int damage){
-        int actualDamage = Math.max(0, damage - currentDefense); // 현재 방어력 적용
+        int actualDamage = Math.max(0, damage - current.Defense); // 현재 방어력 적용
         currentHp -= actualDamage;
-        EffectManager.getInstance(Scene.top()).createDamageTextEffect(transform.getPosition().x + (float)Math.random() * 25.0f, transform.getPosition().y, actualDamage);
+        EffectManager.getInstance(Scene.top()).createDamagEffects(
+                transform.getPosition().x + (float)Math.random() * 25.0f,
+                transform.getPosition().y,
+                this, actualDamage);
     }
 
     public void fillHp(int hp){
-        this.currentHp = Math.min(this.currentHp + hp, currentMaxHp); // 현재 최대 체력까지만 회복
+        this.currentHp = Math.min(this.currentHp + hp, current.MaxHp); // 현재 최대 체력까지만 회복
     }
 
     public void setCurrentTarget(BattleUnit target) {
@@ -273,18 +226,18 @@ public class BattleUnit {
     }
 
     public boolean isTargetInRange() {
-        return (target != null) && (target.getTransform().distance(transform) <= currentAttackRange); // 현재 공격 범위 적용
+        return (target != null) && (target.getTransform().distance(transform) <= current.AttackRange); // 현재 공격 범위 적용
     }
 
     public float getAttackPercent() {
         // 현재 공격 속도 적용
-        return Math.clamp((System.currentTimeMillis() - lastAttackTime) / (1000.0f / currentAttackPerSecond), 0.0f, 1.0f);
+        return Math.clamp((System.currentTimeMillis() - lastAttackTime) / (1000.0f / current.AttackPerSecond), 0.0f, 1.0f);
     }
 
     public boolean isAttackReady() {
         // 현재 공격 속도 적용
         if(lastAttackTime != 0) {
-            return (System.currentTimeMillis() - lastAttackTime) >= (1000 / currentAttackPerSecond);
+            return (System.currentTimeMillis() - lastAttackTime) >= (1000 / current.AttackPerSecond);
         } else {
             lastAttackTime = System.currentTimeMillis();
             return false;
@@ -292,7 +245,7 @@ public class BattleUnit {
     }
 
     public void attackTarget(BattleUnit target) {
-        target.damage(currentAttack); // 현재 공격력 적용
+        target.damage(current.Attack); // 현재 공격력 적용
         if(target.isDead()) {
             battleController.killSign(this, target);
         }
@@ -308,7 +261,7 @@ public class BattleUnit {
     }
 
     public float getSpeed() {
-        return currentSpeed * Metrics.GRID_UNIT * GameView.frameTime; // 현재 이동 속도 적용
+        return current.Speed * Metrics.GRID_UNIT * GameView.frameTime; // 현재 이동 속도 적용
     }
 
     public void moveTo(Transform transform) {
@@ -371,7 +324,7 @@ public class BattleUnit {
     }
 
     public float getAreaRange() {
-        return currentAreaRange; // 현재 범위 공격 범위 적용
+        return current.AreaRange; // 현재 범위 공격 범위 적용
     }
 
     public void setShapeType(Polyman.ShapeType shape) {

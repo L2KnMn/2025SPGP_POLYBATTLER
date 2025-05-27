@@ -1,13 +1,9 @@
 package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.Effect;
 
-import android.animation.Animator;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.DashPathEffect;
 import android.graphics.Paint;
-import android.graphics.Path;
-import android.util.Log;
 import android.view.MotionEvent;
 
 import java.util.ArrayList;
@@ -22,7 +18,6 @@ import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.IGameManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.Layer;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.BehaviorTree.BattleUnit;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.IRemovable;
-import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Polyman;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Coin;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
@@ -72,7 +67,7 @@ public class EffectManager implements IGameManager {
     }
 
     // 특정 위치에 데미지 텍스트 이펙트 생성 및 추가
-    public void createDamageTextEffect(float x, float y, int damage) {
+    public void createDamagEffects(float x, float y, BattleUnit victim, int damage) {
         DamageTextEffect damageText = master.getRecyclable(DamageTextEffect.class);
         if (damageText == null) {
             damageText = new DamageTextEffect(x, y, damage, damageTextPaint);
@@ -80,6 +75,13 @@ public class EffectManager implements IGameManager {
             damageText.init(x, y, damage, damageTextPaint);
         }
         addEffect(damageText);
+
+        HitEffect hitEffect = master.getRecyclable(HitEffect.class);
+        if (hitEffect == null) {
+            hitEffect = new HitEffect();
+        }
+        hitEffect.init(victim, damage); // victim은 BattleUnit
+        addEffect(hitEffect);
     }
 
     // 공격 범위 표시 이펙트
@@ -416,50 +418,132 @@ public class EffectManager implements IGameManager {
     }
 
     public static class HitEffect extends Effect {
-        BattleUnit victim;
-        Paint paint;
-        ArrayList<Position> effectPoints;
-        boolean areaAttack = false;
-        public HitEffect(){
-            super();
+        Paint paint; // 파티클을 그릴 때 사용할 Paint 객체
+        ArrayList<Position> effectPoints; // 각 파티클의 현재 위치
+        ArrayList<Position> effectVelocities; // 각 파티클의 현재 속도
+        boolean areaAttack = false; // 광역 공격 여부 (현재 코드에서는 사용되지 않음)
+
+        private Random random = new Random(); // 랜덤 값 생성을 위한 객체
+        private static final float PARTICLE_RADIUS = 5f; // 파티클 반지름
+        private static final float INITIAL_SPEED_MIN = 50f; // 파티클 초기 최소 속도 (픽셀/초)
+        private static final float INITIAL_SPEED_MAX = 200f; // 파티클 초기 최대 속도 (픽셀/초)
+        private static final float GRAVITY = 100f; // 중력 가속도 (픽셀/초^2)
+        private float initialDuration; // 초기 설정된 duration 값 저장
+
+        public HitEffect() {
+            super(); // 부모 클래스 생성자 호출
             paint = new Paint();
-            Resources res = GameView.view.getResources();
-            paint.setStyle(Paint.Style.STROKE);
-            paint.setStrokeWidth(8);
+            // Resources res = GameView.view.getResources(); // init에서 호출하도록 변경
+            paint.setStyle(Paint.Style.FILL); // 파티클을 채워진 원으로 그림
+            // paint.setStrokeWidth(8); // FILL 스타일에서는 strokeWidth가 크게 중요하지 않음
 
-
-
+            effectPoints = new ArrayList<>();
+            effectVelocities = new ArrayList<>();
         }
 
-        public HitEffect init(BattleUnit victim, int damage){
-            Resources res = GameView.view.getResources();
-            switch (victim.getColorType()) {
-                case RED:
-                    paint.setColor(ResourcesCompat.getColor(res, R.color.PolymanColorRed, null));
-                    break;
-                case BLUE:
-                    paint.setColor(ResourcesCompat.getColor(res, R.color.PolymanColorBlue, null));
-                    break;
-                case GREEN:
-                    paint.setColor(ResourcesCompat.getColor(res, R.color.PolymanColorGreen, null));
-                    break;
-                case BLACK:
-                    paint.setColor(ResourcesCompat.getColor(res, R.color.PolymanColorBlack, null));
-                    break;
-            }
-            paint.setAlpha(128);
+        /**
+         * 피격 이펙트를 초기화합니다.
+         * @param victim 피격당한 유닛
+         * @param damage 데미지 양 (파티클 수에 영향)
+         * @return 초기화된 HitEffect 객체
+         */
+        public HitEffect init(BattleUnit victim, int damage) {
+            this.elapsedTime = 0f; // 경과 시간 초기화
+            this.finished = false; // 활성화 상태로 설정
+            this.remove = false;
 
-            duration = 3.0f;
+            Resources res = GameView.view.getResources();
+            // GameView.view가 null이거나 getResources()가 null을 반환하면 NullPointerException 발생 가능
+            // 실제 앱에서는 GameView.view가 적절히 초기화되어야 합니다.
+            if (res == null) {
+                // 리소스가 없는 경우 기본 색상 사용 또는 에러 처리
+                paint.setColor(Color.RED); // 예: 기본 빨간색
+                System.err.println("Warning: Resources not available for HitEffect paint color.");
+            } else {
+                switch (victim.getColorType()) {
+                    case RED:
+                        paint.setColor(ResourcesCompat.getColor(res, R.color.PolymanColorRed, null));
+                        break;
+                    case BLUE:
+                        paint.setColor(ResourcesCompat.getColor(res, R.color.PolymanColorBlue, null));
+                        break;
+                    case GREEN:
+                        paint.setColor(ResourcesCompat.getColor(res, R.color.PolymanColorGreen, null));
+                        break;
+                    case BLACK:
+                        paint.setColor(ResourcesCompat.getColor(res, R.color.PolymanColorBlack, null));
+                        break;
+                    default:
+                        paint.setColor(Color.MAGENTA); // 정의되지 않은 타입의 경우
+                }
+            }
+            // paint.setAlpha(255); // 초기 알파는 불투명하게 시작해서 update에서 조절
+
+            effectPoints.clear();
+            effectVelocities.clear();
+
+            // 데미지 수치에 비례하여 파티클 수를 결정 (최소 5개, 최대 50개 등으로 제한하는 것이 좋음)
+            int particleCount = Math.max(5, Math.min(damage, 50)); // 예: 최소 5개, 최대 50개
+
+            for (int i = 0; i < particleCount; ++i) {
+                // 파티클 생성 위치는 victim의 중앙
+                effectPoints.add(new Position(victim.getTransform().getPosition().x, victim.getTransform().getPosition().y));
+
+                // 파티클 초기 속도를 랜덤하게 설정 (사방으로 튀도록)
+                float angle = random.nextFloat() * 2 * (float) Math.PI; // 0 ~ 2PI 라디안 (360도)
+                float speed = INITIAL_SPEED_MIN + random.nextFloat() * (INITIAL_SPEED_MAX - INITIAL_SPEED_MIN);
+                float velX = (float) Math.cos(angle) * speed;
+                float velY = (float) Math.sin(angle) * speed;
+                effectVelocities.add(new Position(velX, velY));
+            }
+            this.duration = 1.0f; // 이펙트 지속 시간 (예: 1초)
+            this.initialDuration = this.duration; // 초기 duration 저장
 
             return this;
         }
 
+        /**
+         * 이펙트의 상태를 업데이트합니다. (매 프레임 호출)
+         */
         @Override
         public void update() {
-            super.update();
+            super.update(); // 부모 클래스의 update 호출 (elapsedTime, isActive 업데이트)
+
+            if (finished || remove) {
+                return;
+            }
+
+            // 파티클 위치 업데이트
+            for (int i = 0; i < effectPoints.size(); ++i) {
+                Position point = effectPoints.get(i);
+                Position velocity = effectVelocities.get(i);
+
+                // 속도에 따른 위치 변경
+                point.x += velocity.x * GameView.frameTime;
+                point.y += velocity.y * GameView.frameTime;
+            }
+
+            // 시간이 지남에 따라 파티클이 투명해지도록 알파값 조절
+            float lifeRatio = elapsedTime / initialDuration; // 0.0 (시작) ~ 1.0 (끝)
+            int currentAlpha = (int) (255 * (1 - lifeRatio)); // 점점 투명하게
+            currentAlpha = Math.max(0, Math.min(255, currentAlpha)); // 0~255 범위 유지
+            paint.setAlpha(currentAlpha);
         }
 
-        public void draw(Canvas canvas){
+        /**
+         * 이펙트를 화면에 그립니다.
+         * @param canvas 그림을 그릴 Canvas 객체
+         */
+        @Override
+        public void draw(Canvas canvas) {
+            if (finished || canvas == null) { // 비활성화 상태이거나 canvas가 null이면 그리지 않음
+                return;
+            }
+
+            // 모든 파티클을 그림
+            for (Position point : effectPoints) {
+                canvas.drawCircle(point.x, point.y, PARTICLE_RADIUS, paint);
+            }
         }
     }
 }
