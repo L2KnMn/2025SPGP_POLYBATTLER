@@ -86,21 +86,21 @@ public class BattleUnit {
                 this.base.AttackRange = 3;
                 this.base.AttackPerSecond = 2.0f;
                 this.base.Attack = 9;
-                this.base.MaxHp = 80; // 예시 체력
+                this.base.MaxHp = 80; // 체력
                 this.base.AreaRange = 1.0f;
                 break;
             case RECTANGLE:
                 this.base.Defense = 1;
-                this.base.AttackRange = 1; // 1칸 거리까지 범위 공격
+                this.base.AttackRange = 1; // 1칸 거리까지 공격
                 this.base.AttackPerSecond = 1.8f;
                 this.base.Attack = 11;
-                this.base.MaxHp = 120; // 예시 체력
+                this.base.MaxHp = 120; // 체력
                 break;
             case TRIANGLE:
                 this.base.AttackRange = 5;
                 this.base.AttackPerSecond = 1.8f;
                 this.base.Attack = 11;
-                this.base.MaxHp = 90; // 예시 체력
+                this.base.MaxHp = 90; // 체력
                 break;
         }
 
@@ -225,6 +225,10 @@ public class BattleUnit {
 
     public Transform getTransform() {
         return transform;
+    }
+
+    public float getAttackRange(){
+        return this.current.AttackRange;
     }
 
     public boolean isTargetInRange() {

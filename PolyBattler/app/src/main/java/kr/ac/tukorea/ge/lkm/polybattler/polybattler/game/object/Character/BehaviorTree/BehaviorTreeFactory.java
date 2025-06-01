@@ -111,6 +111,13 @@ public class BehaviorTreeFactory {
                 return BTStatus.SUCCESS;
             }else{
                 Transform tile = manager.getCloseTileToTarget(unit, target);
+                // 움직일 수 있는 타일을 찾았으면 해당 타일에 대해 점유
+                if (tile != null) {
+                    // manager에 해당 transform의 게임 월드 상의 좌표를 주고 점유 신청
+                    // 그러면 manager에서 알아서 해당 좌표를 그리드로 변환해서 unitsMap에 점유 기록함
+                    // 도착하거나 이동을 시작하는 등 기존에 있던 타일에 대한 점유 해제도 필요하지만 -> 일단은 새로 점유 신청하면 기존 위치 바로 점유 해제
+                    // 따라서 호출자(BattleUnit), 현재 위치, 목표 위치 3가지를 전달해줘야됨
+                }
                 if(tile == null) return BTStatus.FAILURE; // 타겟 근처에 빈 타일 없음 -> 새 타겟 설정하던 뭘 말던 아무튼 실패
                 unit.setDestination(tile.position);
                 return BTStatus.SUCCESS;

@@ -514,5 +514,9 @@ public class GameMap implements IGameObject {
     public UiManager.Button getCellButton(int benchIndex) {
         return bench.getCellButton(benchIndex);
     }
+
+    public Transform getFieldTrasnform(int x, int y) {
+        return field.get(x, y);
+    }
 }
 
