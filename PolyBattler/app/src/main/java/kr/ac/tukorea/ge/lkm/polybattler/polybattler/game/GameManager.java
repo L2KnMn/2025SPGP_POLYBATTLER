@@ -39,7 +39,7 @@ public class GameManager implements IGameManager {
     private GameState currentState;
     private int round;
     private int gold;
-    private final int width = 4, height = 7, benchSize = 5;
+    public final int width = 4, height = 7, benchSize = 5;
     private final GameMap gameMap;
     private UiManager.ScoreBoard goldBoard;
     private final BattleController battleController;
@@ -184,7 +184,7 @@ public class GameManager implements IGameManager {
         return instances.computeIfAbsent(master, GameManager::new);
     }
 
-    public GameMap getMap() {
+    public GameMap getGameMap() {
         return gameMap;
     }
 

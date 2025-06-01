@@ -87,7 +87,7 @@ public class BattleUnit {
                 this.base.AttackPerSecond = 2.0f;
                 this.base.Attack = 9;
                 this.base.MaxHp = 80; // 예시 체력
-                this.base.AreaRange = Metrics.GRID_UNIT;
+                this.base.AreaRange = 1.0f;
                 break;
             case RECTANGLE:
                 this.base.Defense = 1;
@@ -274,17 +274,37 @@ public class BattleUnit {
     }
 
     public void moveTo(Transform transform) {
-        if(this.transform.distance(transform) <= getSpeed()){
-            this.transform.goTo(transform);
+        moveTo(transform.position);
+    }
+
+    public void moveTo(Position pos){
+        if(this.transform.distance(pos) <= getSpeed()){
+            // complete move to destination
+            this.transform.goTo(pos.x, pos.y);
+            isMovementSetted = false;
+            isMovementComplete = true;
         }
         else{
-            velocity.makeVector(this.transform.position, transform.position, getSpeed());
+            velocity.makeVector(this.transform.position, pos, getSpeed());
             this.transform.move(velocity.x, velocity.y);
         }
     }
 
-    public boolean isMovementComplete() {
-        return isTargetInRange();
+    private boolean isMovementSetted = false;
+    private boolean isMovementComplete = false;
+    private Position destination = new Position();
+    public void setDestination(Position pos){
+        isMovementSetted = true;
+        isMovementComplete = false;
+        destination.set(pos);
+    }
+
+    public boolean isSettingMovement() {
+        return isMovementSetted;
+    }
+
+    public boolean isCompleteMovement() {
+        return isMovementComplete;
     }
 
     public void setTeam(BattleController.Team team) {
@@ -327,7 +347,7 @@ public class BattleUnit {
     }
 
     public float getAreaRange() {
-        return current.AreaRange ; // 현재 범위 공격 범위 적용
+        return current.AreaRange * Metrics.GRID_UNIT; // 현재 범위 공격 범위 적용
     }
 
     public void setShapeType(Polyman.ShapeType shape) {

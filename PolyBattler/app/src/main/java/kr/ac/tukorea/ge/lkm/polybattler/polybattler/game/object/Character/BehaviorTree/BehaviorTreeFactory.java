@@ -3,11 +3,10 @@ package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Behav
 // 필요한 클래스들을 임포트합니다.
 import android.util.Log;
 
-import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.Effect.EffectManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Polyman;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Polyman.ShapeType; // ShapeType Enum 경로 확인
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.BattleController;
-import kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene.Scene;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -30,6 +29,8 @@ public class BehaviorTreeFactory {
     static BTNode attackSingleTargetAction;
     static BTNode attackAreaAction;
     static BTNode moveToTargetAction;
+    static BTNode getMovePointToTarget;
+
 
     static BiPredicate<BattleUnit, BattleController> hasTarget;
     static BiPredicate<BattleUnit, BattleController> isTargetInRange;
@@ -46,6 +47,7 @@ public class BehaviorTreeFactory {
                 return BTStatus.FAILURE;
             }
             // BattleManager에게 가장 가까운 적 찾기 요청 (BattleUnit 타입 반환 가정)
+            //  -> 단순히 가장 가까운 타겟을 찾도록 하면 타겟 주면 모든 타일이 점유되어서 접근 불가능할 때 공격 가능한 다른 녀석을 공격 안 할 것임
             BattleUnit target = manager.findClosestEnemy(unit);
             unit.setCurrentTarget(target); // 찾은 타겟을 유닛 내부에 저장
             if(target != null) {
@@ -99,6 +101,22 @@ public class BehaviorTreeFactory {
             return BTStatus.SUCCESS;
         });
 
+        getMovePointToTarget = new ActionNode((unit, manager) -> {
+            BattleUnit target = unit.getCurrentTarget();
+
+            if(unit.isSettingMovement()){ // 이미 어디로 움직일지 정해진 상태
+                // 타겟이 이미 죽었으면 이동 실패
+                if (target == null || target.isDead()) return BTStatus.FAILURE;
+                // 타겟이 별 문제 없다면 계속 성공
+                return BTStatus.SUCCESS;
+            }else{
+                Transform tile = manager.getCloseTileToTarget(unit, target);
+                if(tile == null) return BTStatus.FAILURE; // 타겟 근처에 빈 타일 없음 -> 새 타겟 설정하던 뭘 말던 아무튼 실패
+                unit.setDestination(tile.position);
+                return BTStatus.SUCCESS;
+            }
+        });
+
         // Action: 타겟에게 이동 (성공/실패/진행중)
         moveToTargetAction = new ActionNode((unit, manager) -> {
             BattleUnit target = unit.getCurrentTarget();
@@ -113,9 +131,11 @@ public class BehaviorTreeFactory {
             // * 원하는 것 : 이동은 자유롭게 하되 하나의 객체는 하나의 타일 위에 도착해서 공격한다
             // 타겟까지의 이동을 movoTo로 유닛에게 일임하는 게 아니라
             // 이 내부에서 타겟까지의 경로를 생성하고 그 경로에 이동 속도만큼을 이동
-            //
+            // 1. 목표물과 공격 가능한 타일 위치 구하기 -> 위치를 매번 얻으면 빡세니까 구하고 이동할까? -> 이동 목표 구하는 노드 따로 만들기
+            // 2. 이동 목표에 대한 유효성 검증 -> target이 해당 목표 타일에서 공격 가능한지 확인
+            // 3. 그 타일 위치까지 이동 경로 구하기 -> 일단은 겹쳐도 되도록 직선으로 이동
             unit.moveTo(target.getTransform()); // BattleUnit의 이동 메서드 호출
-            return unit.isMovementComplete() ? BTStatus.SUCCESS : BTStatus.RUNNING;
+            return unit.isCompleteMovement() ? BTStatus.SUCCESS : BTStatus.RUNNING;
         });
 
         // Condition: 타겟이 있고 살아있는가?
@@ -152,9 +172,10 @@ public class BehaviorTreeFactory {
                         new Sequence(
                                 "Move to target",
                                 new ConditionNode(hasTarget),
+                                getMovePointToTarget, // 타겟 주변에 사거리 내에 접근 가능한 타일 탐색 
                                 moveToTargetAction
                         ),
-                        // 3순위: 타겟 없으면 찾기
+                        // 3순위: 타겟 탐색
                         findTargetAction
                 )
         );

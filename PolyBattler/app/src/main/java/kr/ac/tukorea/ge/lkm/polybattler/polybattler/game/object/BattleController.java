@@ -2,6 +2,7 @@ package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object;
 
 import android.content.res.Resources;
 import android.util.Log;
+import android.util.Pair;
 
 import androidx.core.content.res.ResourcesCompat;
 
@@ -18,7 +19,9 @@ import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Behavi
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.BehaviorTree.BehaviorTreeFactory;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Polyman;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.SynergyFactory;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.GameMap.GameMap;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.UiManager;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.scene.Scene;
 import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.GameView;
@@ -27,6 +30,7 @@ import kr.ac.tukorea.ge.spgp2025.a2dg.framework.view.Metrics;
 public class BattleController {
     private final Scene master;
     private Result result;
+    private static String TAG = "BattleController";
 
     public enum Team {
         PLAYER,
@@ -44,7 +48,7 @@ public class BattleController {
     private final String winMassage;
     private final String loseMassage;
     UiManager.Signage signage;
-
+    BattleUnit[][] unitsMap;
 
     public BattleController(Scene master) {
         this.master = master;
@@ -60,6 +64,7 @@ public class BattleController {
         signage.setColors(ResourcesCompat.getColor(res, R.color.resultBoardbg, null), ResourcesCompat.getColor(res, R.color.resultBoardText, null));
         signage.setVisibility(GameState.RESULT, true);
         synergyFactory = new SynergyFactory(master);
+        unitsMap = null;
     }
 
     public void resignPlayer() {
@@ -100,7 +105,8 @@ public class BattleController {
 
         updateSynergy();
 
-        // Log.d("BattleManager", "setGameState() called" + state.name());
+        unitsMap = new BattleUnit[GameManager.getInstance(master).height][GameManager.getInstance(master).width];
+
         for(Team team : Team.values()) {
             ArrayList<BattleUnit> units = battlers.get(team);
             if(units == null)
@@ -108,6 +114,10 @@ public class BattleController {
             for(BattleUnit unit : units){
                 unit.setBehaviorTree(BehaviorTreeFactory.getTreeForShape(unit.getShapeType()), this);
                 UiManager.getInstance(master).addHpBar(unit);
+                // unit map에 기록하고 움직일 때 이걸 참조
+                int width = GameManager.getInstance(master).getGameMap().getWidth(unit.getTransform().getPosition().x);
+                int height = GameManager.getInstance(master).getGameMap().getHeight(unit.getTransform().getPosition().y);
+                unitsMap[height][width] = unit;
             }
             counts.put(team, units.size());
         }
@@ -145,7 +155,6 @@ public class BattleController {
                 }
             }
         }
-        //Log.d("BattleManager", "return target (" + closestEnemy.getTransform().getPosition().x + ", " + closestEnemy.getTransform().getPosition().y + ")");
         return closestEnemy;
     }
 
@@ -185,4 +194,36 @@ public class BattleController {
     public Result getResult() {
         return result;
     }
+
+    public Transform getCloseTileToTarget(BattleUnit unit, BattleUnit target) {
+        if(unit == null){
+            Log.d(TAG, "get close tile to target : unit is null");
+            return null;
+        }
+        if(target == null){
+            Log.d(TAG, "get close tile to target : target is null");
+            return null;
+        }
+
+        GameMap gameMap = GameManager.getInstance(master).getGameMap();
+
+        if(gameMap == null){
+            Log.d(TAG, "get close tile to target : gameMap is null");
+            return null;
+        }
+
+        int width = gameMap.getWidth(unit.getTransform().getPosition().x);
+        int height = gameMap.getHeight(unit.getTransform().getPosition().y);
+
+        int target_width = gameMap.getWidth(target.getTransform().getPosition().x); // 몇 칸 이동 해야 하는지 횡 칸
+        int target_height = gameMap.getHeight(target.getTransform().getPosition().y); // 몇 칸 이동 해야 하는지 종 칸
+
+        //TODO: 목표 타일 주변에서 이 오브젝트가 사거리에 닿는 타일 중 갈 수 있는 가장 가까운 빈 타일을 찾아서 물어본다
+
+
+
+
+        return null;
+    }
 }
+
