@@ -203,6 +203,9 @@ public class BattleUnit {
                 transform.getPosition().x + (float)Math.random() * 25.0f,
                 transform.getPosition().y,
                 this, (int) Math.ceil(actualDamage)); // 데미지는 소수점으로 존재하지만 출력은 정수 단위로 올림 해서 출력
+        if(isDead()){ // 이번 공격을 받고 죽었다면
+            stopAttackEffect();
+        }
     }
 
     public void fillHp(float hp){
@@ -359,7 +362,6 @@ public class BattleUnit {
     public void setShapeType(Polyman.ShapeType shape) {
         this.shapeType = shape;
     }
-
     public void setColorType(Polyman.ColorType color) {
         this.colorType = color;
     }
