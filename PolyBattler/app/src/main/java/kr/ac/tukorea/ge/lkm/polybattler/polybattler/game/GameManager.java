@@ -140,7 +140,8 @@ public class GameManager implements IGameManager {
 
         UiManager.getInstance(master).addSignage("저장하고 종료하시겠습니까?", battleButtonX, Metrics.height/2,
                 Metrics.width, Metrics.height).setVisibility(GameState.POST_GAME, true)
-                .setColors(R.color.resultBoardbg, R.color.resultBoardText);
+                .setColors(ResourcesCompat.getColor(res, R.color.resultBoardbg, null),
+                        ResourcesCompat.getColor(res, R.color.resultBoardText, null));
 
         UiManager.getInstance(master).addButton("아니요", battleButtonX - buttonWidth/3*2, battleButtonY,
                 buttonWidth, buttonHeight,

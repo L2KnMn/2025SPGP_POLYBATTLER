@@ -22,7 +22,6 @@ public class BattleUnit {
     Polyman.ShapeType shapeType;
     Polyman.ColorType colorType;
     private float currentHp;
-
     static class Status{ // 모든 스텟은 float를 기본으로
         float MaxHp = 0;
         float Attack = 0;
@@ -298,6 +297,7 @@ public class BattleUnit {
     private boolean isMovementSetted = false;
     private boolean isMovementComplete = false;
     private Position destination = new Position();
+
     public void setDestination(Position pos){
         isMovementSetted = true;
         isMovementComplete = false;
@@ -308,10 +308,12 @@ public class BattleUnit {
         isMovementComplete = false;
     }
 
+    public Position getDestination() {
+        return destination;
+    }
     public boolean isSettingMovement() {
         return isMovementSetted;
     }
-
     public boolean isCompleteMovement() {
         return isMovementComplete;
     }

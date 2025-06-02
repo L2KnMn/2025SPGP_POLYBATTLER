@@ -109,7 +109,10 @@ public class BehaviorTreeFactory {
                 // 타겟이 이미 죽었으면 실패
                 if (target == null || target.isDead()) return BTStatus.FAILURE;
                 // 타겟은 움직인다 이미 설정된 목표 지점과 타겟이 일정 거리 벗어나면 새로 찾자
-                double dist = unit.getTransform().distanceSq(target.getTransform().getPosition());
+                Position destination = unit.getDestination();
+                float dist = Math.abs(destination.x - target.getTransform().position.x) +
+                        Math.abs(destination.y - target.getTransform().position.y);
+                dist /= manager.getGameMap().getTileSize();
                 if(dist > unit.getAttackRange()) { // 공격범위보다 크게 움직이면 -> 내가 도착해도 때릴 수 없다면 -> 초기화하고 다시 찾자
                     unit.resetDestination();
                     return BTStatus.RUNNING; // 다음 update 스케쥴에 이 노드가 다시 호출되도록

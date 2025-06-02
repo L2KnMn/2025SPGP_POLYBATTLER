@@ -31,7 +31,6 @@ public class BattleController {
     private final Scene master;
     private Result result;
     private static String TAG = "BattleController";
-
     public enum Team {
         PLAYER,
         ENEMY
@@ -312,6 +311,11 @@ public class BattleController {
         unitsMap[targetGridY][targetGridX] = unit; //
         Log.d(TAG, "requestTileOccupation: Unit " + unit + " occupied target tile (" + targetGridX + "," + targetGridY + ")."); //
         return true; //
+    }
+
+
+    public GameMap getGameMap() {
+        return GameManager.getInstance(master).getGameMap();
     }
 }
 
