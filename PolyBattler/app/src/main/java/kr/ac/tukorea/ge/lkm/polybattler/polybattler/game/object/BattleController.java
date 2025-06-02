@@ -2,7 +2,6 @@ package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object;
 
 import android.content.res.Resources;
 import android.util.Log;
-import android.util.Pair;
 
 import androidx.core.content.res.ResourcesCompat;
 
@@ -20,6 +19,7 @@ import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Behavi
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Polyman;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.SynergyFactory;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.GameMap.GameMap;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.GameMap.Gravity;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.ui.UiManager;
@@ -148,7 +148,9 @@ public class BattleController {
 
         for(int i =0; i< enemies.size(); ++i) {
             if(!enemies.get(i).isDead()) {
-                double distance = unit.getTransform().distance(enemies.get(i).getTransform());
+                BattleUnit enemy = enemies.get(i);
+                double distance = Math.abs(enemy.getTransform().position.x - unit.getTransform().position.x)
+                        + Math.abs(enemy.getTransform().position.y - unit.getTransform().position.y);
                 if (distance < minDistance) {
                     minDistance = distance;
                     closestEnemy = enemies.get(i);
@@ -195,7 +197,7 @@ public class BattleController {
         return result;
     }
 
-    public Transform getCloseTileToTarget(BattleUnit unit, BattleUnit target) {
+    public Position getCloseTileToTarget(BattleUnit unit, BattleUnit target) {
         if(unit == null){
             Log.d(TAG, "get close tile to target : unit is null");
             return null;
@@ -219,8 +221,7 @@ public class BattleController {
 
         int attackRange = (int)unit.getAttackRange(); // 사거리 가져오기 status는 모두 float이므로 int로 임의 변환
 
-        Transform closestAvailableTileTransform = null;
-        int tileX = 0, tileY = 0;
+        Position closestAvailableTileTransform = null;
         double minDistance = Double.MAX_VALUE;
 
         // 타겟 주변의 모든 그리드 셀을 순회하며 유닛의 사거리 내에 있는지,
@@ -253,9 +254,10 @@ public class BattleController {
                     int distanceToUnit = Math.abs(x - unitGridX) + Math.abs(y - unitGridY);
                     if (distanceToUnit < minDistance) {
                         minDistance = distanceToUnit;
-                        closestAvailableTileTransform = gameMap.getFieldTrasnform(x, y);
-                        tileX = x;
-                        tileY = y;
+                        if(closestAvailableTileTransform == null)
+                            closestAvailableTileTransform = new Position();
+                        closestAvailableTileTransform.x = gameMap.getTileX(x, Gravity.CENTER);
+                        closestAvailableTileTransform.y = gameMap.getTileY(y, Gravity.CENTER);;
                     }
                 }
             }
@@ -296,10 +298,9 @@ public class BattleController {
             // 현재 위치에 이 유닛이 점유하고 있었다면 해제
             if (unitsMap[currentGridY][currentGridX] == unit) { //
                 unitsMap[currentGridY][currentGridX] = null; //
-                Log.d(TAG, "requestTileOccupation: Released tile (" + currentGridX + "," + currentGridY + ") for unit " + unit.getId()); //
             } else if (unitsMap[currentGridY][currentGridX] != null) {
                 // 다른 유닛이 현재 위치를 점유하고 있는 경우 (경고)
-                Log.w(TAG, "requestTileOccupation: Unit " + unit.getId() + " expected at (" + currentGridX + "," + currentGridY + ") but found " + unitsMap[currentGridY][currentGridX].getId());
+                Log.w(TAG, "requestTileOccupation: Unit " + unit + " expected at (" + currentGridX + "," + currentGridY + ") but found " + unitsMap[currentGridY][currentGridX]);
             }
         } else {
             // 현재 그리드 좌표가 맵 범위를 벗어나는 경우 (초기 배치 등)
@@ -309,8 +310,7 @@ public class BattleController {
         // 3. 목표 타일 점유 (또는 예약)
         // 목표 타일을 해당 유닛으로 점유합니다.
         unitsMap[targetGridY][targetGridX] = unit; //
-        Log.d(TAG, "requestTileOccupation: Unit " + unit.getId() + " occupied target tile (" + targetGridX + "," + targetGridY + ")."); //
-
+        Log.d(TAG, "requestTileOccupation: Unit " + unit + " occupied target tile (" + targetGridX + "," + targetGridY + ")."); //
         return true; //
     }
 }

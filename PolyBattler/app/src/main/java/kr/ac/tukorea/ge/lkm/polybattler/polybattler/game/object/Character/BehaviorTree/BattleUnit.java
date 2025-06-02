@@ -2,6 +2,7 @@ package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Behav
 
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.Effect.AttackEffect;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.Effect.EffectManager;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.GameManager;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.BattleController;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Polyman;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
@@ -21,6 +22,7 @@ public class BattleUnit {
     Polyman.ShapeType shapeType;
     Polyman.ColorType colorType;
     private float currentHp;
+
     static class Status{ // 모든 스텟은 float를 기본으로
         float MaxHp = 0;
         float Attack = 0;
@@ -232,13 +234,10 @@ public class BattleUnit {
     }
 
     public boolean isTargetInRange() {
-        // 몇 칸 떨어졌는지 거리 측정을 하면 좋을 듯
-        // x, y 거리 차이를 구한다
-        // 거리 차이당 몇 칸인지 대략 구한다
-        // x차이 칸 + y 차이칸 =  총 거리
-        // current.AttackRange
-
-        return (target != null) && (target.getTransform().distance(transform) <= current.AttackRange * Metrics.GRID_UNIT); // 현재 공격 범위 적용
+        float dist = Math.abs(target.getTransform().position.x - transform.position.x);
+        dist += Math.abs(target.getTransform().position.y - transform.position.y);
+        dist = dist / GameManager.getInstance(Scene.top()).getGameMap().getTileSize();
+        return (target != null) && (dist <= current.AttackRange); // 현재 공격 범위 적용
     }
 
     public float getAttackPercent() {
@@ -277,21 +276,20 @@ public class BattleUnit {
         return current.Speed * Metrics.GRID_UNIT * GameView.frameTime; // 현재 이동 속도 적용
     }
 
-    public void moveTo(Transform transform) {
-        moveTo(transform.position);
-    }
-
     public void moveTo(Position pos){
         if(this.transform.distance(pos) <= getSpeed()){
             // complete move to destination
             this.transform.goTo(pos.x, pos.y);
-            isMovementSetted = false;
             isMovementComplete = true;
         }
         else{
             velocity.makeVector(this.transform.position, pos, getSpeed());
             this.transform.move(velocity.x, velocity.y);
         }
+    }
+
+    public void moveToDestination() {
+        moveTo(destination);
     }
 
     private boolean isMovementSetted = false;
@@ -301,6 +299,10 @@ public class BattleUnit {
         isMovementSetted = true;
         isMovementComplete = false;
         destination.set(pos);
+    }
+    public void resetDestination() {
+        isMovementSetted = false;
+        isMovementComplete = false;
     }
 
     public boolean isSettingMovement() {

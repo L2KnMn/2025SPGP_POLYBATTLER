@@ -6,6 +6,7 @@ import android.util.Log;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Polyman;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Character.Polyman.ShapeType; // ShapeType Enum 경로 확인
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.BattleController;
+import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
 
 import java.util.ArrayList;
@@ -53,11 +54,12 @@ public class BehaviorTreeFactory {
             if(target != null) {
                 return BTStatus.SUCCESS;
             }else{
+                // 타겟 찾기 실패
                 return BTStatus.FAILURE;
             }
         });
 
-        // Action: 단일 타겟 공격 (성공/실패/진행중)
+        // Action: 단일 타겟 공격
         attackSingleTargetAction = new ActionNode((unit, manager) -> {
             BattleUnit target = unit.getCurrentTarget();
             // 타겟 없거나 죽었으면 실패
@@ -103,24 +105,39 @@ public class BehaviorTreeFactory {
 
         getMovePointToTarget = new ActionNode((unit, manager) -> {
             BattleUnit target = unit.getCurrentTarget();
-
-            if(unit.isSettingMovement()){ // 이미 어디로 움직일지 정해진 상태
-                // 타겟이 이미 죽었으면 이동 실패
+            if(unit.isSettingMovement() && !unit.isCompleteMovement()){ // 이미 어디로 움직일지 정해진 상태
+                // 타겟이 이미 죽었으면 실패
                 if (target == null || target.isDead()) return BTStatus.FAILURE;
+                // 타겟은 움직인다 이미 설정된 목표 지점과 타겟이 일정 거리 벗어나면 새로 찾자
+                double dist = unit.getTransform().distanceSq(target.getTransform().getPosition());
+                if(dist > unit.getAttackRange()) { // 공격범위보다 크게 움직이면 -> 내가 도착해도 때릴 수 없다면 -> 초기화하고 다시 찾자
+                    unit.resetDestination();
+                    return BTStatus.RUNNING; // 다음 update 스케쥴에 이 노드가 다시 호출되도록
+                }
                 // 타겟이 별 문제 없다면 계속 성공
                 return BTStatus.SUCCESS;
             }else{
-                Transform tile = manager.getCloseTileToTarget(unit, target);
+                // 이동이 완료된 상태면 정말 꼭 다음 이동 위치를 찾아야 하나?
+                // 공격 가능하면 그냥 있자
+                if(unit.isTargetInRange())
+                    return BTStatus.SUCCESS;
+
+                Position tile = manager.getCloseTileToTarget(unit, target);
                 // 움직일 수 있는 타일을 찾았으면 해당 타일에 대해 점유
                 if (tile != null) {
                     // manager에 해당 transform의 게임 월드 상의 좌표를 주고 점유 신청
                     // 그러면 manager에서 알아서 해당 좌표를 그리드로 변환해서 unitsMap에 점유 기록함
                     // 도착하거나 이동을 시작하는 등 기존에 있던 타일에 대한 점유 해제도 필요하지만 -> 일단은 새로 점유 신청하면 기존 위치 바로 점유 해제
                     // 따라서 호출자(BattleUnit), 현재 위치, 목표 위치 3가지를 전달해줘야됨
+                    boolean result = manager.requestTileOccupation(unit,
+                            unit.transform.position.x, unit.transform.position.y,
+                            tile.x, tile.y);
+                    if(result){
+                        unit.setDestination(tile);
+                        return BTStatus.SUCCESS;
+                    }
                 }
-                if(tile == null) return BTStatus.FAILURE; // 타겟 근처에 빈 타일 없음 -> 새 타겟 설정하던 뭘 말던 아무튼 실패
-                unit.setDestination(tile.position);
-                return BTStatus.SUCCESS;
+                return BTStatus.FAILURE; // 등록 실패
             }
         });
 
@@ -129,11 +146,6 @@ public class BehaviorTreeFactory {
             BattleUnit target = unit.getCurrentTarget();
             // 타겟이 이미 죽었으면 이동 실패
             if (target == null || target.isDead()) return BTStatus.FAILURE;
-            // 이미 범위 내에 있으면 이동 성공
-            if (unit.isTargetInRange()) {
-                return BTStatus.SUCCESS;
-            }
-            // 이동 중인 상태
             // TODO: 현재 이동 방식 변경 중
             // * 원하는 것 : 이동은 자유롭게 하되 하나의 객체는 하나의 타일 위에 도착해서 공격한다
             // 타겟까지의 이동을 movoTo로 유닛에게 일임하는 게 아니라
@@ -141,7 +153,7 @@ public class BehaviorTreeFactory {
             // 1. 목표물과 공격 가능한 타일 위치 구하기 -> 위치를 매번 얻으면 빡세니까 구하고 이동할까? -> 이동 목표 구하는 노드 따로 만들기
             // 2. 이동 목표에 대한 유효성 검증 -> target이 해당 목표 타일에서 공격 가능한지 확인
             // 3. 그 타일 위치까지 이동 경로 구하기 -> 일단은 겹쳐도 되도록 직선으로 이동
-            unit.moveTo(target.getTransform()); // BattleUnit의 이동 메서드 호출
+            unit.moveToDestination();
             return unit.isCompleteMovement() ? BTStatus.SUCCESS : BTStatus.RUNNING;
         });
 

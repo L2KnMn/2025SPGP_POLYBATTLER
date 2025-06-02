@@ -556,7 +556,46 @@ public class EffectManager implements IGameManager {
         levelUpEffect.init(unit);
         addEffect(levelUpEffect);
     }
-    // 새로운 LevelUpEffect 클래스 정의
+
+    // Particle 내부 클래스 정의 (LevelUpEffect 클래스 내부에 추가)
+    private static class Particle {
+        float x, y;         // 현재 위치
+        float velX, velY;   // 속도
+        float life;         // 남은 생명 (0이 되면 사라짐)
+        float initialLife;  // 초기 생명
+        int alpha;          // 투명도
+        float size;         // 크기
+        int color;          // 색상
+
+        Particle(float x, float y, float velX, float velY, float life, float size, int color) {
+            this.x = x;
+            this.y = y;
+            this.velX = velX;
+            this.velY = velY; // 위로 올라가는 효과를 위해 음수 값으로 설정될 경우가 많음
+            this.life = life;
+            this.initialLife = life;
+            this.alpha = 255;
+            this.size = size;
+            this.color = color;
+        }
+
+        void update(float frameTime) {
+            life -= frameTime;
+            if (life <= 0) return;
+
+            x += velX * frameTime;
+            y += velY * frameTime;
+
+            // 생명주기에 따라 투명도 조절 (서서히 사라짐)
+            alpha = (int) (255 * (life / initialLife));
+            alpha = Math.max(0, Math.min(255, alpha)); // 0~255 범위 유지
+        }
+
+        boolean isAlive() {
+            return life > 0;
+        }
+    }
+
     public static class LevelUpEffect extends Effect {
         private BattleUnit targetUnit; // 이펙트가 발생할 대상 유닛
         private final Paint textPaint;     // "LEVEL UP!" 텍스트를 그릴 Paint
@@ -567,6 +606,19 @@ public class EffectManager implements IGameManager {
         private float maxCircleRadius; // 원형 빛의 최대 반지름
         private int initialTextAlpha; // 텍스트 초기 알파값
         private int initialCircleAlpha; // 원형 빛 초기 알파값
+
+        private List<Particle> particles; // 빛 알갱이들을 담을 리스트
+        private Paint particlePaint;      // 빛 알갱이를 그릴 Paint
+        private static Random random;            // 파티클 생성 시 랜덤 요소를 위한 객체
+        private float particleSpawnTimer; // 파티클 생성 간격을 위한 타이머
+        private static final float PARTICLE_SPAWN_INTERVAL = 0.05f; // 파티클 생성 간격 (초)
+        private static final int MAX_PARTICLES_AT_ONCE = 3; // 한 번에 생성할 최대 파티클 수
+        private static final int TOTAL_PARTICLE_WAVES = 5; // 총 파티클 생성 웨이브 수
+        private int particleWavesSpawned; // 현재까지 생성된 파티클 웨이브 수
+
+        static{
+            random = new Random();
+        }
 
         public LevelUpEffect() {
             super(); // 부모 생성자 호출
@@ -610,6 +662,22 @@ public class EffectManager implements IGameManager {
             circleRadius = 0;
             maxCircleRadius = targetUnit != null ? targetUnit.getTransform().getSize() * 1.5f : Metrics.GRID_UNIT * 2; // 유닛 크기보다 약간 크게
 
+            // 파티클 관련 초기화
+            if (this.particles == null) {
+                this.particles = new ArrayList<>();
+            } else {
+                this.particles.clear();
+            }
+            if (this.particlePaint == null) {
+                this.particlePaint = new Paint();
+                this.particlePaint.setStyle(Paint.Style.FILL);
+            }
+
+            this.particleSpawnTimer = 0f;
+            this.particleWavesSpawned = 0;
+
+            spawnParticles();
+
             return this;
         }
 
@@ -618,6 +686,23 @@ public class EffectManager implements IGameManager {
             // 부모 클래스의 update 호출 (elapsedTime, finished, remove 처리)
             super.update();
             if (finished || remove) return;
+
+            // 파티클 생성 로직 (일정 간격으로 여러 웨이브 생성)
+            particleSpawnTimer += GameView.frameTime;
+            if (particleWavesSpawned < TOTAL_PARTICLE_WAVES && particleSpawnTimer >= PARTICLE_SPAWN_INTERVAL) {
+                spawnParticles();
+                particleSpawnTimer = 0f; // 타이머 리셋
+                particleWavesSpawned++;
+            }
+
+            // 파티클 업데이트 및 소멸 처리
+            for (int i = particles.size() - 1; i >= 0; i--) {
+                Particle p = particles.get(i);
+                p.update(GameView.frameTime);
+                if (!p.isAlive()) {
+                    particles.remove(i);
+                }
+            }
         }
 
         @Override
@@ -639,6 +724,13 @@ public class EffectManager implements IGameManager {
             // 원형 빛 그리기
             canvas.drawCircle(transform.getPosition().x, transform.getPosition().y, circleRadius, circlePaint);
 
+            // 파티클 그리기
+            for (Particle p : particles) {
+                particlePaint.setColor(p.color);
+                particlePaint.setAlpha(p.alpha);
+                canvas.drawCircle(p.x, p.y, p.size, particlePaint);
+            }
+
             // "LEVEL UP!" 텍스트 그리기
             // 텍스트 Y 위치는 캐릭터 머리 위에서 시작하여 더 위로 올라가도록 조정
             float textX = transform.getPosition().x;
@@ -650,11 +742,45 @@ public class EffectManager implements IGameManager {
         public void onRecycle() {
             super.onRecycle(); // 부모의 onRecycle 호출
             targetUnit = null;
+            if (particles != null) {
+                particles.clear(); // 파티클 리스트 비우기
+            }
         }
 
         @Override
         public Layer getLayer() {
             return Layer.effect_front; // 다른 이펙트들처럼 앞쪽에 표시
         }
+
+        // LevelUpEffect에 새로운 메소드 추가: spawnParticles
+        private void spawnParticles() {
+            if (targetUnit == null || targetUnit.getTransform() == null) return;
+
+            Position unitPos = targetUnit.getTransform().getPosition();
+            float unitSize = targetUnit.getTransform().getSize() * 2;
+
+            int count = random.nextInt(MAX_PARTICLES_AT_ONCE) + 1; // 1 ~ MAX_PARTICLES_AT_ONCE 개 생성
+            for (int i = 0; i < count; i++) {
+                // 캐릭터 주변에서 약간 랜덤한 위치에서 시작
+                float startX = unitPos.x + (random.nextFloat() - 0.5f) * unitSize;
+                float startY = unitPos.y + (random.nextFloat() - 0.5f) * unitSize * 0.3f; // 캐릭터 높이의 30% 내 (중심 부근)
+
+                // 위로 올라가는 속도 (약간의 좌우 퍼짐)
+                float velX = (random.nextFloat() - 0.5f) * Metrics.GRID_UNIT * 1.5f; // 좌우 속도
+                float velY = -(Metrics.GRID_UNIT * (2.0f + random.nextFloat() * 2.0f)); // 위로 향하는 기본 속도 + 랜덤
+
+                float life = 0.5f + random.nextFloat() * 0.7f; // 생명주기 (0.5 ~ 1.2초)
+                float size = Metrics.GRID_UNIT / 10f + random.nextFloat() * (Metrics.GRID_UNIT / 10f); // 파티클 크기
+
+                // 파티클 색상 (밝은 노란색, 흰색 계열)
+                int r = 200 + random.nextInt(56); // 200-255
+                int g = 200 + random.nextInt(56); // 200-255
+                int b = 150 + random.nextInt(106); // 150-255 (약간 덜 파랗게)
+                int color = Color.rgb(r, g, b);
+
+                particles.add(new Particle(startX, startY, velX, velY, life, size, color));
+            }
+        }
+
     }
 }
