@@ -172,9 +172,10 @@ public class UiManager implements IGameManager {
         }
 
         // 색상 설정
-        public void setColors(int backgroundColor, int textColor) {
+        public Signage setColors(int backgroundColor, int textColor) {
             signBackgroundPaint.setColor(backgroundColor);
             signTextPaint.setColor(textColor);
+            return this;
         }
 
         public void setTextSize(int size){

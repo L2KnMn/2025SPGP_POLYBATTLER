@@ -9,6 +9,7 @@ import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.BattleController
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Position;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.object.Transform.Transform;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.Map;
@@ -113,7 +114,9 @@ public class BehaviorTreeFactory {
                 float dist = Math.abs(destination.x - target.getTransform().position.x) +
                         Math.abs(destination.y - target.getTransform().position.y);
                 dist /= manager.getGameMap().getTileSize();
+                Log.d("getMovePointToTarget", "dist: " + dist);
                 if(dist > unit.getAttackRange()) { // 공격범위보다 크게 움직이면 -> 내가 도착해도 때릴 수 없다면 -> 초기화하고 다시 찾자
+                    Log.d("getMovePointToTarget", "far to taget, so reset destination");
                     unit.resetDestination();
                     return BTStatus.RUNNING; // 다음 update 스케쥴에 이 노드가 다시 호출되도록
                 }
@@ -149,13 +152,6 @@ public class BehaviorTreeFactory {
             BattleUnit target = unit.getCurrentTarget();
             // 타겟이 이미 죽었으면 이동 실패
             if (target == null || target.isDead()) return BTStatus.FAILURE;
-            // TODO: 현재 이동 방식 변경 중
-            // * 원하는 것 : 이동은 자유롭게 하되 하나의 객체는 하나의 타일 위에 도착해서 공격한다
-            // 타겟까지의 이동을 movoTo로 유닛에게 일임하는 게 아니라
-            // 이 내부에서 타겟까지의 경로를 생성하고 그 경로에 이동 속도만큼을 이동
-            // 1. 목표물과 공격 가능한 타일 위치 구하기 -> 위치를 매번 얻으면 빡세니까 구하고 이동할까? -> 이동 목표 구하는 노드 따로 만들기
-            // 2. 이동 목표에 대한 유효성 검증 -> target이 해당 목표 타일에서 공격 가능한지 확인
-            // 3. 그 타일 위치까지 이동 경로 구하기 -> 일단은 겹쳐도 되도록 직선으로 이동
             unit.moveToDestination();
             return unit.isCompleteMovement() ? BTStatus.SUCCESS : BTStatus.RUNNING;
         });

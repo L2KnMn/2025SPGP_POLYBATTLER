@@ -47,6 +47,7 @@ public class GameManager implements IGameManager {
     private final ArrayList<Polyman> players;
     private final ArrayList<Polyman> enemies;
     private final PolymanGenerator polymanGenerator; // PolymanGenerator 필드 추가
+    UiManager.Signage round_signage;
 
 
     private GameManager(Scene master) {
@@ -70,14 +71,13 @@ public class GameManager implements IGameManager {
     private void AddUI() {
         goldBoard = UiManager.getInstance(master).addScoreBoard("GOLD:", gold, Metrics.width / 2, 50, 100, 100);
         Resources res =  GameView.view.getResources();
-        goldBoard.setColors(ResourcesCompat.getColor(res, R.color.goldSignageBg, null), ResourcesCompat.getColor(res,R.color.goldSignageText, null));
         goldBoard.setTextSize(100);
-        goldBoard.setVisibility(GameState.PREPARE, true);
-        goldBoard.setVisibility(GameState.SHOPPING, true);
-        goldBoard.setVisibility(GameState.BATTLE, true);
-        goldBoard.setVisibility(GameState.RESULT, true);
-
-
+        goldBoard.setColors(ResourcesCompat.getColor(res, R.color.goldSignageBg, null),
+                        ResourcesCompat.getColor(res,R.color.goldSignageText, null))
+                .setVisibility(GameState.PREPARE, true)
+                .setVisibility(GameState.SHOPPING, true)
+                .setVisibility(GameState.BATTLE, true)
+                .setVisibility(GameState.RESULT, true);
 
         // 1. "전투 시작" 버튼 생성
         // 버튼 위치 및 크기 정의
@@ -137,6 +137,11 @@ public class GameManager implements IGameManager {
                     }
                 }
         ).setVisibility(GameState.RESULT, true);
+
+        round_signage = UiManager.getInstance(master).addSignage("ROUND 1", battleButtonX, Metrics.height/7,
+                        Metrics.width, Metrics.height).setVisibility(GameState.PREPARE, true)
+                .setColors(ResourcesCompat.getColor(res, R.color.goldSignageBg, null),
+                        ResourcesCompat.getColor(res, R.color.resultBoardText, null));
 
         UiManager.getInstance(master).addSignage("저장하고 종료하시겠습니까?", battleButtonX, Metrics.height/2,
                 Metrics.width, Metrics.height).setVisibility(GameState.POST_GAME, true)
@@ -292,6 +297,7 @@ public class GameManager implements IGameManager {
             case PREPARE:
                 // 전투로 인한 위치 변경 및 상태 변경을 초기화
                 gameMap.setDrawBlocked(true);
+                round_signage.setText("ROUND " + round);
                 break;
             case SHOPPING:
                 for (int i = 0; i < benchSize; ++i) {
