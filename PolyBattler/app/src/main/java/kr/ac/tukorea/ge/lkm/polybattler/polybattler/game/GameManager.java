@@ -297,7 +297,12 @@ public class GameManager implements IGameManager {
             case PREPARE:
                 // 전투로 인한 위치 변경 및 상태 변경을 초기화
                 gameMap.setDrawBlocked(true);
-                round_signage.setText("ROUND " + round);
+                if(round > 10) { // 10라운드가 넘으면
+                    // 게임 종료
+                    UiManager.getInstance(master).showToast("10라운드까지 게임을 완료했습니다!");
+                    MasterManager.getInstance(master).setGameState(GameState.POST_GAME);
+                }else
+                    round_signage.setText("ROUND " + round);
                 break;
             case SHOPPING:
                 for (int i = 0; i < benchSize; ++i) {
