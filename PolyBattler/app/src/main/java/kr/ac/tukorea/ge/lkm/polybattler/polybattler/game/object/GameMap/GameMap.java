@@ -487,6 +487,9 @@ public class GameMap implements IGameObject {
     }
 
     public void getEnemyPostions(ArrayList<Position> enemyPositions, int numEnemy) {
+        // TODO: blocked 된 파일 개수 찾아내기 -> 일단 4 * 4로 하드코딩 지정해서 막아둬서 마찬가지로 봄
+        int numBlockedBlock = 16;
+        numEnemy = Math.min(numEnemy, numBlockedBlock);
         for(int i = 0; i < numEnemy; i++){
             Position randomPosition;
             if(i < enemyPositions.size()) {

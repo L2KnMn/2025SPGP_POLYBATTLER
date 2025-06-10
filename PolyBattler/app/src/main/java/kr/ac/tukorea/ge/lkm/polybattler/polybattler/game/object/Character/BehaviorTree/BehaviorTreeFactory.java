@@ -123,11 +123,6 @@ public class BehaviorTreeFactory {
                 // 타겟이 별 문제 없다면 계속 성공
                 return BTStatus.SUCCESS;
             }else{
-                // 이동이 완료된 상태면 정말 꼭 다음 이동 위치를 찾아야 하나?
-                // 공격 가능하면 그냥 있자
-                if(unit.isTargetInRange())
-                    return BTStatus.SUCCESS;
-
                 Position tile = manager.getCloseTileToTarget(unit, target);
                 // 움직일 수 있는 타일을 찾았으면 해당 타일에 대해 점유
                 if (tile != null) {

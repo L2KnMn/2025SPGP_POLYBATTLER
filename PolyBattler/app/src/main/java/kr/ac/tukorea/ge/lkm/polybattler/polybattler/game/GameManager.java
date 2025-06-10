@@ -10,7 +10,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.util.Log;
 import android.view.MotionEvent;
-import android.widget.Toast;
 
 import androidx.core.content.res.ResourcesCompat;
 

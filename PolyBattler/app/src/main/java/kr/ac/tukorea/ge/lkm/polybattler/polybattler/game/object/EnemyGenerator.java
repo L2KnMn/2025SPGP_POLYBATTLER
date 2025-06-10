@@ -138,6 +138,17 @@ public class EnemyGenerator {
         }
     }
 
+    int getRandomLevel(int round){
+        int rand = random.nextInt(100);
+        if(rand <= Math.max(0, round - 5)){
+            return 3;
+        }else if(rand <= Math.max(0, round * 2 - 5)){
+            return 2;
+        }else {
+            return 1;
+        }
+    }
+
     public void saveRoundData(Context context, int round, ArrayList<Polyman> polymans){
         RoundData data = new RoundData(round);
         // player의 캐릭터들을 데이터에 추가
@@ -247,13 +258,8 @@ public class EnemyGenerator {
                     break; // 할당 가능한 위치가 부족하면 중단
                 }
 
-                // Scene의 재활용 시스템 사용
                 Polyman enemy = scene.getRecyclable(Polyman.class);
-                if (enemy == null) {
-                    enemy = new Polyman(info.shape, Polyman.ColorType.BLACK); // 색상은 BLACK 고정
-                } else {
-                    enemy.init(info.shape, Polyman.ColorType.BLACK, 1);
-                }
+                enemy.init(info.shape, Polyman.ColorType.BLACK, getRandomLevel(round));
 
                 Position spawnPos = enemyPositions.get(positionIndex++);
                 enemy.transform.set(spawnPos); // 위치 설정
