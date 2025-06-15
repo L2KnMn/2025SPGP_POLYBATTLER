@@ -133,7 +133,7 @@ by 게임공학과 이관민
 
 git 기록
 
-![image](https://github.com/user-attachments/assets/87c6b600-3e8f-4a64-b1fa-499b144bfb26)
+![image](https://github.com/user-attachments/assets/65f551b4-b32d-4c95-a728-7e8014b978f5)
 
 --- 
 
