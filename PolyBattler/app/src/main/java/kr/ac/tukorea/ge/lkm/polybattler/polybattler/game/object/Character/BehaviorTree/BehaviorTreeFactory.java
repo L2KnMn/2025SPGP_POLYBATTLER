@@ -106,9 +106,9 @@ public class BehaviorTreeFactory {
 
         getMovePointToTarget = new ActionNode((unit, manager) -> {
             BattleUnit target = unit.getCurrentTarget();
+            if(target == null || target.isDead()) return BTStatus.FAILURE;
+            if(unit.isTargetInRange()) return BTStatus.SUCCESS;
             if(unit.isSettingMovement() && !unit.isCompleteMovement()){ // 이미 어디로 움직일지 정해진 상태
-                // 타겟이 이미 죽었으면 실패
-                if (target == null || target.isDead()) return BTStatus.FAILURE;
                 // 타겟은 움직인다 이미 설정된 목표 지점과 타겟이 일정 거리 벗어나면 새로 찾자
                 Position destination = unit.getDestination();
                 float dist = Math.abs(destination.x - target.getTransform().position.x) +

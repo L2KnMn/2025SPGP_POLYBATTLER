@@ -19,6 +19,8 @@ public class MasterManager implements IGameManager {
     private final Scene master;
     private GameState currentState;
     MediaPlayer touchPlayer;
+    ArrayList<MediaPlayer> bgPlayer;
+    MediaPlayer nowBgPlayer;
 
     public static MasterManager getInstance(Scene master){
         return instances.computeIfAbsent(master, MasterManager::new);
@@ -36,6 +38,21 @@ public class MasterManager implements IGameManager {
         touchPlayer = MediaPlayer.create(GameView.view.getContext(), R.raw.touch_effect);
         touchPlayer.setLooping(false);
         touchPlayer.setVolume(1.0f, 1.0f);
+
+        bgPlayer = new ArrayList<>();
+        bgPlayer.add(MediaPlayer.create(GameView.view.getContext(), R.raw.prepare_phase_bg));
+        bgPlayer.add(MediaPlayer.create(GameView.view.getContext(), R.raw.battle_phase_bg1)); // Battle
+        bgPlayer.add(bgPlayer.get( 0)); // shop
+        bgPlayer.add(MediaPlayer.create(GameView.view.getContext(), R.raw.battle_phase_bg2)); // result
+        bgPlayer.add(MediaPlayer.create(GameView.view.getContext(), R.raw.battle_phase_bg3)); // post game
+        for(MediaPlayer player : bgPlayer) {
+            if(player != null){
+                player.setLooping(true);
+                player.setVolume(1.0f, 1.0f);
+            }
+        }
+        nowBgPlayer = bgPlayer.get(currentState.ordinal());
+        nowBgPlayer.start();
     }
 
     @Override
@@ -54,6 +71,20 @@ public class MasterManager implements IGameManager {
 
     @Override
     public IGameManager setGameState(GameState state) {
+        if(bgPlayer.get(state.ordinal()) != null) {
+            if(nowBgPlayer == null){
+                nowBgPlayer = bgPlayer.get(state.ordinal());
+                nowBgPlayer.start();
+            }else if (nowBgPlayer != bgPlayer.get(state.ordinal())) {
+                nowBgPlayer.pause();
+                nowBgPlayer = bgPlayer.get(state.ordinal());
+                nowBgPlayer.start();
+            }
+        }else{
+            if(nowBgPlayer != null)
+                nowBgPlayer.pause();
+            nowBgPlayer = null;
+        }
         for(IGameManager manager : managers){
             manager.setGameState(state);
         }

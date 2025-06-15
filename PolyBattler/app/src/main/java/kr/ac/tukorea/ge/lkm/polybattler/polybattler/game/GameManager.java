@@ -8,6 +8,7 @@ import java.util.Random;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
+import android.media.MediaPlayer;
 import android.util.Log;
 import android.view.MotionEvent;
 
@@ -47,7 +48,6 @@ public class GameManager implements IGameManager {
     private final ArrayList<Polyman> enemies;
     private final PolymanGenerator polymanGenerator; // PolymanGenerator 필드 추가
     UiManager.Signage round_signage;
-
 
     private GameManager(Scene master) {
         currentState = GameState.PREPARE;

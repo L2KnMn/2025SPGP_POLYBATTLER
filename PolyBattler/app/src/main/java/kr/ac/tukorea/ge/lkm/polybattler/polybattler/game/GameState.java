@@ -5,5 +5,6 @@ public enum GameState {
     BATTLE,
     SHOPPING,
     RESULT,
-    POST_GAME
+    POST_GAME;
+    public static final int COUNT = values().length;
 }
