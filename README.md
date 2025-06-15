@@ -133,7 +133,7 @@ by 게임공학과 이관민
 
 git 기록
 
-![image](https://github.com/user-attachments/assets/b63a73f6-8898-4eb8-86b3-11877dc4ee7a)
+![image](https://github.com/user-attachments/assets/87c6b600-3e8f-4a64-b1fa-499b144bfb26)
 
 --- 
 
@@ -151,7 +151,13 @@ git 기록
       - 주로 공격 타겟을 설정할 때 이용합니다. 타겟이 설정되면 해당 객체의 Battle Unit을 참조해서 가지고 있게 됩니다.
     - 비전투 중 터치 이벤트가 발생하면 GameManager 객체 내부에 Drag And Drop Event Controller라는 객체가 Game Map을 참조해서 터치한 위치의 타일 위를 조사하고 그 IGameObject들 중에서 오브젝트가 있다면 그 오브젝트를 반환하여 위치 정보 및 Map 내에서 배치 정보를 조정합니다.
       - 터치를 통해 캐릭터 이동 배치, 캐릭터 간에 자리 교환 등이 가능합니다.
-    - 지금은 별도의 Image 소스 없이 Canvas의 도형을 그리는 함수를 통해 그려주고 있습니다. 
+    - 지금은 별도의 Image 소스 없이 Canvas의 도형을 그리는 함수를 통해 그려주고 있습니다.
+    - BehaviorTree
+        - ConditionNode : 모든 노드가 포함하는 인터페이스
+        - CompositeNode : 특정 조건 확인하고 boolean을 반환하는 노드 인터페이스 
+        - ActionNode : 간단한 람다식을 포함하는 리프 노드입니다.
+        - Selector : 모든 하위 자식 노드 중 하나라도 성공하면 성공을 반환하는 노드
+        - Sequence : 모든 하위 노드가 성공해야지 성공하는 노드
 - Game Map
   * 게임의 배경입니다. 사각형 타일로 구분되어 있고, 각 타일당 비전투 상태에선 하나의 Polyman만 배치할 수 있게 했습니다.
     * MapPart : 오브젝트를 배치 가능한 구역 역할을 하는 클래스입니다. 이 클래스로 맵의 밴치를 구현했습니다.
