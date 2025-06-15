@@ -1,5 +1,6 @@
 package kr.ac.tukorea.ge.lkm.polybattler.polybattler.game;
 
+import android.content.Context;
 import android.graphics.Canvas;
 import android.view.MotionEvent;
 
@@ -31,5 +32,28 @@ public class MainScene extends Scene {
     public void draw(Canvas canvas){
         backgorund.draw(canvas);
         super.draw(canvas);
+    }
+
+    @Override
+    public void onEnter() {
+        super.onEnter();
+    }
+
+    @Override
+    public void onExit() {
+        master.onExit();
+        super.onExit();
+    }
+
+    @Override
+    public void onPause() {
+        master.onPause();
+        super.onPause();
+    }
+
+    @Override
+    public void onResume() {
+        master.onResume();
+        super.onResume();
     }
 }

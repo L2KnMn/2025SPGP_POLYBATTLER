@@ -177,6 +177,12 @@ public class Scene {
 
     //////////////////////////////////////////////////
     // Overridables
+    public boolean isTransparent() {
+        return false;
+    }
+    protected int getTouchLayerIndex() {
+        return -1;
+    }
     public boolean onTouchEvent(MotionEvent event) {
         return false;
     }

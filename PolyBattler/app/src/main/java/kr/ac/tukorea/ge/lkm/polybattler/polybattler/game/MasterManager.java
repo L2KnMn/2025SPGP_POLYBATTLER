@@ -19,7 +19,8 @@ public class MasterManager implements IGameManager {
     private final Scene master;
     private GameState currentState;
     MediaPlayer touchPlayer;
-    ArrayList<MediaPlayer> bgPlayer;
+    MediaPlayer prepareBgPlayer;
+    ArrayList<MediaPlayer> battleBgPlayer;
     MediaPlayer nowBgPlayer;
 
     public static MasterManager getInstance(Scene master){
@@ -39,19 +40,22 @@ public class MasterManager implements IGameManager {
         touchPlayer.setLooping(false);
         touchPlayer.setVolume(1.0f, 1.0f);
 
-        bgPlayer = new ArrayList<>();
-        bgPlayer.add(MediaPlayer.create(GameView.view.getContext(), R.raw.prepare_phase_bg));
-        bgPlayer.add(MediaPlayer.create(GameView.view.getContext(), R.raw.battle_phase_bg1)); // Battle
-        bgPlayer.add(bgPlayer.get( 0)); // shop
-        bgPlayer.add(MediaPlayer.create(GameView.view.getContext(), R.raw.battle_phase_bg2)); // result
-        bgPlayer.add(MediaPlayer.create(GameView.view.getContext(), R.raw.battle_phase_bg3)); // post game
-        for(MediaPlayer player : bgPlayer) {
+
+        prepareBgPlayer = MediaPlayer.create(GameView.view.getContext(), R.raw.prepare_phase_bg);
+        prepareBgPlayer.setLooping(true);
+        prepareBgPlayer.setVolume(1.0f, 1.0f);
+
+        battleBgPlayer = new ArrayList<>();
+        battleBgPlayer.add(MediaPlayer.create(GameView.view.getContext(), R.raw.battle_phase_bg1)); // Battle
+        battleBgPlayer.add(MediaPlayer.create(GameView.view.getContext(), R.raw.battle_phase_bg2)); // result
+        battleBgPlayer.add(MediaPlayer.create(GameView.view.getContext(), R.raw.battle_phase_bg3)); // post game
+        for(MediaPlayer player : battleBgPlayer) {
             if(player != null){
                 player.setLooping(true);
                 player.setVolume(1.0f, 1.0f);
             }
         }
-        nowBgPlayer = bgPlayer.get(currentState.ordinal());
+        nowBgPlayer = prepareBgPlayer;
         nowBgPlayer.start();
     }
 
@@ -71,20 +75,22 @@ public class MasterManager implements IGameManager {
 
     @Override
     public IGameManager setGameState(GameState state) {
-        if(bgPlayer.get(state.ordinal()) != null) {
-            if(nowBgPlayer == null){
-                nowBgPlayer = bgPlayer.get(state.ordinal());
-                nowBgPlayer.start();
-            }else if (nowBgPlayer != bgPlayer.get(state.ordinal())) {
+        // 새 상태가 기존 상태랑 비교해서 음악 교체해야 하는지 검사
+        if(battleMusicPlay(state) != battleMusicPlay(currentState)){
+            // 기존 전투 음악 끄기
+            if(nowBgPlayer != null){
                 nowBgPlayer.pause();
-                nowBgPlayer = bgPlayer.get(state.ordinal());
+            }
+            if(battleMusicPlay(state)){
+                nowBgPlayer = battleBgPlayer.get(state.ordinal());
+            }else{
+                nowBgPlayer = prepareBgPlayer;
+            }
+            if(nowBgPlayer != null){
                 nowBgPlayer.start();
             }
-        }else{
-            if(nowBgPlayer != null)
-                nowBgPlayer.pause();
-            nowBgPlayer = null;
-        }
+        } // 서로 같으면 굳이 음악 교체할 필요 없음
+
         for(IGameManager manager : managers){
             manager.setGameState(state);
         }
@@ -95,5 +101,21 @@ public class MasterManager implements IGameManager {
     @Override
     public GameState getGameState() {
         return currentState;
+    }
+
+    private boolean battleMusicPlay(GameState state){
+        return state == GameState.BATTLE || state == GameState.RESULT || state == GameState.POST_GAME;
+    }
+
+    public void onExit() {
+        nowBgPlayer.stop();
+    }
+
+    public void onPause(){
+        nowBgPlayer.pause();
+    }
+
+    public void onResume() {
+        nowBgPlayer.start();
     }
 }
