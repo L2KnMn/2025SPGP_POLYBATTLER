@@ -5,6 +5,7 @@ import android.util.ArrayMap;
 import android.view.MotionEvent;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import kr.ac.tukorea.ge.lkm.polybattler.R;
 import kr.ac.tukorea.ge.lkm.polybattler.polybattler.game.Effect.EffectManager;
@@ -22,6 +23,7 @@ public class MasterManager implements IGameManager {
     MediaPlayer prepareBgPlayer;
     ArrayList<MediaPlayer> battleBgPlayer;
     MediaPlayer nowBgPlayer;
+    Random random = new Random();
 
     public static MasterManager getInstance(Scene master){
         return instances.computeIfAbsent(master, MasterManager::new);
@@ -68,8 +70,10 @@ public class MasterManager implements IGameManager {
             if(curr != currentState || spend)
                 break;
         }
-        if(spend)
+        if(spend) {
+            touchPlayer.seekTo(0);
             touchPlayer.start();
+        }
         return spend;
     }
 
@@ -82,7 +86,7 @@ public class MasterManager implements IGameManager {
                 nowBgPlayer.pause();
             }
             if(battleMusicPlay(state)){
-                nowBgPlayer = battleBgPlayer.get(state.ordinal());
+                nowBgPlayer = battleBgPlayer.get(random.nextInt(0, battleBgPlayer.size()));
             }else{
                 nowBgPlayer = prepareBgPlayer;
             }
