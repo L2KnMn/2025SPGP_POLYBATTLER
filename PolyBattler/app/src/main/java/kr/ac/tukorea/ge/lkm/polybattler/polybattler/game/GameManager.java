@@ -243,7 +243,6 @@ public class GameManager implements IGameManager {
         if(index >= 0 && index < benchSize){
             // 벤치에 추가 성공 시 합성 가능한 3개를 찾아서 합성
             if(polymanGenerator.checkAndSynthesize(polyman)){
-                //TODO: 나중에 level up 효과 같은 걸 구현하기
                 UiManager.getInstance(master).showToast("LEVEL UP!");
             }
             return true;
