@@ -18,7 +18,7 @@ public class MainScene extends Scene {
     public MainScene() {
         initLayers(Layer.COUNT);
         Metrics.setGameSize(700, 1600);
-        GameView.drawsDebugStuffs = BuildConfig.DEBUG;
+//        GameView.drawsDebugStuffs = BuildConfig.DEBUG;
         master = MasterManager.getInstance(this);
         backgorund = new Background();
     }

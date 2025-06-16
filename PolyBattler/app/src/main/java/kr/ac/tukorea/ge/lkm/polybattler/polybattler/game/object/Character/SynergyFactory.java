@@ -85,7 +85,7 @@ public class SynergyFactory {
         synergyDisplay = UiManager.getInstance(master).addSynergyDisplay(panelX, panelY, panelWidth, panelHeight);
         synergyDisplay.appendSynergies(this.getActiveSynergies()); // 자원 등록 -> 알아서 업데이트 될 것임
         synergyDisplay.setVisibility(false); // 시너지 패널은 항상 보이도록 설정 (또는 게임 상태에 따라 제어)
-        UiManager.Button button = UiManager.getInstance(master).addButton("시너지 확인", Metrics.GRID_UNIT, Metrics.GRID_UNIT, Metrics.GRID_UNIT, Metrics.GRID_UNIT,
+        UiManager.Button button = UiManager.getInstance(master).addButton("시너지 확인", Metrics.GRID_UNIT, Metrics.GRID_UNIT, Metrics.GRID_UNIT * 2, Metrics.GRID_UNIT,
                 synergyDisplay::open
         ).setVisibility(GameState.PREPARE, true).setVisibility(GameState.BATTLE, true);
         synergyDisplay.addOpener(button);
