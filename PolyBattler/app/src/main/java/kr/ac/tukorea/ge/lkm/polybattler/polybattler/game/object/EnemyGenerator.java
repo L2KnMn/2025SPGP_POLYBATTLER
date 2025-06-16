@@ -232,7 +232,7 @@ public class EnemyGenerator {
      */
     public void generateEnemiesForRound(int round, GameMap gameMap, Scene scene, ArrayList<Polyman> generatedEnemies) {
         RoundData data = getRoundData(round);
-        if (data == null) {
+        if (data == null || random.nextInt(10) < 5) {
             Log.w(TAG, "No enemy data found for round: " + round + ". Generating default enemies.");
             data = generateDefaultRoundData(round); // 기본 데이터 생성
         }
@@ -286,7 +286,12 @@ public class EnemyGenerator {
         int currNumEnemy = numEnemy;
         for(int i = 0; i < Polyman.ShapeType.values().length; i++){
             int tempNumEnemy = random.nextInt(currNumEnemy);
-            currNumEnemy -= tempNumEnemy;
+            if (i == Polyman.ShapeType.values().length - 1){
+                tempNumEnemy = currNumEnemy;
+                currNumEnemy = 0;
+            }else {
+                currNumEnemy -= tempNumEnemy;
+            }
             defaultData.enemies.add(new EnemyInfo(Polyman.ShapeType.values()[i], tempNumEnemy));
         }
         // 생성된 기본 데이터를 맵에 저장해두면 다음 요청 시 재사용 가능 (선택적)
